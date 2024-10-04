@@ -12,7 +12,7 @@ const config = {
     multiplier: 1,
 }
 
-const Typography = ({children}) => <p className='text-[48px] leading-[60px] font-bold'>{children}</p>
+const Typography = ({children}: any) => <p className='text-[48px] leading-[60px] font-bold'>{children}</p>
 
 const JumpFlow = () => {
     const videoRef = useRef(null);
@@ -24,7 +24,7 @@ const JumpFlow = () => {
     const [hipsInView, setHipsInView] = useState(false);
     const [hipsVerticalVector, setHipsVerticalVector] = useState({prevValue: 0, currentVector: 0});
     const [startCounter, setStartCounter] = useState(0);
-    const [jumpAnchor, setJumpAnchor] = useState<number>(null);
+    const [jumpAnchor, setJumpAnchor] = useState<number | null>(null);
     const [eyesInView, setEyesInView] = useState(false);
 
     const loadModel = async () => {
@@ -46,12 +46,13 @@ const JumpFlow = () => {
         });
     };
 
-    const detectJump = (pose) => {
+    const detectJump = (pose: any) => {
         if (!pose) return
         const left = pose.keypoints.find((point: any) => point.name === 'left_hip');
         const right = pose.keypoints.find((point: any) => point.name === 'right_hip');
         if (left.score > 0.5 && right.score > 0.5) {
             const avgAnkleY = (left.y + right.y) / 2; // Average y position of both ankles
+            if(!jumpAnchor) return
             if (jumpAnchor - avgAnkleY > 10 && !isUp) {
                 setJumpCount(prevState => prevState + 1)
                 setIsUp(prevState => true)
@@ -74,7 +75,7 @@ const JumpFlow = () => {
         return `rgb(${colorRGB.join(',')})`
     }
 
-    const drawKeyPoints = (pose, ctx) => {
+    const drawKeyPoints = (pose: any, ctx: any) => {
         if (jumpAnchor) {
             ctx.beginPath();
             ctx.arc(320, jumpAnchor, 3, 0, 2 * Math.PI);
@@ -95,13 +96,13 @@ const JumpFlow = () => {
         });
     }
 
-    const getEyes = (pose) => {
+    const getEyes = (pose: any) => {
         const left = pose?.keypoints.find((point: any) => point.name === 'left_eye');
         const right = pose?.keypoints.find((point: any) => point.name === 'right_eye');
         return {left, right}
     }
 
-    const checkEyes = (pose, benchmark) => {
+    const checkEyes = (pose: any, benchmark: any) => {
         const {left, right} = getEyes(pose)
         if (left?.score > benchmark && right?.score > benchmark) {
             setEyesInView(true)
@@ -110,13 +111,13 @@ const JumpFlow = () => {
         }
     }
 
-    const getHips = (pose) => {
+    const getHips = (pose: any) => {
         const left = pose?.keypoints.find((point: any) => point.name === 'left_hip');
         const right = pose?.keypoints.find((point: any) => point.name === 'right_hip');
         return {left, right}
     }
 
-    const checkHips = (pose, benchmark) => {
+    const checkHips = (pose:any, benchmark: any) => {
         const {left, right} = getHips(pose)
         if (left?.score > benchmark && right?.score > benchmark) {
             setHipsInView(true)
