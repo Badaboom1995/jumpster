@@ -119,8 +119,6 @@ const VideoCanvas = () => {
 
     useEffect(() => {
         if(seconds === 0){
-            // setAnchorY(moveVectorY.prevValue);
-            // console.log(moveVectorY.currentVector)
             setJumpStarted(true);
         }
     }, [seconds, moveVectorY.prevValue]);
@@ -136,11 +134,12 @@ const VideoCanvas = () => {
             <video ref={videoRef} className="hidden" />
             <canvas ref={canvasRef} className="w-full h-full -scale-x-100" />
              <div className="absolute top-[24px] left-1/2 -translate-x-1/2 text-white p-4">
-                 <p className='text-[48px] font-bold'>
+                 <p className='text-[48px] font-bold text-center'>
                      {!flowStarted && <span>Подготовка...</span>}
-                     {flowStarted && !hipsDetected && <span>Встаньте в кадр</span>}
-                     {hipsDetected && !moveVectorY.standStill && <span>Стойте спокойно</span>}
-                     {hipsDetected && moveVectorY.standStill && !jumpStarted && <span>Прыгайте через <p className='text-[80px] text-center'>{seconds}</p></span>}
+                     {!jumpStarted && flowStarted && !hipsDetected && <span>Встаньте в кадр</span>}
+                     {!jumpStarted && hipsDetected && !moveVectorY.standStill && <span>Стойте спокойно</span>}
+                     {!jumpStarted && hipsDetected && moveVectorY.standStill && !jumpStarted && <span>Прыгайте через <p className='text-[80px] text-center'>{seconds}</p></span>}
+                     {jumpStarted && <span className='text-[200px]'>{jumpsCounter}</span>}
                  </p>
                  {/*<p>{flowStarted && 'Flow Started'}</p>*/}
                  {/*<p></p>{hipsDetected && 'Hips Detected'}*/}

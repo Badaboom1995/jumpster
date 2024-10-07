@@ -1,3 +1,4 @@
+export {};
 // 'use client'
 // import React, {useEffect, useRef, useState} from 'react';
 // import * as poseDetection from '@tensorflow-models/pose-detection';

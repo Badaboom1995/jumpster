@@ -1,5 +1,4 @@
 
-// @ts-nocheck
 const KEYPOINT_PAIRS = [
     ['left_shoulder', 'right_shoulder'],
     ['left_shoulder', 'left_elbow'],
@@ -15,8 +14,8 @@ const KEYPOINT_PAIRS = [
     ['right_knee', 'right_ankle']
 ];
 
-export const drawPoses = (poses, context, offsetX, offsetY, scale) => {
-    poses.forEach((pose) => {
+export const drawPoses = (poses: any, context: any, offsetX: any, offsetY: any, scale: any) => {
+    poses.forEach((pose: any) => {
         const keypoints = pose.keypoints;
 
         // Draw lines between keypoints (joints)
@@ -35,7 +34,7 @@ export const drawPoses = (poses, context, offsetX, offsetY, scale) => {
         // });
 
         // Draw keypoints as blue dots
-        keypoints.forEach((keypoint) => {
+        keypoints.forEach((keypoint: any) => {
             if (keypoint.score > 0.3) {
                 const { x, y } = keypoint;
                 context.beginPath();
@@ -47,20 +46,20 @@ export const drawPoses = (poses, context, offsetX, offsetY, scale) => {
     });
 };
 
-const drawMarker = (context, keypoint, offsetX, offsetY, scale) => {
+const drawMarker = (context: any, keypoint: any, offsetX: any, offsetY: any, scale: any) => {
     context.beginPath();
     context.arc(keypoint.x * scale + offsetX, keypoint.y * scale + offsetY, 5, 0, 2 * Math.PI);
     context.fillStyle = '#D2FA63';
     context.fill();
 };
-export const detectHips = (poses) => {
+export const detectHips = (poses: any) => {
     let leftHipDetected = false;
     let rightHipDetected = false;
 
-    poses.forEach((pose) => {
+    poses.forEach((pose: any) => {
         const keypoints = pose.keypoints;
-        const leftHip = keypoints.find((keypoint) => keypoint.name === 'left_hip');
-        const rightHip = keypoints.find((keypoint) => keypoint.name === 'right_hip');
+        const leftHip = keypoints.find((keypoint: any) => keypoint.name === 'left_hip');
+        const rightHip = keypoints.find((keypoint: any) => keypoint.name === 'right_hip');
 
         // Check if hips are detected and draw markers
         if (leftHip && leftHip.score > 0.3) {
@@ -88,7 +87,7 @@ export const startCamera = async (video: any) => {
     }
 };
 
-export const drawVideoFrame = (context, videoElement, canvasElement) => {
+export const drawVideoFrame = (context: any, videoElement: any, canvasElement: any) => {
     const videoAspectRatio = videoElement.videoWidth / videoElement.videoHeight;
     const canvasWidth = canvasElement.width;
     const canvasHeight = canvasElement.height;
