@@ -5,23 +5,24 @@ const VideoCanvas = () => {
     const canvasRef = useRef(null);
 
     useEffect(() => {
-        if(!videoRef.current || !canvasRef.current) return;
-        const videoElement: any = videoRef.current;
-        const canvasElement: any = canvasRef.current;
-        // @ts-ignore
-        const context: any = canvasElement.getContext('2d')
-        if(!context || !videoElement || !canvasElement) return;
+        if (!videoRef.current || !canvasRef.current) return;
+        const videoElement = videoRef.current;
+        const canvasElement = canvasRef.current;
+        const context = canvasElement.getContext('2d');
+
         // Get video stream from the camera
         navigator.mediaDevices.getUserMedia({ video: true })
             .then((stream) => {
+                console.log("Camera access granted, starting stream.");
                 videoElement.srcObject = stream;
                 videoElement.play();
             })
             .catch((err) => console.error('Error accessing camera:', err));
 
-        // Draw video onto canvas while maintaining aspect ratio
+        // Draw video onto canvas
         const drawVideo = () => {
             if (videoElement.readyState === videoElement.HAVE_ENOUGH_DATA) {
+                console.log("Drawing video frame.");
                 const videoAspectRatio = videoElement.videoWidth / videoElement.videoHeight;
                 const canvasWidth = canvasElement.width;
                 const canvasHeight = canvasElement.height;
@@ -44,20 +45,34 @@ const VideoCanvas = () => {
 
                 context.clearRect(0, 0, canvasWidth, canvasHeight);
                 context.drawImage(videoElement, offsetX, offsetY, drawWidth, drawHeight);
+            } else {
+                console.log("Video not ready yet, skipping frame.");
             }
+
+            // Keep drawing the video in a loop
+            requestAnimationFrame(drawVideo);
         };
 
+        // Start drawing video once video metadata is loaded
         videoElement.addEventListener('loadedmetadata', () => {
+            console.log("Video metadata loaded.");
             canvasElement.width = canvasElement.offsetWidth;
             canvasElement.height = canvasElement.offsetHeight;
-            setInterval(drawVideo, 50);
+
+            // Ensure the video is playing before drawing frames
+            videoElement.play().then(() => {
+                console.log("Video playback started.");
+                requestAnimationFrame(drawVideo);
+            }).catch((error) => {
+                console.error("Error starting video playback:", error);
+            });
         });
 
     }, [videoRef, canvasRef]);
 
     return (
         <div className="w-full h-full fixed top-0 left-0">
-            <video ref={videoRef} className='hidden'/>
+            <video ref={videoRef} className="hidden" />
             <canvas ref={canvasRef} className="w-full h-full" />
         </div>
     );
