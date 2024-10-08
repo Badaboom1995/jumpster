@@ -13,7 +13,6 @@ const JumpFlow = () => {
     const canvasRef = useRef(null);
     const detectorRef = useRef<any>(null);
 
-
     const loadModel = async () => {
         const detectorConfig = {modelType: poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING};
         detectorRef.current = await poseDetection.createDetector(poseDetection.SupportedModels.MoveNet, detectorConfig);
@@ -36,8 +35,28 @@ const JumpFlow = () => {
         const canvas: any = canvasRef.current;
         const ctx = canvas.getContext('2d');
         if (detectorRef.current && video.readyState === 4) {
+            const videoAspectRatio = video.videoWidth / video.videoHeight;
+            const canvasWidth = canvas.width;
+            const canvasHeight = canvas.height;
+            const canvasAspectRatio = canvasWidth / canvasHeight;
+
+            let drawWidth, drawHeight, offsetX, offsetY;
+
+            // Adjust draw size and position to maintain aspect ratio
+            if (canvasAspectRatio > videoAspectRatio) {
+                drawHeight = canvasHeight;
+                drawWidth = canvasHeight * videoAspectRatio;
+                offsetX = (canvasWidth - drawWidth) / 2;
+                offsetY = 0;
+            } else {
+                drawWidth = canvasWidth;
+                drawHeight = canvasWidth / videoAspectRatio;
+                offsetX = 0;
+                offsetY = (canvasHeight - drawHeight) / 2;
+            }
+
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            ctx.drawImage(video, offsetX, offsetY, drawWidth, drawHeight);
         }
     };
 
@@ -64,9 +83,7 @@ const JumpFlow = () => {
                 <video ref={videoRef} autoPlay playsInline className='h-[50vh] hidden'></video>
                 <canvas
                     ref={canvasRef}
-                    width={640}
-                    height={480}
-                    className='border border-4 border-red-500 -scale-x-[1'>
+                    className='border border-4 border-red-500 -scale-x-[1] w-full h-full'>
                 </canvas>
             </div>
         </div>
