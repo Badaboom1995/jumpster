@@ -45,19 +45,19 @@ const VideoCanvas = () => {
                 context.clearRect(0, 0, canvasWidth, canvasHeight);
                 context.drawImage(videoElement, offsetX, offsetY, drawWidth, drawHeight);
             }
-            requestAnimationFrame(drawVideo);
         };
 
-        // videoElement.addEventListener('loadedmetadata', () => {
-        //     canvasElement.width = canvasElement.offsetWidth;
-        //     canvasElement.height = canvasElement.offsetHeight;
-        //     drawVideo();
-        // });
+        videoElement.addEventListener('loadedmetadata', () => {
+            canvasElement.width = canvasElement.offsetWidth;
+            canvasElement.height = canvasElement.offsetHeight;
+            setInterval(drawVideo, 50);
+        });
+
     }, [videoRef, canvasRef]);
 
     return (
         <div className="w-full h-full fixed top-0 left-0">
-            <video ref={videoRef} />
+            <video ref={videoRef} className='hidden'/>
             <canvas ref={canvasRef} className="w-full h-full" />
         </div>
     );
