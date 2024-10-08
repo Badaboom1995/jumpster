@@ -1,6 +1,8 @@
 'use client'
 import React from 'react';
-import VideoCanvas from "@/components/JumpFlow/CleanFlow";
+// import VideoCanvas from "@/components/JumpFlow/CleanFlow";
+import JumpFlow from "@/components/JumpFlow/JumpFlow";
+
 // import {useLaunchParams} from "@telegram-apps/sdk-react";
 // import { createClient } from '@supabase/supabase-js'
 // import VideoCanvas from "@/components/JumpFlow/TestFlow";
@@ -19,9 +21,9 @@ const Main = () => {
 
     return (
         <div className='w-[100vw] h-[100vh] bg-white'>
-            {/*<JumpFlow />*/}
+            <JumpFlow />
             {/*<VideoCanvas/>*/}
-            <VideoCanvas />
+            {/*<VideoCanvas />*/}
         </div>
     );
 };
