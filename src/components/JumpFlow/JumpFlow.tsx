@@ -71,6 +71,13 @@ const JumpFlow = () => {
 
     useEffect(() => {
         const intervalId = setInterval(mainLoop, 50)
+        const canvas = canvasRef.current;
+        if (canvas) {
+            // @ts-ignore
+            canvas.width = window.innerWidth
+            // @ts-ignore
+            canvas.height = window.innerHeight;
+        }
         return () => {
             clearInterval(intervalId)
         };
@@ -78,14 +85,12 @@ const JumpFlow = () => {
 
 
     return (
-        <div>
-            <div>
-                <video ref={videoRef} autoPlay playsInline className='h-[50vh] hidden'></video>
+        <div className="w-full h-full fixed top-0 left-0">
+                <video ref={videoRef} autoPlay playsInline className='hidden'></video>
                 <canvas
                     ref={canvasRef}
-                    className='border border-4 border-red-500 -scale-x-[1] w-full h-full'>
+                    className='border border-4 border-red-500 h-[100vh] w-full'>
                 </canvas>
-            </div>
         </div>
     );
 };
