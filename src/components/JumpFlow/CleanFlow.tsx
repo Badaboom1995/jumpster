@@ -5,10 +5,11 @@ const VideoCanvas = () => {
     const canvasRef = useRef(null);
 
     useEffect(() => {
-        const videoElement = videoRef.current;
-        const canvasElement = canvasRef.current;
-        const context = canvasElement.getContext('2d');
-
+        const videoElement: any = videoRef.current;
+        const canvasElement: any = canvasRef.current;
+        // @ts-ignore
+        const context: any = canvasElement.getContext('2d')
+        if(!context || !videoElement || !canvasElement) return;
         // Get video stream from the camera
         navigator.mediaDevices.getUserMedia({ video: true })
             .then((stream) => {
