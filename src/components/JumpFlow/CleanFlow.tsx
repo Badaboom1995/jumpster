@@ -1,13 +1,14 @@
 import React, { useEffect, useRef } from 'react';
 
 const VideoCanvas = () => {
-    const videoRef = useRef(null);
-    const canvasRef = useRef(null);
+    const videoRef = useRef<any>(null);
+    const canvasRef = useRef<any>(null);
 
     useEffect(() => {
         if (!videoRef.current || !canvasRef.current) return;
         const videoElement = videoRef.current;
         const canvasElement = canvasRef.current;
+        // @ts-ignore
         const context = canvasElement.getContext('2d');
 
         // Get video stream from the camera
@@ -63,7 +64,7 @@ const VideoCanvas = () => {
             videoElement.play().then(() => {
                 console.log("Video playback started.");
                 requestAnimationFrame(drawVideo);
-            }).catch((error) => {
+            }).catch((error: any) => {
                 console.error("Error starting video playback:", error);
             });
         });
