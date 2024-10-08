@@ -5,6 +5,7 @@ const VideoCanvas = () => {
     const canvasRef = useRef(null);
 
     useEffect(() => {
+        if(!videoRef.current || !canvasRef.current) return;
         const videoElement: any = videoRef.current;
         const canvasElement: any = canvasRef.current;
         // @ts-ignore
@@ -47,16 +48,16 @@ const VideoCanvas = () => {
             requestAnimationFrame(drawVideo);
         };
 
-        videoElement.addEventListener('loadedmetadata', () => {
-            canvasElement.width = canvasElement.offsetWidth;
-            canvasElement.height = canvasElement.offsetHeight;
-            drawVideo();
-        });
-    }, []);
+        // videoElement.addEventListener('loadedmetadata', () => {
+        //     canvasElement.width = canvasElement.offsetWidth;
+        //     canvasElement.height = canvasElement.offsetHeight;
+        //     drawVideo();
+        // });
+    }, [videoRef, canvasRef]);
 
     return (
         <div className="w-full h-full fixed top-0 left-0">
-            <video ref={videoRef} className="hidden" />
+            <video ref={videoRef} />
             <canvas ref={canvasRef} className="w-full h-full" />
         </div>
     );
