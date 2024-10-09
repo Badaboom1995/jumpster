@@ -114,3 +114,25 @@ export const drawVideoFrame = (context: any, videoElement: any, canvasElement: a
 
     return { offsetX, offsetY, scale: drawWidth / videoElement.videoWidth };
 };
+
+export const setMoveVector = (keypoints: any, setVector: any) => {
+    if(!keypoints) return;
+    const leftHip = keypoints.find((keypoint: any) => keypoint.name === 'left_eye');
+    const rightHip = keypoints.find((keypoint: any) => keypoint.name === 'right_eye');
+    const avgHipY = (leftHip.y + rightHip.y) / 2;
+    setVector((prev) => {
+        if(prev.prevValue === 0) return {prevValue: avgHipY, currentVector: 0, standStill: false};
+        const diff = prev.prevValue - avgHipY;
+        let gravity = 0;
+        const vector = prev.currentVector;
+        if (vector > 0 && vector < 10) gravity = -1;
+        if (vector < 0 && vector > -10) gravity = 1;
+        if (vector > 10) gravity = -5;
+        if (vector < -10) gravity = 5;
+        const nextValue = vector + diff + gravity;
+        if(Math.abs(prev.currentVector - nextValue) < 5){
+            return {prevValue: prev.prevValue, currentVector:prev.currentVector + gravity, standStill: Math.abs(prev.currentVector + gravity) < 10};
+        }
+        return {prevValue: avgHipY, currentVector:nextValue, standStill: Math.abs(nextValue) < 10};
+    });
+}

@@ -4,6 +4,7 @@ import * as poseDetection from '@tensorflow-models/pose-detection';
 import * as tf from '@tensorflow/tfjs-core';
 // Register one of the TF.js backends.
 import '@tensorflow/tfjs-backend-webgl';
+import {drawPoses, drawVideoFrame, setMoveVector} from "@/components/JumpFlow/utils";
 
 const constraints = {
     video: true
@@ -12,6 +13,8 @@ const JumpFlow = () => {
     const videoRef = useRef(null);
     const canvasRef = useRef(null);
     const detectorRef = useRef<any>(null);
+    const [loadingStatus, setLoadingStatus] = useState('initial');
+    const [moveVectorY, setMoveVectorY] = useState({prevValue: 0, currentVector: 0, standStill: false});
 
     const loadModel = async () => {
         const detectorConfig = {modelType: poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING};
@@ -35,38 +38,38 @@ const JumpFlow = () => {
         const canvas: any = canvasRef.current;
         const ctx = canvas.getContext('2d');
         if (detectorRef.current && video.readyState === 4) {
-            const videoAspectRatio = video.videoWidth / video.videoHeight;
-            const canvasWidth = canvas.width;
-            const canvasHeight = canvas.height;
-            const canvasAspectRatio = canvasWidth / canvasHeight;
-
-            let drawWidth, drawHeight, offsetX, offsetY;
-
-            // Adjust draw size and position to maintain aspect ratio
-            if (canvasAspectRatio > videoAspectRatio) {
-                drawHeight = canvasHeight;
-                drawWidth = canvasHeight * videoAspectRatio;
-                offsetX = (canvasWidth - drawWidth) / 2;
-                offsetY = 0;
-            } else {
-                drawWidth = canvasWidth;
-                drawHeight = canvasWidth / videoAspectRatio;
-                offsetX = 0;
-                offsetY = (canvasHeight - drawHeight) / 2;
-            }
-
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.drawImage(video, offsetX, offsetY, drawWidth, drawHeight);
+            const {offsetX, offsetY, scale} = drawVideoFrame(ctx, video, canvas);
+            const poses = await detectorRef.current.estimatePoses(video);
+            setMoveVector(poses[0]?.keypoints, setMoveVectorY);
+            drawPoses(poses, ctx, offsetX, offsetY, scale);
         }
     };
 
+    const getStatusText = (status: string) => {
+        switch (status) {
+            case 'initial':
+                return 'Загрузка...';
+            case 'loadingModel':
+                return 'Настраиваем нейросети...';
+            case 'loadingCamera':
+                return 'Подключаем камеру...';
+            case 'running':
+                return 'Готово!';
+            default:
+                return '';
+        }
+    }
+
     useEffect(() => {
-        const runPoseDetection = async () => {
+        const init = async () => {
             await tf.ready()
+            setLoadingStatus('loadingModel');
             await loadModel();
+            setLoadingStatus('loadingCamera');
             await setupCamera();
+            setLoadingStatus('running');
         };
-        runPoseDetection()
+        init()
     }, []);
 
     useEffect(() => {
@@ -86,10 +89,12 @@ const JumpFlow = () => {
 
     return (
         <div className="w-full h-full fixed top-0 left-0">
+                {getStatusText(loadingStatus)}
+                {moveVectorY.currentVector}
                 <video ref={videoRef} autoPlay playsInline className='hidden'></video>
                 <canvas
                     ref={canvasRef}
-                    className='border border-4 border-red-500 h-[100vh] w-full'>
+                    className='border border-4 border-red-500 h-[30vh]'>
                 </canvas>
         </div>
     );
