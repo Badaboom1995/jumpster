@@ -190,7 +190,7 @@ export const setMoveVector = (keypoints: any, setVector: any) => {
     if(!keypoints) return;
     const leftHip = keypoints.find((keypoint: any) => keypoint.name === 'left_hip');
     const rightHip = keypoints.find((keypoint: any) => keypoint.name === 'right_hip');
-    if(!leftHip.score > 0.5 || !rightHip > 0.5) return;
+    if(!(leftHip.score > 0.5) || !(rightHip > 0.5)) return;
     const avgHipY = (leftHip.y + rightHip.y) / 2;
     setVector((prev: any) => {
         if(prev.prevValue === 0) return {prevValue: avgHipY, currentVector: 0, standStill: false};
