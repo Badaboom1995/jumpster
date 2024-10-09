@@ -120,7 +120,7 @@ export const setMoveVector = (keypoints: any, setVector: any) => {
     const leftHip = keypoints.find((keypoint: any) => keypoint.name === 'left_eye');
     const rightHip = keypoints.find((keypoint: any) => keypoint.name === 'right_eye');
     const avgHipY = (leftHip.y + rightHip.y) / 2;
-    setVector((prev) => {
+    setVector((prev: any) => {
         if(prev.prevValue === 0) return {prevValue: avgHipY, currentVector: 0, standStill: false};
         const diff = prev.prevValue - avgHipY;
         let gravity = 0;
