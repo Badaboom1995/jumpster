@@ -4,7 +4,14 @@ import * as poseDetection from '@tensorflow-models/pose-detection';
 import * as tf from '@tensorflow/tfjs-core';
 // Register one of the TF.js backends.
 import '@tensorflow/tfjs-backend-webgl';
-import {drawPoses, drawVideoFrame, setMoveVector} from "@/components/JumpFlow/utils";
+import {
+    drawPoses,
+    drawPoses2,
+    drawVideoFrame,
+    drawVideoFrame2,
+    requestWithRetry,
+    setMoveVector
+} from "@/components/JumpFlow/utils";
 
 const constraints = {
     video: true
@@ -18,6 +25,7 @@ const JumpFlow = () => {
 
     const loadModel = async () => {
         const detectorConfig = {modelType: poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING};
+        await requestWithRetry(async () => await poseDetection.createDetector(poseDetection.SupportedModels.MoveNet, detectorConfig))
         detectorRef.current = await poseDetection.createDetector(poseDetection.SupportedModels.MoveNet, detectorConfig);
     };
 
@@ -38,10 +46,11 @@ const JumpFlow = () => {
         const canvas: any = canvasRef.current;
         const ctx = canvas.getContext('2d');
         if (detectorRef.current && video.readyState === 4) {
-            const {offsetX, offsetY, scale} = drawVideoFrame(ctx, video, canvas);
+            // const {offsetX, offsetY, scale} = drawVideoFrame(ctx, video, canvas);
+            const {sx, sy, scale, sWidth, sHeight} = drawVideoFrame2(ctx, video, canvas);
             const poses = await detectorRef.current.estimatePoses(video);
             setMoveVector(poses[0]?.keypoints, setMoveVectorY);
-            drawPoses(poses, ctx, offsetX, offsetY, scale);
+            drawPoses2(poses, ctx, sx, sy, sWidth, sHeight, canvas.width, canvas.height);
         }
     };
 
@@ -52,9 +61,9 @@ const JumpFlow = () => {
             case 'loadingModel':
                 return 'Настраиваем нейросети...';
             case 'loadingCamera':
-                return 'Подключаем камеру...';
+                return 'Настраиваем камеру...';
             case 'running':
-                return 'Готово!';
+                return 'Настройка завершена!';
             default:
                 return '';
         }
@@ -86,15 +95,14 @@ const JumpFlow = () => {
         };
     }, []);
 
-
     return (
-        <div className="w-full h-full fixed top-0 left-0">
+        <div className="relative w-full h-full fixed top-0 left-0">
                 {getStatusText(loadingStatus)}
                 {moveVectorY.currentVector}
                 <video ref={videoRef} autoPlay playsInline className='hidden'></video>
                 <canvas
                     ref={canvasRef}
-                    className='border border-4 border-red-500 h-[30vh]'>
+                    className='absolute top-0 left-1/2 -translate-x-1/2 border-4 border-red-500 h-[100vh] w-full'>
                 </canvas>
         </div>
     );

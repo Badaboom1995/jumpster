@@ -14,31 +14,57 @@ const KEYPOINT_PAIRS = [
     ['right_knee', 'right_ankle']
 ];
 
+// Draw lines between keypoints (joints)
+// KEYPOINT_PAIRS.forEach(([partA, partB]) => {
+//     const keypointA = keypoints.find((keypoint) => keypoint.name === partA);
+//     const keypointB = keypoints.find((keypoint) => keypoint.name === partB);
+//
+//     if (keypointA && keypointB && keypointA.score > 0.3 && keypointB.score > 0.3) {
+//         context.beginPath();
+//         context.moveTo(keypointA.x * scale + offsetX, keypointA.y * scale + offsetY);
+//         context.lineTo(keypointB.x * scale + offsetX, keypointB.y * scale + offsetY);
+//         context.strokeStyle = '#D2FA63';
+//         context.lineWidth = 2;
+//         context.stroke();
+//     }
+// });
 export const drawPoses = (poses: any, context: any, offsetX: any, offsetY: any, scale: any) => {
     poses.forEach((pose: any) => {
         const keypoints = pose.keypoints;
-
-        // Draw lines between keypoints (joints)
-        // KEYPOINT_PAIRS.forEach(([partA, partB]) => {
-        //     const keypointA = keypoints.find((keypoint) => keypoint.name === partA);
-        //     const keypointB = keypoints.find((keypoint) => keypoint.name === partB);
-        //
-        //     if (keypointA && keypointB && keypointA.score > 0.3 && keypointB.score > 0.3) {
-        //         context.beginPath();
-        //         context.moveTo(keypointA.x * scale + offsetX, keypointA.y * scale + offsetY);
-        //         context.lineTo(keypointB.x * scale + offsetX, keypointB.y * scale + offsetY);
-        //         context.strokeStyle = '#D2FA63';
-        //         context.lineWidth = 2;
-        //         context.stroke();
-        //     }
-        // });
-
         // Draw keypoints as blue dots
         keypoints.forEach((keypoint: any) => {
             if (keypoint.score > 0.3) {
                 const { x, y } = keypoint;
                 context.beginPath();
                 context.arc(x * scale + offsetX, y * scale + offsetY, 5, 0, 2 * Math.PI);
+                context.fillStyle = '#D2FA63';
+                context.fill();
+            }
+        });
+    });
+};
+export const drawPoses2 = (
+    poses,
+    context,
+    sx,
+    sy,
+    sWidth,
+    sHeight,
+    canvasWidth,
+    canvasHeight
+) => {
+    poses.forEach((pose) => {
+        const keypoints = pose.keypoints;
+        keypoints.forEach((keypoint) => {
+            if (keypoint.score > 0.3) {
+                const { x, y } = keypoint;
+
+                // Map the keypoint coordinates to the canvas
+                const canvasX = ((x - sx) / sWidth) * canvasWidth;
+                const canvasY = ((y - sy) / sHeight) * canvasHeight;
+
+                context.beginPath();
+                context.arc(canvasX, canvasY, 5, 0, 2 * Math.PI);
                 context.fillStyle = '#D2FA63';
                 context.fill();
             }
@@ -115,6 +141,50 @@ export const drawVideoFrame = (context: any, videoElement: any, canvasElement: a
     return { offsetX, offsetY, scale: drawWidth / videoElement.videoWidth };
 };
 
+export const drawVideoFrame2 = (context, videoElement, canvasElement) => {
+    const videoWidth = videoElement.videoWidth;
+    const videoHeight = videoElement.videoHeight;
+    const canvasWidth = canvasElement.width;
+    const canvasHeight = canvasElement.height;
+
+    const videoAspectRatio = videoWidth / videoHeight;
+    const canvasAspectRatio = canvasWidth / canvasHeight;
+
+    let sx, sy, sWidth, sHeight;
+
+    if (videoAspectRatio > canvasAspectRatio) {
+        // Video is wider than canvas; crop the sides
+        sHeight = videoHeight;
+        sWidth = sHeight * canvasAspectRatio;
+        sx = (videoWidth - sWidth) / 2;
+        sy = 0;
+    } else {
+        // Video is taller than canvas; crop the top and bottom
+        sWidth = videoWidth;
+        sHeight = sWidth / canvasAspectRatio;
+        sx = 0;
+        sy = (videoHeight - sHeight) / 2;
+    }
+
+    // Clear canvas and draw the video frame
+    context.clearRect(0, 0, canvasWidth, canvasHeight);
+    context.drawImage(
+        videoElement,
+        sx,
+        sy,
+        sWidth,
+        sHeight,
+        0,
+        0,
+        canvasWidth,
+        canvasHeight
+    );
+
+    // Optionally, return values if needed for further processing
+    return { sx, sy, sWidth, sHeight, scale: canvasWidth / sWidth };
+};
+
+
 export const setMoveVector = (keypoints: any, setVector: any) => {
     if(!keypoints) return;
     const leftHip = keypoints.find((keypoint: any) => keypoint.name === 'left_eye');
@@ -135,4 +205,15 @@ export const setMoveVector = (keypoints: any, setVector: any) => {
         }
         return {prevValue: avgHipY, currentVector:nextValue, standStill: Math.abs(nextValue) < 10};
     });
+}
+
+export const requestWithRetry = async (request: any, retries = 3) => {
+    try {
+        return await request();
+    } catch (error) {
+        if (retries === 0) {
+            throw new Error('Max retries reached');
+        }
+        return requestWithRetry(request, retries - 1);
+    }
 }
