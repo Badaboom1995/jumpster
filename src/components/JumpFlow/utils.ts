@@ -114,14 +114,14 @@ export const drawVideoFrame = (context: any, videoElement: any, canvasElement: a
 };
 
 export const drawPoses2 = (
-    poses,
-    context,
-    sx,
-    sy,
-    sWidth,
-    sHeight,
-    canvasWidth,
-    canvasHeight
+    poses: any,
+    context: any,
+    sx: number,
+    sy: number,
+    sWidth: number,
+    sHeight: number,
+    canvasWidth: number,
+    canvasHeight: number
 ) => {
     poses.forEach((pose: any) => {
         const keypoints = pose.keypoints;
