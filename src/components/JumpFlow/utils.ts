@@ -50,6 +50,7 @@ const drawMarker = (context: any, keypoint: any, offsetX: any, offsetY: any, sca
     context.fillStyle = '#D2FA63';
     context.fill();
 };
+
 export const detectHips = (poses: any) => {
     let leftHipDetected = false;
     let rightHipDetected = false;
@@ -190,23 +191,27 @@ export const setMoveVector = (keypoints: any, setVector: any) => {
     if(!keypoints) return;
     const leftHip = keypoints.find((keypoint: any) => keypoint.name === 'left_hip');
     const rightHip = keypoints.find((keypoint: any) => keypoint.name === 'right_hip');
-    if(!(leftHip.score > 0.5) || !(rightHip > 0.5)) return;
-    const avgHipY = (leftHip.y + rightHip.y) / 2;
-    setVector((prev: any) => {
-        if(prev.prevValue === 0) return {prevValue: avgHipY, currentVector: 0, standStill: false};
-        const diff = prev.prevValue - avgHipY;
-        let gravity = 0;
-        const vector = prev.currentVector;
-        if (vector > 0 && vector < 10) gravity = -1;
-        if (vector < 0 && vector > -10) gravity = 1;
-        if (vector > 10) gravity = -5;
-        if (vector < -10) gravity = 5;
-        const nextValue = vector + diff + gravity;
-        if(Math.abs(prev.currentVector - nextValue) < 5){
-            return {prevValue: prev.prevValue, currentVector:prev.currentVector + gravity, standStill: Math.abs(prev.currentVector + gravity) < 10};
-        }
-        return {prevValue: avgHipY, currentVector:nextValue, standStill: Math.abs(nextValue) < 10};
-    });
+    // if(!(leftHip.score > 0.5) || !(rightHip > 0.5)) return;
+    if(leftHip.score > 0.5 && rightHip.score > 0.5) {
+        const avgHipY = (leftHip.y + rightHip.y) / 2;
+        setVector((prev: any) => {
+            if(prev.prevValue === 0) return {prevValue: avgHipY, currentVector: 0, standStill: false};
+            const diff = prev.prevValue - avgHipY;
+            let gravity = 0;
+            const vector = prev.currentVector;
+            if (vector > 0 && vector < 10) gravity = -0.7;
+            if (vector < 0 && vector > -10) gravity = 0.7;
+            if (vector > 10) gravity = -3;
+            if (vector < -10) gravity = 3;
+            const nextValue = Math.floor(vector + diff + gravity);
+            if(Math.abs(prev.currentVector - nextValue) < 5){
+                return {prevValue: prev.prevValue, currentVector:prev.currentVector + gravity, standStill: Math.abs(prev.currentVector + gravity) < 10};
+            }
+            return {prevValue: avgHipY, currentVector:nextValue, standStill: Math.abs(nextValue) < 10};
+        });
+    } else {
+        setVector(() => ({prevValue: 0, currentVector: 0, standStill: false}));
+    }
 }
 
 export const requestWithRetry = async (request: any, retries = 3): Promise<any> => {
@@ -217,5 +222,26 @@ export const requestWithRetry = async (request: any, retries = 3): Promise<any> 
             throw new Error('Max retries reached');
         }
         return requestWithRetry(request, retries - 1);
+    }
+}
+
+export const getStatusText = (status: string) => {
+    switch (status) {
+        case 'initial':
+            return 'Начинаем загрузку';
+        case 'loadingModel':
+            return 'Настраиваем нейросети';
+        case 'loadingCamera':
+            return 'Настраиваем камеру';
+        case 'searchHips':
+            return 'Встаньте в кадр';
+        case 'stayStill':
+            return 'Стойте спокойно';
+        case 'countdown':
+            return 'Прыгайте через';
+        case 'jumping':
+            return 'Старт!';
+        default:
+            return '';
     }
 }
