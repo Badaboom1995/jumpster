@@ -209,7 +209,7 @@ export const setMoveVector = (keypoints: any, setVector: any) => {
     });
 }
 
-export const requestWithRetry = async (request: any, retries = 3) => {
+export const requestWithRetry = async (request: any, retries = 3): Promise<any> => {
     try {
         return await request();
     } catch (error) {
