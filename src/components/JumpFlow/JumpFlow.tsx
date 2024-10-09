@@ -5,9 +5,7 @@ import * as tf from '@tensorflow/tfjs-core';
 // Register one of the TF.js backends.
 import '@tensorflow/tfjs-backend-webgl';
 import {
-    drawPoses,
     drawPoses2,
-    drawVideoFrame,
     drawVideoFrame2,
     requestWithRetry,
     setMoveVector
@@ -46,7 +44,6 @@ const JumpFlow = () => {
         const canvas: any = canvasRef.current;
         const ctx = canvas.getContext('2d');
         if (detectorRef.current && video.readyState === 4) {
-            // const {offsetX, offsetY, scale} = drawVideoFrame(ctx, video, canvas);
             const {sx, sy, scale, sWidth, sHeight} = drawVideoFrame2(ctx, video, canvas);
             const poses = await detectorRef.current.estimatePoses(video);
             setMoveVector(poses[0]?.keypoints, setMoveVectorY);

@@ -43,34 +43,6 @@ export const drawPoses = (poses: any, context: any, offsetX: any, offsetY: any, 
         });
     });
 };
-export const drawPoses2 = (
-    poses,
-    context,
-    sx,
-    sy,
-    sWidth,
-    sHeight,
-    canvasWidth,
-    canvasHeight
-) => {
-    poses.forEach((pose) => {
-        const keypoints = pose.keypoints;
-        keypoints.forEach((keypoint) => {
-            if (keypoint.score > 0.3) {
-                const { x, y } = keypoint;
-
-                // Map the keypoint coordinates to the canvas
-                const canvasX = ((x - sx) / sWidth) * canvasWidth;
-                const canvasY = ((y - sy) / sHeight) * canvasHeight;
-
-                context.beginPath();
-                context.arc(canvasX, canvasY, 5, 0, 2 * Math.PI);
-                context.fillStyle = '#D2FA63';
-                context.fill();
-            }
-        });
-    });
-};
 
 const drawMarker = (context: any, keypoint: any, offsetX: any, offsetY: any, scale: any) => {
     context.beginPath();
@@ -141,7 +113,36 @@ export const drawVideoFrame = (context: any, videoElement: any, canvasElement: a
     return { offsetX, offsetY, scale: drawWidth / videoElement.videoWidth };
 };
 
-export const drawVideoFrame2 = (context, videoElement, canvasElement) => {
+export const drawPoses2 = (
+    poses,
+    context,
+    sx,
+    sy,
+    sWidth,
+    sHeight,
+    canvasWidth,
+    canvasHeight
+) => {
+    poses.forEach((pose: any) => {
+        const keypoints = pose.keypoints;
+        keypoints.forEach((keypoint: any) => {
+            if (keypoint.score > 0.3) {
+                const { x, y } = keypoint;
+
+                // Map the keypoint coordinates to the canvas
+                const canvasX = ((x - sx) / sWidth) * canvasWidth;
+                const canvasY = ((y - sy) / sHeight) * canvasHeight;
+
+                context.beginPath();
+                context.arc(canvasX, canvasY, 5, 0, 2 * Math.PI);
+                context.fillStyle = '#D2FA63';
+                context.fill();
+            }
+        });
+    });
+};
+
+export const drawVideoFrame2 = (context: any, videoElement: any, canvasElement: any) => {
     const videoWidth = videoElement.videoWidth;
     const videoHeight = videoElement.videoHeight;
     const canvasWidth = canvasElement.width;
@@ -187,8 +188,9 @@ export const drawVideoFrame2 = (context, videoElement, canvasElement) => {
 
 export const setMoveVector = (keypoints: any, setVector: any) => {
     if(!keypoints) return;
-    const leftHip = keypoints.find((keypoint: any) => keypoint.name === 'left_eye');
-    const rightHip = keypoints.find((keypoint: any) => keypoint.name === 'right_eye');
+    const leftHip = keypoints.find((keypoint: any) => keypoint.name === 'left_hip');
+    const rightHip = keypoints.find((keypoint: any) => keypoint.name === 'right_hip');
+    if(!leftHip.score > 0.5 || !rightHip > 0.5) return;
     const avgHipY = (leftHip.y + rightHip.y) / 2;
     setVector((prev: any) => {
         if(prev.prevValue === 0) return {prevValue: avgHipY, currentVector: 0, standStill: false};
