@@ -59,9 +59,6 @@ importers:
       tailwind-merge:
         specifier: ^2.5.3
         version: 2.5.3
-      tw-merge:
-        specifier: 0.0.1-alpha.3
-        version: 0.0.1-alpha.3
     devDependencies:
       '@types/node':
         specifier: ^20
@@ -1919,9 +1916,6 @@ packages:
 
   tslib@2.6.3:
     resolution: {integrity: sha512-xNvxJEOUiWPGhUuUdQgAJPKOOJfGnIyKySOc09XkKsgdUV/3E2zvwZYdejjmRgPCgcym1juLH3226yA7sEFJKQ==}
-
-  tw-merge@0.0.1-alpha.3:
-    resolution: {integrity: sha512-HvuKdaUWjJKFlUa/DKDGnicPXill0bUZnzoK/BoTWn0OkKLfIrMMn97VXW6fFdArA40FeBkitWjr7SJRuaDvCg==}
 
   tweetnacl-util@0.15.1:
     resolution: {integrity: sha512-RKJBIj8lySrShN4w6i/BonWp2Z/uxwC3h4y7xsRrpP59ZboCd0GpEVsOnMDYLMmKBpYhb5TgHzZXy7wTfYFBRw==}
@@ -4110,8 +4104,6 @@ snapshots:
   tslib@2.4.0: {}
 
   tslib@2.6.3: {}
-
-  tw-merge@0.0.1-alpha.3: {}
 
   tweetnacl-util@0.15.1: {}
 
