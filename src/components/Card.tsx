@@ -16,7 +16,7 @@ const Card = (props: CardProps ) => {
         );
     }
     return (
-        <div className={twMerge('bg-background border border-background-light bg-opacity-50', className)}>
+        <div className={twMerge('bg-background border border-background-light bg-opacity-40', className)}>
             {children}
         </div>
     );
