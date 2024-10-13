@@ -15,10 +15,10 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: PropsWithChildren) {
   return (
     <html lang="en">
-    <body>
+    <body className='bg-background-dark'>
     <Root>
-      <div className='fixed top-0 left-0 z-0'><MovingGradient/></div>
-      <div className='flex flex-col h-[100vh] bg-background relative z-10 bg-opacity-10'>
+      {/*<div className='h-[100vh] fixed top-0 left-0 z-0'><MovingGradient/></div>*/}
+      <div className='flex flex-col h-[100vh]  relative z-10 bg-opacity-10'>
         <Header/>
         <div className='grow'>{children}</div>
         <Footer/>

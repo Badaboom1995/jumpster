@@ -22,23 +22,21 @@ const MovingGradient: React.FC = () => {
 
         const draw = () => {
             if (!ctx) return;
-
             // Clear the canvas before redrawing
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-
             // Create a linear gradient
-            const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-
+            // const gradient = ctx.createLinearGradient(0, 0, Math.abs(Math.sin(gradientShift)) * canvas.width, Math.abs(Math.sin(gradientShift)) * canvas.height);
+            const gradient = ctx.createLinearGradient(0, 0, canvas.width - 100, canvas.height);
             // Update the gradient stops to animate
             gradientShift += 0.005;
-            const shiftA = Math.sin(gradientShift) * 0.5 + 0.5;
-            const shiftB = Math.cos(gradientShift) * 0.5 + 0.5;
-            const shiftC = Math.tan(gradientShift) * 0.5 + 0.5;
+            const shiftA = Math.cos(gradientShift) * 0.3 + 0.8;
+            const shiftB = parseFloat(Math.abs(Math.cos(gradientShift/10) * 0.5).toFixed(5));
 
             // Gradient colors shift slightly over time
-            gradient.addColorStop(0, `rgba(${Math.floor(30 * shiftA)}, ${Math.floor(30 * shiftA)}, ${Math.floor(30 * shiftA)}, 1)`);
-            gradient.addColorStop(0.5, `rgba(${Math.floor(255 * shiftA)}, 250, 99, 1)`);
-            gradient.addColorStop(1, `rgba(${Math.floor(30 * shiftA)}, ${Math.floor(30 * shiftA)}, ${Math.floor(30 * shiftA)}, 1)`);
+            gradient.addColorStop(0, `rgba(0, 0, 0, 0)`);
+            // gradient.addColorStop(0 + shiftB, `rgba(${Math.floor(255 * shiftA)}, 250, 0, 0.5)`);
+            gradient.addColorStop(1-shiftB, `rgba(${Math.floor(255 * shiftA)}, 250, 99, ${Math.abs(Math.sin(gradientShift / 3))})`);
+            // gradient.addColorStop(0.7, `rgba(${Math.floor(30 * shiftA)}, ${Math.floor(30 * shiftA)}, ${Math.floor(30 * shiftA)}, 1)`);
 
             // Fill the canvas with the gradient
             ctx.fillStyle = gradient;
@@ -61,7 +59,7 @@ const MovingGradient: React.FC = () => {
         };
     }, []);
 
-    return <canvas ref={canvasRef} className="moving-gradient opacity-30" />;
+    return <canvas ref={canvasRef} className="moving-gradient opacity-10" />;
 };
 
 export default MovingGradient;

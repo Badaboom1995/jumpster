@@ -13,7 +13,7 @@ const config: Config | any = {
         background:{ DEFAULT:'#292930', dark: "#1E1E24", light: "#4D4D5B"},
       },
       boxShadow: {
-        'glow': '0 35px 60px -15px rgba(210 250 99, 0.5)',
+        'glow': '0 0 22px 5px rgba(100, 100, 100, 0.8)',
       },
       keyframes: {
         flash: {
@@ -22,6 +22,19 @@ const config: Config | any = {
           },
           "50%": {
             opacity: "0.8"
+          },
+        },
+        keyframes: {
+          tilt: {
+            '0%, 50%, 100%': {
+              transform: 'rotate(0deg)',
+            },
+            '25%': {
+              transform: 'rotate(0.5deg)',
+            },
+            '75%': {
+              transform: 'rotate(-0.5deg)',
+            },
           },
         },
         movingGradient: {
@@ -37,14 +50,15 @@ const config: Config | any = {
             boxShadow: '0 0 5px 2px rgba(60, 60, 60, 0.5)'
           },
           '50%': {
-            boxShadow: '0 0 12px 5px rgba(100, 100, 100, 0.8)'
+            boxShadow: '0 0 8px 5px rgba(100, 100, 100, 0.8)'
           }
         },
       },
       animation: {
         flash: "flash 1s ease-in-out 0.25s 3",
-        glow: "glow 3s ease infinite",
-        movingGradient: "movingGradient 1s ease infinite"
+        glow: "glow 5s ease infinite",
+        movingGradient: "movingGradient 1s ease infinite",
+        tilt: "tilt 1s ease-in-out 0.25s 3",
       },
       backgroundImage: {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",

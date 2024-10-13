@@ -20,31 +20,33 @@ const Main = () => {
             .from('Users')
             .select('*')
             .eq('telegram_id', lp.initData?.user?.id)
-            .then(console.log)
     }, []);
 
     return (
         <div className='w-[100vw] h-full flex flex-col p-[16px]'>
-            <div className='grow flex flex-col justify-end'>
-                <div className='mb-[48px]'>
-                    <p className='w-full mb-0 text-[56px] leading-[60px] text-white text-center font-bold'>100</p>
-                    <p className='w-full text-[20px] text-center text-slate-400'>+10 per hour</p>
-                </div>
-                <Card className='
-                    mb-[32px] flex flex-col items-center justify-center
-                    text-white rounded-[24px] p-[24px]
-                '>
-                    <Image className='-mt-[50px] scale-110' src={roo as any} alt='roo'/>
-                    <div className='flex flex-wrap justify-between w-full'>
-                        <span>Beginner</span>
-                        <span>+10k</span>
-                        <div className='w-full rounded-full mt-[8px] border border-white p-1'>
-                            <div className='w-1/12 rounded-full h-[7px] bg-white'></div>
-                        </div>
+            <div className='grow flex flex-col justify-between'>
+                <div></div>
+                <div>
+                    <div className='mb-[32px]'>
+                        <p className='w-full mb-0 text-[56px] leading-[60px] text-white text-center font-bold'>100</p>
+                        <p className='w-full text-[20px] text-center text-slate-400'>+10 coins per hour</p>
                     </div>
-                </Card>
+                    <Card className='
+                        mb-[32px] flex flex-col items-center justify-center
+                        text-white rounded-[24px] p-[24px]
+                    '>
+                        <Image className='-mt-[30px] scale-110' src={roo as any} alt='roo'/>
+                        <div className='flex flex-wrap justify-between w-full'>
+                            <span>Beginner</span>
+                            <span>+10k</span>
+                            <div className='w-full rounded-full mt-[8px] border border-white p-1'>
+                                <div className='w-1/12 rounded-full h-[7px] bg-white animate-glow'></div>
+                            </div>
+                        </div>
+                    </Card></div>
                 <div className='flex justify-between mb-[12px] font-bold text-white px-[8px]'>
-                    <div className='flex gap-[4px]'><Image src={energy as any} alt='energy'/><span>1000/1000</span></div>
+                    <div className='flex gap-[4px]'><Image src={energy as any} alt='energy'/><span>1000/1000</span>
+                    </div>
                     <div className='flex gap-[4px]'><Image src={saved as any} alt='boost'/><span>Boost</span></div>
                 </div>
             </div>
