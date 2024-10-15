@@ -10,7 +10,7 @@ type GetUserResponse = {
     user: User | null;
 }
 
-const createUser = async (userID: number, username?: string) => {
+const createUser = async (userID: number, username = 'unknown') => {
     const {data, error} = await supabase
         .from('Users')
         .insert([{telegram_id: userID, username}])
@@ -42,7 +42,7 @@ const useGetUser = (): GetUserResponse => {
        onError: async (error) => {
            if(!userID) return
            await createUser(userID, username)
-           // refetch()
+           window.location.reload()
        }
    })
 

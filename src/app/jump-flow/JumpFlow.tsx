@@ -91,6 +91,7 @@ const JumpFlow = () => {
             setHipsVisible(hipsVisible)
         }
     };
+
     // init camera and model
     useEffect(() => {
         const init = async () => {
@@ -107,7 +108,6 @@ const JumpFlow = () => {
             stopCamera()
         }
     }, []);
-
     // run main loop
     useEffect(() => {
         const intervalId = setInterval(mainLoop, 50)
@@ -122,7 +122,6 @@ const JumpFlow = () => {
             clearInterval(intervalId)
         };
     }, []);
-
     // track hips and stillness
     useEffect(() => {
         if(flowStatus === 'jump' || !appReady) return
@@ -161,7 +160,7 @@ const JumpFlow = () => {
                     <Image src={arrow as string} alt='arrow-down' width={24} height={24}/>
                 </button>
             </Link>
-            <div className='absolute top-[80px] w-full left-1/2 -translate-x-1/2 z-50'>
+            <div className='absolute top-[240px] w-full left-1/2 -translate-x-1/2 z-50'>
                 <Title>{statusText}</Title>
                 {isRunning && seconds > 0 && <Title>Старт через {seconds}</Title>}
                 {flowStatus === 'jump' && <Title>{jumpsCounter}</Title>}
