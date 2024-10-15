@@ -2,7 +2,6 @@
 import {useQuery} from "react-query";
 import {supabase} from "@/components/Root/Root";
 import {useLaunchParams} from "@telegram-apps/sdk-react";
-import {useEffect} from "react";
 import {User} from "@/database.types";
 
 type GetUserResponse = {
@@ -11,10 +10,10 @@ type GetUserResponse = {
     user: User | null;
 }
 
-const createUser = async (userID: number) => {
+const createUser = async (userID: number, username?: string) => {
     const {data, error} = await supabase
         .from('Users')
-        .insert([{telegram_id: userID}])
+        .insert([{telegram_id: userID, username}])
     if (error) {
         throw new Error(error.message)
     }
@@ -24,6 +23,7 @@ const createUser = async (userID: number) => {
 const useGetUser = (): GetUserResponse => {
    const lp = useLaunchParams();
    const userID = lp.initData?.user?.id;
+   const username = lp.initData?.user?.username;
    const {data, isLoading, isFetching, refetch} = useQuery({
        queryKey: ['user'],
        queryFn: async () => {
@@ -41,7 +41,7 @@ const useGetUser = (): GetUserResponse => {
        enabled: !!userID,
        onError: async (error) => {
            if(!userID) return
-           await createUser(userID)
+           await createUser(userID, username)
            // refetch()
        }
    })

@@ -13,6 +13,7 @@ import useCountdown from "@/hooks/useCountDown";
 import Image from "next/image";
 import arrow from '@/app/_assets/icons/ArrowDown.svg'
 import Link from "next/link";
+import useGetUser from "@/hooks/api/useGetUser";
 
 const constraints = {
     video: true
@@ -20,7 +21,7 @@ const constraints = {
 
 const Title = ({children}: PropsWithChildren) => {
     return (
-        <p className="text-[48px] font-bold leading-[56px] text-white text-center">{children}</p>
+        <p className="w-full text-[40px] font-bold leading-[56px] text-white text-center">{children}</p>
     )
 }
 
@@ -35,6 +36,8 @@ const JumpFlow = () => {
     const [jumpState, setJumpState] = useState('down');
     const [jumpsCounter, setJumpsCounter] = useState(0);
     const statusText = getStatusText(flowStatus);
+
+    const {user, isUserLoading} = useGetUser()
 
     const {seconds, startCountDown, stopCountDown, isRunning} = useCountdown()
 
@@ -151,22 +154,23 @@ const JumpFlow = () => {
     }, [moveVectorY.currentVector, flowStatus])
 
     return (
-        <div className="relative w-full h-full fixed top-0 left-0 bg-slate-800">
+        <div className="w-full h-full fixed top-0 left-0 bg-slate-800">
             <Link href='/'>
                 <button
-                    className='absolute z-[100] rotate-90 top-[24px] left-[24px] text-white transition active:bg-slate-900 p-2 rounded-full'>
-                    <Image src={arrow as string} alt='arrow-down' width={24} height={24}/></button>
+                    className='relative z-50 rotate-90 top-[24px] left-[24px] text-white transition active:bg-slate-900 p-2 rounded-full'>
+                    <Image src={arrow as string} alt='arrow-down' width={24} height={24}/>
+                </button>
             </Link>
-            <div className='absolute top-[100px] left-1/2 -translate-x-1/2 z-50'>
+            <div className='absolute top-[80px] w-full left-1/2 -translate-x-1/2 z-50'>
                 <Title>{statusText}</Title>
                 {isRunning && seconds > 0 && <Title>Старт через {seconds}</Title>}
-                    {flowStatus === 'jump' && <Title>{jumpsCounter}</Title>}
-                </div>
-                <video ref={videoRef} autoPlay playsInline className='hidden'></video>
-                <canvas
-                    ref={canvasRef}
-                    className='absolute top-0 left-1/2 -translate-x-1/2 h-[100vh] w-full -scale-x-100 opacity-80'>
-                </canvas>
+                {flowStatus === 'jump' && <Title>{jumpsCounter}</Title>}
+            </div>
+            <video ref={videoRef} autoPlay playsInline className='hidden'></video>
+            <canvas
+                ref={canvasRef}
+                className='absolute top-0 left-1/2 -translate-x-1/2 h-[100vh] w-full -scale-x-100 opacity-80'>
+            </canvas>
         </div>
     );
 };

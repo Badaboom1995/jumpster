@@ -9,14 +9,16 @@ import roo from '@/app/_assets/images/roo-1.png'
 import Card from "@/components/Card";
 import Image from "next/image";
 import useGetUser from "@/hooks/api/useGetUser";
+import {useLaunchParams} from "@telegram-apps/sdk-react";
 
 const Main = () => {
+    const lp = useLaunchParams();
     const {user, isUserLoading} = useGetUser()
     if(isUserLoading) return <div>Loading...</div>
     return (
         <div className='w-[100vw] h-full flex flex-col p-[16px]'>
             <div className='grow flex flex-col justify-between'>
-                <div></div>
+                <div>{lp.initData?.user?.username}</div>
                 <div>
                     <div className='mb-[32px]'>
                         <p className='w-full mb-0 text-[56px] leading-[60px] text-white text-center font-bold'>{user?.coins}</p>
