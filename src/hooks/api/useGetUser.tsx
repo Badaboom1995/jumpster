@@ -12,9 +12,10 @@ type GetUserResponse = {
 
 const createUser = async (userID: number, username = 'unknown') => {
     const {data, error} = await supabase
-        .from('Users')
+        .from('users')
         .insert([{telegram_id: userID, username}])
     if (error) {
+        console.log(error)
         throw new Error(error.message)
     }
     return data
@@ -26,16 +27,21 @@ const useGetUser = (refetchOnMount?:any): GetUserResponse => {
    const username = lp.initData?.user?.username;
    const {data, isLoading, isFetching, refetch} = useQuery({
        queryKey: ['user'],
+       staleTime: 0,
        queryFn: async () => {
+           console.log('fetching user')
               const {data, error} = await supabase
-                .from('Users')
-                .select('*')
+                .from('users')
+                .select(`*, user_parameters(name, value, recovery_rate, updated_at)`)
                 .eq('telegram_id', userID)
                 .single()
               if (error) {
                 throw new Error(error.message)
               }
-              return data
+              // @ts-ignore
+              return {...data, user_parameters: data.user_parameters.reduce((acc, item) => {
+                  return {...acc, [item.name]: {value: item.value, recovery_rate: item.recovery_rate, last_update: item.updated_at}}
+                }, {})}
        },
        retry: false,
        refetchOnMount: refetchOnMount,

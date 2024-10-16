@@ -6,7 +6,6 @@ import * as tf from '@tensorflow/tfjs-core';
 import '@tensorflow/tfjs-backend-webgl';
 import {
     detectHips,
-    drawPoses2,
     drawVideoFrame2, getStatusText,
     requestWithRetry,
     setMoveVector

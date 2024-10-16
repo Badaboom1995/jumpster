@@ -31,19 +31,19 @@ const Button: React.FC<ButtonProps> = ({
     onClick,
 }) => {
     const specificClass = (variant: string) => classNames({
-        'bg-primary active:bg-primary-dark transition': variant === 'primary',
+        'bg-primary active:bg-primary-dark transition': variant === 'primary' && !disabled,
+        'bg-primary opacity-30 transition': variant === 'primary' && disabled,
         'bg-white': variant === 'secondary',
     })
-    const buttonClass = twMerge(
-        'rounded-[12px] text-black text-[16px] p-[12px] w-full flex justify-center font-',
-        specificClass(variant),
-        className
-    );
 
     return (
         <button
             type={type as "button" | "submit"}
-            className={buttonClass}
+            className={twMerge(
+                'rounded-[12px] text-black text-[16px] p-[12px] w-full flex justify-center font-',
+                specificClass(variant),
+                className
+            )}
             disabled={disabled || isLoading}
             onClick={onClick}
         >

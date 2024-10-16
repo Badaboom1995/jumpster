@@ -15,6 +15,7 @@ import {calculateCaloriesBurned, secondsToMinutesString} from "@/app/jump-flow/u
 import {supabase} from "@/components/Root/Root";
 import useGetUser from "@/hooks/api/useGetUser";
 import {useRouter} from "next/navigation";
+import {useQueryClient} from "react-query";
 
 const StatCard = ({children, className}: PropsWithChildren & {className?: string}) => {
     return (
@@ -25,6 +26,7 @@ const StatCard = ({children, className}: PropsWithChildren & {className?: string
 const coinsPerJump = 1;
 
 const Reward = ({jumps, time}:{jumps: number, time: number}) => {
+    const queryClient = useQueryClient()
     const router = useRouter()
     const coinsEarned = jumps * coinsPerJump;
     const coinsEarnedAnimated = useAnimatedNumber(coinsEarned, 2, true);
@@ -36,12 +38,26 @@ const Reward = ({jumps, time}:{jumps: number, time: number}) => {
 
     const addCoins = async () => {
        if(!user) return
-       await supabase
-            .from('Users')
-            .update({coins: (user.coins || 0) + coinsEarned})
-            .eq('id', user.id)
-            .select()
-        router.push('/?claim=true')
+        try {
+           const now = new Date().toISOString()
+           await supabase
+               .from('user_parameters')
+                // @ts-ignore
+                .update({value: user?.user_parameters.coins.value + coinsEarned})
+                .eq('user_id', user.id)
+                .eq('name', 'coins')
+
+            await supabase
+                .from('user_parameters')
+                .update({value: 0, updated_at: now})
+                .eq('user_id', user.id)
+                .eq('name', 'energy')
+
+            await queryClient.invalidateQueries('user')
+            router.push('/?claim=true')
+        } catch (e) {
+
+        }
     }
 
     return (

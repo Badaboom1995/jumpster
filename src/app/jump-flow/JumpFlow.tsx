@@ -30,7 +30,7 @@ export const Title = ({children, className}: PropsWithChildren & {className?: st
     )
 }
 
-const energyPerJump = 100;
+const energyPerJump = 10;
 
 const JumpFlow = () => {
     const videoRef = useRef(null);
@@ -48,7 +48,8 @@ const JumpFlow = () => {
 
     useEffect(() => {
         if(isUserLoading) return
-        setAvailableEnergy(user?.current_energy || 0)
+        // @ts-ignore
+        setAvailableEnergy(user?.user_parameters.energy.value || 0)
     }, [isUserLoading]);
 
     const {currentSeconds, stop: stopTimer, start: startTimer} = useTimer()
@@ -82,7 +83,6 @@ const JumpFlow = () => {
         const video: any = videoRef.current;
         const stream = await navigator?.mediaDevices.getUserMedia(constraints);
         video.srcObject = stream;
-
         return new Promise((resolve) => {
             video.onloadedmetadata = () => {
                 resolve(video);
@@ -182,7 +182,7 @@ const JumpFlow = () => {
     }, [flowStatus, secondsUntilReward, isRewardRunning]);
 
     return (
-        <div className={twMerge("w-full h-full fixed top-0 left-0 bg-background-dark", availableEnergy < 600 && !flowStatus.includes('end')&& 'animate-pulse', isRewardRunning && 'animate-fade')}>
+        <div className={twMerge("w-full h-full fixed top-0 left-0 bg-background-dark", availableEnergy < 50 && !flowStatus.includes('end')&& 'animate-pulse', isRewardRunning && 'animate-fade')}>
             {flowStatus !== 'end' && <Link href='/' className='block'>
                 <button
                     className='relative z-50 rotate-90 p-[20px] text-white transition active:bg-slate-900 rounded-full'>
