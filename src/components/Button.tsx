@@ -14,6 +14,7 @@ interface ButtonProps {
     loaderText?: string;
     loaderIcon?: React.ReactNode;
     disabled?: boolean;
+    onClick?: () => void;
 }
 
 const Button: React.FC<ButtonProps> = ({
@@ -27,6 +28,7 @@ const Button: React.FC<ButtonProps> = ({
     loaderText,
     loaderIcon,
     disabled = false,
+    onClick,
 }) => {
     const specificClass = (variant: string) => classNames({
         'bg-primary active:bg-primary-dark transition': variant === 'primary',
@@ -43,9 +45,10 @@ const Button: React.FC<ButtonProps> = ({
             type={type as "button" | "submit"}
             className={buttonClass}
             disabled={disabled || isLoading}
+            onClick={onClick}
         >
-            <span className='flex gap-[8px]'>
-                { iconLeft && <Image src={iconLeft as string} alt='icon'/>}
+            <span className='flex gap-[8px] font-[600] items-center'>
+                { iconLeft && <Image src={iconLeft as any} alt='icon'/>}
                 {!isLoading && children}
             </span>
         </button>

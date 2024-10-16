@@ -20,7 +20,7 @@ const createUser = async (userID: number, username = 'unknown') => {
     return data
 }
 
-const useGetUser = (): GetUserResponse => {
+const useGetUser = (refetchOnMount?:any): GetUserResponse => {
    const lp = useLaunchParams();
    const userID = lp.initData?.user?.id;
    const username = lp.initData?.user?.username;
@@ -38,6 +38,7 @@ const useGetUser = (): GetUserResponse => {
               return data
        },
        retry: false,
+       refetchOnMount: refetchOnMount,
        enabled: !!userID,
        onError: async (error) => {
            if(!userID) return

@@ -21,10 +21,10 @@ const Footer = () => {
     return (
         <div className={`relative z-10 w-full px-[12px] py-[8px] pb-[12px] ${!visible && 'hidden'}`}>
             <ul className='w-full flex flex justify-between'>
-                <Navitem src={homeIcon as string}>Home</Navitem>
-                <Navitem src={earnIcon as string}>Earn</Navitem>
-                <Navitem src={friendsIcon as string}>Pals</Navitem>
-                <Navitem src={walletIcon as string}>Wallet</Navitem>
+                <Navitem src={homeIcon as any}>Home</Navitem>
+                <Navitem src={earnIcon as any}>Earn</Navitem>
+                <Navitem src={friendsIcon as any}>Pals</Navitem>
+                <Navitem src={walletIcon as any}>Wallet</Navitem>
             </ul>
         </div>
     );

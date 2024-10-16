@@ -46,6 +46,25 @@ export const detectHips = (poses: any) => {
     return leftHipDetected && rightHipDetected;
 };
 
+export const secondsToMinutesString = (seconds: number) => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+}
+
+export function calculateCaloriesBurned(jumps: number, timeInSeconds: number): number {
+    const MET = 11.8; // MET for moderate skipping rope pace
+    const timeInMinutes = timeInSeconds / 60;
+    const averageJumpsPerMinute = jumps / timeInMinutes;
+
+    // Using the standard calorie burning formula
+    const caloriesPerMinute = (MET * 3.5 * 68) / 200; // Assuming 68kg as a baseline weight
+    const totalCaloriesBurned = caloriesPerMinute * timeInMinutes;
+
+    return totalCaloriesBurned;
+}
+
+
 // Start the camera stream
 // export const startCamera = async (video: any) => {
 //     try {
@@ -216,3 +235,56 @@ export const getStatusText = (status: string) => {
             return '';
     }
 }
+
+function drawDynamicPattern(ctx: CanvasRenderingContext2D, colors: string[]) {
+    let t = 0;
+
+    // Helper function to set fill style and draw a pixel
+    const col = (x: number, y: number, r: number, g: number, b: number) => {
+        ctx.fillStyle = `rgb(${r},${g},${b})`;
+        ctx.fillRect(x, y, 1, 1);
+    };
+
+    // Functions to calculate R, G, and B values based on time
+    const R = (x: number, y: number, t: number) => {
+        return Math.floor(192 + 64 * Math.cos((x * x - y * y) / 300 + t));
+    };
+
+    const G = (x: number, y: number, t: number) => {
+        return Math.floor(
+            192 +
+            64 *
+            Math.sin(
+                (x * x * Math.cos(t / 4) + y * y * Math.sin(t / 3)) / 300
+            )
+        );
+    };
+
+    const B = (x: number, y: number, t: number) => {
+        return Math.floor(
+            192 +
+            64 *
+            Math.sin(
+                5 * Math.sin(t / 9) +
+                ((x - 100) * (x - 100) + (y - 100) * (y - 100)) / 1100
+            )
+        );
+    };
+
+    // Main function to animate the pattern
+    const run = () => {
+        for (let x = 0; x <= 35; x++) {
+            for (let y = 0; y <= 35; y++) {
+                // Calculate RGB values and render the pattern
+                col(x, y, R(x, y, t), G(x, y, t), B(x, y, t));
+            }
+        }
+        t += 0.12;
+        window.requestAnimationFrame(run);
+    };
+
+    // Start the animation
+    run();
+}
+
+

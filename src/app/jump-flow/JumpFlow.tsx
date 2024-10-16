@@ -6,45 +6,66 @@ import '@tensorflow/tfjs-backend-webgl';
 import {
     detectHips,
     drawVideoFrame2, getStatusText,
-    requestWithRetry,
+    requestWithRetry, secondsToMinutesString,
     setMoveVector
 } from "./utils";
 import useCountdown from "@/hooks/useCountDown";
 import Image from "next/image";
 import arrow from '@/app/_assets/icons/ArrowDown.svg'
+import energy from '@/app/_assets/icons/Energy-primary.svg'
 import Link from "next/link";
 import useGetUser from "@/hooks/api/useGetUser";
+import {twMerge} from "tailwind-merge";
+import useTimer from "@/hooks/api/useTimer";
+import Reward from "@/app/jump-flow/Reward";
+import {supabase} from "@/components/Root/Root";
 
 const constraints = {
     video: true
 }
 
-const Title = ({children}: PropsWithChildren) => {
+export const Title = ({children, className}: PropsWithChildren & {className?: string}) => {
     return (
-        <p className="w-full text-[40px] font-bold leading-[56px] text-white text-center">{children}</p>
+        <p className={twMerge('w-full text-[40px] font-bold leading-[48px] text-white text-center', className)}>{children}</p>
     )
 }
+
+const energyPerJump = 100;
 
 const JumpFlow = () => {
     const videoRef = useRef(null);
     const canvasRef = useRef(null);
     const detectorRef = useRef<any>(null);
-    const [flowStatus, setFlowStatus] = useState('initial');
-    const [moveVectorY, setMoveVectorY] = useState({prevValue: 0, currentVector: 0, standStill: false});
-    const [hipsVisible, setHipsVisible] = useState(false);
-    const [appReady, setAppReady] = useState(false);
+    const [flowStatus, setFlowStatus] = useState('initial'); // initial, searchHips, stayStill, countDown, jump, end
+    const [moveVectorY, setMoveVectorY] = useState({prevValue: 0, currentVector: 0, standStill: false}); // vector of movement
+    const [hipsVisible, setHipsVisible] = useState(false); // hips are visible
+    const [appReady, setAppReady] = useState(false); // set to false to disable camera and model
     const [jumpState, setJumpState] = useState('down');
     const [jumpsCounter, setJumpsCounter] = useState(0);
+    const [availableEnergy, setAvailableEnergy] = useState<number>(0);
     const statusText = getStatusText(flowStatus);
-
     const {user, isUserLoading} = useGetUser()
 
+    useEffect(() => {
+        if(isUserLoading) return
+        setAvailableEnergy(user?.current_energy || 0)
+    }, [isUserLoading]);
+
+    const {currentSeconds, stop: stopTimer, start: startTimer} = useTimer()
     const {seconds, startCountDown, stopCountDown, isRunning} = useCountdown()
+    const {seconds: secondsUntilReward, startCountDown: startRewardCountdown, stopCountDown: stopRewardCountdown, isRunning: isRewardRunning } = useCountdown()
 
     const detectUpAndDown = (vector: any) => {
-        if(vector > 10 && jumpState === 'down'){
+        if(vector > 5 && jumpState === 'down'){
+            if(availableEnergy < energyPerJump) {
+                setFlowStatus('endCountdown')
+                stopTimer()
+                startRewardCountdown()
+                return
+            }
             setJumpState('up');
             setJumpsCounter((prev) => prev + 1);
+            setAvailableEnergy(prev => prev - energyPerJump)
         }
         if(vector < 0 && jumpState === 'up'){
             setJumpState('down');
@@ -108,7 +129,7 @@ const JumpFlow = () => {
             stopCamera()
         }
     }, []);
-    // run main loop
+
     useEffect(() => {
         const intervalId = setInterval(mainLoop, 50)
         const canvas = canvasRef.current;
@@ -124,7 +145,7 @@ const JumpFlow = () => {
     }, []);
     // track hips and stillness
     useEffect(() => {
-        if(flowStatus === 'jump' || !appReady) return
+        if(flowStatus === 'jump' || !appReady || flowStatus.includes('end'))return
         if(!hipsVisible){
             setFlowStatus('searchHips');
             stopCountDown()
@@ -142,6 +163,7 @@ const JumpFlow = () => {
         }
         if(hipsVisible && moveVectorY.standStill && seconds === 0){
             setFlowStatus('jump')
+            startTimer()
             return
         }
     }, [hipsVisible, moveVectorY.standStill, seconds, isRunning, flowStatus]);
@@ -152,23 +174,37 @@ const JumpFlow = () => {
         detectUpAndDown(moveVectorY.currentVector)
     }, [moveVectorY.currentVector, flowStatus])
 
+    useEffect(() => {
+        if(flowStatus === 'endCountdown' && secondsUntilReward === 0 && isRewardRunning){
+            setFlowStatus('end')
+            stopRewardCountdown()
+        }
+    }, [flowStatus, secondsUntilReward, isRewardRunning]);
+
     return (
-        <div className="w-full h-full fixed top-0 left-0 bg-slate-800">
-            <Link href='/'>
+        <div className={twMerge("w-full h-full fixed top-0 left-0 bg-background-dark", availableEnergy < 600 && !flowStatus.includes('end')&& 'animate-pulse', isRewardRunning && 'animate-fade')}>
+            {flowStatus !== 'end' && <Link href='/' className='block'>
                 <button
-                    className='relative z-50 rotate-90 top-[24px] left-[24px] text-white transition active:bg-slate-900 p-2 rounded-full'>
-                    <Image src={arrow as string} alt='arrow-down' width={24} height={24}/>
+                    className='relative z-50 rotate-90 p-[20px] text-white transition active:bg-slate-900 rounded-full'>
+                    <Image src={arrow as any} alt='arrow-down' width={24} height={24}/>
                 </button>
-            </Link>
+            </Link>}
             <div className='absolute top-[240px] w-full left-1/2 -translate-x-1/2 z-50'>
                 <Title>{statusText}</Title>
                 {isRunning && seconds > 0 && <Title>Старт через {seconds}</Title>}
-                {flowStatus === 'jump' && <Title>{jumpsCounter}</Title>}
             </div>
+            {flowStatus === 'jump' &&
+                <div className='absolute top-[72px] w-full left-1/2 -translate-x-1/2 z-50'>
+                    <h1 className='flex items-center justify-center text-[54px] text-white font-bold'>{secondsToMinutesString(currentSeconds)}</h1>
+                    <div className='flex items-center justify-center text-primary mb-[80px] -ml-[32px] text-[32px] font-bold'><Image height={32} src={energy as any} alt='energy'/>{availableEnergy}/{user?.max_energy}</div>
+                    <h1 className='flex items-center justify-center text-white text-[140px] leading-[120px]'>{jumpsCounter}</h1>
+                </div>
+            }
+            {flowStatus === 'end' && <Reward jumps={jumpsCounter} time={currentSeconds}/>}
             <video ref={videoRef} autoPlay playsInline className='hidden'></video>
             <canvas
                 ref={canvasRef}
-                className='absolute top-0 left-1/2 -translate-x-1/2 h-[100vh] w-full -scale-x-100 opacity-80'>
+                className='absolute top-0 left-1/2 -translate-x-1/2 h-[100vh] w-full -scale-x-100 opacity-50'>
             </canvas>
         </div>
     );

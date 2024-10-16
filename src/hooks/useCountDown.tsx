@@ -7,7 +7,6 @@ const useCountdown = () => {
 
     // Start the countdown
     const start = () => {
-        console.log('start')
         if (intervalRef.current) return; // Prevent multiple intervals
         setSeconds(3); // Reset the countdown to 3 seconds
         setIsRunning(true);
@@ -26,7 +25,6 @@ const useCountdown = () => {
 
     // Stop the countdown
     const stop = () => {
-        console.log('stop')
         if (intervalRef.current) {
             clearInterval(intervalRef.current);
             intervalRef.current = null;
@@ -34,7 +32,6 @@ const useCountdown = () => {
         setSeconds(3); // Reset the countdown
         setIsRunning(false);
     };
-
     // Clean up interval on component unmount
     useEffect(() => {
         return () => {

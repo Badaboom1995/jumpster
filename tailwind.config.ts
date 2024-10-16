@@ -10,6 +10,7 @@ const config: Config | any = {
     extend: {
       colors: {
         primary: { DEFAULT:'#D2FA63', dark: "#A5C54C"},
+        caption: { DEFAULT:'#848484'},
         background:{ DEFAULT:'#292930', dark: "#1E1E24", light: "#4D4D5B"},
       },
       boxShadow: {
@@ -21,8 +22,21 @@ const config: Config | any = {
             opacity: "1"
           },
           "50%": {
-            opacity: "0.8"
+            opacity: "0.5"
           },
+        },
+        fade: {
+            "0%": {
+                opacity: "1",
+                background: "rgba(210, 220, 60, 0.7)"
+            },
+          "20%": {
+            opacity: "0.9",
+            background: "rgba(0, 0, 0, 0.8)"
+          },
+          "100%": {
+                opacity: "0"
+            }
         },
         keyframes: {
           tilt: {
@@ -59,6 +73,7 @@ const config: Config | any = {
         glow: "glow 5s ease infinite",
         movingGradient: "movingGradient 1s ease infinite",
         tilt: "tilt 1s ease-in-out 0.25s 3",
+        fade: "fade 4s ease-in-out 0.25s 3",
       },
       backgroundImage: {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
