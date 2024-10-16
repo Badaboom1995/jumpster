@@ -22,7 +22,6 @@ const Main = () => {
     return (
         <div className='w-[100vw] h-full flex flex-col p-[16px]'>
             <div className='grow flex flex-col justify-between'>
-                <button>{lp.initData?.user?.username}</button>
                 <div>
                     <div className='mb-[32px]'>
                         <p className='w-full mb-0 text-[56px] leading-[60px] text-white text-center font-bold'>{user?.coins}</p>
