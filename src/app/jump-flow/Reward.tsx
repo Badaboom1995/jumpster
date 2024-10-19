@@ -1,4 +1,4 @@
-import React, {PropsWithChildren} from 'react';
+import React, {PropsWithChildren, useEffect} from 'react';
 import Image from "next/image";
 import medal from "@/app/_assets/images/medal.png";
 import fire from "@/app/_assets/icons/Fire.svg";
@@ -36,6 +36,7 @@ const Reward = ({jumps, time}:{jumps: number, time: number}) => {
     const jumpsPerMinuteAnimated = useAnimatedNumber(Math.floor(jumps/time*60), 2, true);
     const {user, isUserLoading} = useGetUser()
 
+    // TODO: move to backend
     const addCoins = async () => {
        if(!user) return
         try {
@@ -52,13 +53,16 @@ const Reward = ({jumps, time}:{jumps: number, time: number}) => {
                 .update({value: 0, updated_at: now})
                 .eq('user_id', user.id)
                 .eq('name', 'energy')
-
             await queryClient.invalidateQueries('user')
-            router.push('/?claim=true')
+
         } catch (e) {
 
         }
     }
+
+    useEffect(() => {
+        addCoins()
+    }, []);
 
     return (
         <div
@@ -92,7 +96,7 @@ const Reward = ({jumps, time}:{jumps: number, time: number}) => {
                 </div>
             </div>
             <Link className='w-full' href='/?claim=true'>
-                <Button onClick={addCoins} iconLeft={gift as any} variant='secondary'>
+                <Button onClick={() => { router.push('/?claim=true')}} iconLeft={gift as any} variant='secondary'>
                     Забрать награду
                 </Button>
             </Link>

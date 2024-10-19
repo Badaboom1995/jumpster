@@ -4,7 +4,7 @@ import {createClient} from "@supabase/supabase-js";
 
 export const supabase = createClient('https://adrdxahjylqbmxomhrmi.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFkcmR4YWhqeWxxYm14b21ocm1pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mjc2Njc1NDAsImV4cCI6MjA0MzI0MzU0MH0.pe1KulD4qwauzZxD0PFIV0cfdnuVii12tdgUHsQsRiA')
 
-import React, { type PropsWithChildren, useEffect, useMemo, useState } from 'react';
+import React, {type PropsWithChildren, useContext, useEffect, useMemo, useState} from 'react';
 import {
   SDKProvider,
   useLaunchParams,
@@ -25,6 +25,8 @@ import { useDidMount } from '@/hooks/useDidMount';
 
 import './styles.css';
 import {QueryClient, QueryClientProvider} from "react-query";
+
+export const StoreContext = React.createContext<any>({store: {}, setStore: () => {}});
 
 function App(props: PropsWithChildren) {
   const lp = useLaunchParams();
@@ -56,6 +58,8 @@ function App(props: PropsWithChildren) {
 
 function RootInner({ children }: PropsWithChildren) {
   // Mock Telegram environment in development mode if needed.
+  const [store, setStore] = useState({one:'two'})
+
   if (process.env.NODE_ENV === 'development') {
     // eslint-disable-next-line react-hooks/rules-of-hooks
     useTelegramMock();
@@ -89,7 +93,9 @@ function RootInner({ children }: PropsWithChildren) {
       <SDKProvider acceptCustomStyles debug={debug}>
         <App>
           <QueryClientProvider client={queryClient}>
-            {children}
+            <StoreContext.Provider value={{store, setStore}}>
+              {children}
+            </StoreContext.Provider>
           </QueryClientProvider>
         </App>
       </SDKProvider>

@@ -1,5 +1,5 @@
 'use client'
-import React, {PropsWithChildren, useEffect, useRef, useState} from 'react';
+import React, {PropsWithChildren, useContext, useEffect, useRef, useState} from 'react';
 import * as poseDetection from '@tensorflow-models/pose-detection';
 import * as tf from '@tensorflow/tfjs-core';
 import '@tensorflow/tfjs-backend-webgl';
@@ -18,7 +18,7 @@ import useGetUser from "@/hooks/api/useGetUser";
 import {twMerge} from "tailwind-merge";
 import useTimer from "@/hooks/api/useTimer";
 import Reward from "@/app/jump-flow/Reward";
-import {supabase} from "@/components/Root/Root";
+import {StoreContext} from "@/components/Root/Root";
 
 const constraints = {
     video: true
@@ -30,9 +30,10 @@ export const Title = ({children, className}: PropsWithChildren & {className?: st
     )
 }
 
-const energyPerJump = 10;
+const energyPerJump = 100;
 
 const JumpFlow = () => {
+    const {store} = useContext(StoreContext)
     const videoRef = useRef(null);
     const canvasRef = useRef(null);
     const detectorRef = useRef<any>(null);
@@ -74,9 +75,13 @@ const JumpFlow = () => {
     }
 
     const loadModel = async () => {
-        const detectorConfig = {modelType: poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING};
-        await requestWithRetry(async () => await poseDetection.createDetector(poseDetection.SupportedModels.MoveNet, detectorConfig))
-        detectorRef.current = await poseDetection.createDetector(poseDetection.SupportedModels.MoveNet, detectorConfig);
+        if(store.detector){
+            detectorRef.current = store.detector
+        } else {
+            const detectorConfig = {modelType: poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING};
+            await requestWithRetry(async () => await poseDetection.createDetector(poseDetection.SupportedModels.MoveNet, detectorConfig))
+            detectorRef.current = await poseDetection.createDetector(poseDetection.SupportedModels.MoveNet, detectorConfig);
+        }
     };
 
     const setupCamera = async () => {
@@ -92,19 +97,37 @@ const JumpFlow = () => {
 
     const stopCamera = () => {
         const video: any = videoRef.current;
+        console.log('try to stop but video is', video, videoRef)
         if (video && video.srcObject) {
+            console.log('Stopping camera...');
+
             const stream = video.srcObject as MediaStream;
-            const tracks = stream.getTracks();
-            tracks.forEach(track => track.stop());
+
+            // Stop all media tracks (audio and video)
+            stream.getTracks().forEach((track) => {
+                console.log(`Stopping track: ${track.kind}`);
+                track.stop();  // Stop each track completely
+            });
+
+            // Clear the video element's source and pause playback
             video.srcObject = null;
+            video.pause();
+            video.removeAttribute('src');  // Clear any lingering src reference
+            video.load();  // Reload the video element to reset
+
+            console.log('Camera stopped and video element reset.');
+        } else {
+            console.warn('No active camera stream found.');
         }
     };
+
+
 
     const mainLoop = async () => {
         const video: any = videoRef.current;
         const canvas: any = canvasRef.current;
         const ctx = canvas.getContext('2d');
-        if (detectorRef.current && video.readyState === 4) {
+        if (detectorRef.current && video.readyState === 4){
             drawVideoFrame2(ctx, video, canvas);
             const poses = await detectorRef.current.estimatePoses(video);
             setMoveVector(poses[0]?.keypoints, setMoveVectorY);
@@ -126,6 +149,7 @@ const JumpFlow = () => {
         };
         init()
         return () => {
+            console.log('UNMOUNT')
             stopCamera()
         }
     }, []);

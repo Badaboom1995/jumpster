@@ -1,5 +1,5 @@
 'use client'
-import React, {useEffect, useState} from 'react';
+import React, {useContext, useEffect, useRef, useState} from 'react';
 import Button from "@/components/Button";
 import Link from "next/link";
 import play from '@/app/_assets/icons/Play.svg'
@@ -9,19 +9,34 @@ import roo from '@/app/_assets/images/roo-1.png'
 import Card from "@/components/Card";
 import Image from "next/image";
 import useGetUser from "@/hooks/api/useGetUser";
-import {useLaunchParams} from "@telegram-apps/sdk-react";
-import {useSearchParams} from "next/navigation";
-import {supabase} from "@/components/Root/Root";
 import {addEnergy} from "@/utils";
-import {useQueryClient} from "react-query";
+
+import * as tf from '@tensorflow/tfjs-core';
+import * as poseDetection from "@tensorflow-models/pose-detection";
+import {requestWithRetry} from "@/app/jump-flow/utils";
+import {StoreContext} from "@/components/Root/Root";
+
 
 const Main = () => {
+    const {store, setStore} = useContext(StoreContext)
+    const detectorRef = useRef<any>(null);
+
+    const loadModel = async () => {
+        if(store.detector) return
+        await tf.ready()
+        const detectorConfig = {modelType: poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING};
+        await requestWithRetry(async () => await poseDetection.createDetector(poseDetection.SupportedModels.MoveNet, detectorConfig))
+        detectorRef.current = await poseDetection.createDetector(poseDetection.SupportedModels.MoveNet, detectorConfig);
+        setStore({detector: detectorRef.current})
+    };
+
     const {user, isUserLoading} = useGetUser(true)
     // @ts-ignore
     const userParams = user?.user_parameters
     const [currentEnergyLevel, setCurrentEnergyLevel] = useState(userParams?.energy.value || 0)
 
     useEffect(() => {
+        loadModel()
         // recover energy every second without sending request to the server
         const interval = setInterval(() => {
             setCurrentEnergyLevel((prev: number) => prev > 999 ? 1000 : prev + 1)
@@ -70,7 +85,7 @@ const Main = () => {
                 </div>
             </div>
             <Link href='/jump-flow'>
-                <Button disabled={currentEnergyLevel < 100} iconLeft={play as any}>Начать прыжки</Button>
+                <Button disabled={currentEnergyLevel < 0} iconLeft={play as any}>Начать прыжки</Button>
             </Link>
         </div>
     );
