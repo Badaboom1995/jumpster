@@ -21,22 +21,14 @@ import {StoreContext} from "@/components/Root/Root";
 const Main = () => {
     const {store, setStore} = useContext(StoreContext)
     const detectorRef = useRef<any>(null);
-    const [isModelLoading, setIsModelLoading] = useState(true)
 
     const loadModel = async () => {
-        if(store.detector) {
-            console.log('detector exists')
-            setIsModelLoading(false)
-            return
-        }
-        console.log('start loading model')
+        if(store.detector) return
         await tf.ready()
         const detectorConfig = {modelType: poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING};
         await requestWithRetry(async () => await poseDetection.createDetector(poseDetection.SupportedModels.MoveNet, detectorConfig))
         detectorRef.current = await poseDetection.createDetector(poseDetection.SupportedModels.MoveNet, detectorConfig);
         setStore({detector: detectorRef.current})
-        setIsModelLoading(false)
-        console.log('end loading model')
     };
 
     const {user, isUserLoading} = useGetUser(true)
@@ -62,7 +54,6 @@ const Main = () => {
     }, [isUserLoading, user]);
 
     if(isUserLoading || !userParams) return <div>Loading...</div>
-    if(isModelLoading) return <div>Loading model...</div>
     return (
         <div className='w-[100vw] h-full flex flex-col p-[16px]'>
             <div className='grow flex flex-col justify-between'>
