@@ -11,6 +11,7 @@ import Image from "next/image";
 import useGetUser from "@/hooks/api/useGetUser";
 import {addEnergy} from "@/utils";
 
+import '@tensorflow/tfjs-backend-webgl';
 import * as tf from '@tensorflow/tfjs-core';
 import * as poseDetection from "@tensorflow-models/pose-detection";
 import {requestWithRetry} from "@/app/jump-flow/utils";
