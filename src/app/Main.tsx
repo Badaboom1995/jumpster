@@ -66,7 +66,7 @@ const Main = () => {
                     '>
                         <Image className='-mt-[30px]' src={roo as any} alt='roo'/>
                         <div className='flex flex-wrap justify-between w-full'>
-                            <span>Новичок</span>
+                            <span>Новичок!</span>
                             <span>+10</span>
                             <div className='w-full rounded-full mt-[8px] border border-white p-1'>
                                 <div
