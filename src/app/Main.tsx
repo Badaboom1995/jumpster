@@ -37,7 +37,6 @@ const Main = () => {
     const [currentEnergyLevel, setCurrentEnergyLevel] = useState(userParams?.energy.value || 0)
 
     useEffect(() => {
-        console.log('init')
         loadModel()
         // recover energy every second without sending request to the server
         const interval = setInterval(() => {

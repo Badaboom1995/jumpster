@@ -36,10 +36,11 @@ const JumpFlow = () => {
     const {store} = useContext(StoreContext)
     const videoRef = useRef(null);
     const canvasRef = useRef(null);
-    const detectorRef = useRef<any>(null);
+    const detectorRef = useRef<any>(store.detector);
     const [flowStatus, setFlowStatus] = useState('initial'); // initial, searchHips, stayStill, countDown, jump, end
     const [moveVectorY, setMoveVectorY] = useState({prevValue: 0, currentVector: 0, standStill: false}); // vector of movement
     const [hipsVisible, setHipsVisible] = useState(false); // hips are visible
+    const [cameraReady, setCameraReady] = useState(false); // set to false to disable camera and model
     const [appReady, setAppReady] = useState(false); // set to false to disable camera and model
     const [jumpState, setJumpState] = useState('down');
     const [jumpsCounter, setJumpsCounter] = useState(0);
@@ -74,20 +75,20 @@ const JumpFlow = () => {
         }
     }
 
-    const loadModel = async () => {
-        if(store.detector){
-            detectorRef.current = store.detector
-        } else {
-            const detectorConfig = {modelType: poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING};
-            await requestWithRetry(async () => await poseDetection.createDetector(poseDetection.SupportedModels.MoveNet, detectorConfig))
-            detectorRef.current = await poseDetection.createDetector(poseDetection.SupportedModels.MoveNet, detectorConfig);
-        }
-    };
+    // const loadModel = async () => {
+    //     if(!store.detector) return detectorRef.current = store.detector
+    //     // else {
+    //     //     const detectorConfig = {modelType: poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING};
+    //     //     await requestWithRetry(async () => await poseDetection.createDetector(poseDetection.SupportedModels.MoveNet, detectorConfig))
+    //     //     detectorRef.current = await poseDetection.createDetector(poseDetection.SupportedModels.MoveNet, detectorConfig);
+    //     // }
+    // };
 
     const setupCamera = async () => {
         const video: any = videoRef.current;
         const stream = await navigator?.mediaDevices.getUserMedia(constraints);
         video.srcObject = stream;
+        setCameraReady(true)
         return new Promise((resolve) => {
             video.onloadedmetadata = () => {
                 resolve(video);
@@ -97,30 +98,21 @@ const JumpFlow = () => {
 
     const stopCamera = () => {
         const video: any = videoRef.current;
-        console.log('try to stop but video is', video, videoRef)
         if (video && video.srcObject) {
-            console.log('Stopping camera...');
-
             const stream = video.srcObject as MediaStream;
-
             // Stop all media tracks (audio and video)
             stream.getTracks().forEach((track) => {
-                console.log(`Stopping track: ${track.kind}`);
                 track.stop();  // Stop each track completely
             });
-
             // Clear the video element's source and pause playback
             video.srcObject = null;
             video.pause();
             video.removeAttribute('src');  // Clear any lingering src reference
             video.load();  // Reload the video element to reset
-
-            console.log('Camera stopped and video element reset.');
         } else {
             console.warn('No active camera stream found.');
         }
     };
-
 
 
     const mainLoop = async () => {
@@ -135,24 +127,26 @@ const JumpFlow = () => {
             setHipsVisible(hipsVisible)
         }
     };
-
+    useEffect(() => {
+        detectorRef.current = store.detector
+    }, [store.detector]);
     // init camera and model
     useEffect(() => {
-        const init = async () => {
-            await tf.ready()
-            setFlowStatus('loadingModel');
-            await loadModel();
-            setFlowStatus('loadingCamera');
-            await setupCamera();
-            setFlowStatus('searchHips');
-            setAppReady(true);
-        };
-        init()
+        setFlowStatus('loadingCamera');
+        setupCamera();
         return () => {
-            console.log('UNMOUNT')
             stopCamera()
         }
     }, []);
+
+    useEffect(() => {
+        console.log('init', videoRef, detectorRef.current, cameraReady)
+        // @ts-ignore
+        if(videoRef.current.srcObject && detectorRef.current){
+            setFlowStatus('searchHips');
+            setAppReady(true);
+        }
+    }, [cameraReady, detectorRef.current])
 
     useEffect(() => {
         const intervalId = setInterval(mainLoop, 50)
