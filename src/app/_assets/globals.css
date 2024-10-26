@@ -8,3 +8,6 @@ body {
   background: var(--tg-theme-secondary-bg-color, white);
   font-family: 'Inter', sans-serif;
 }
+.slick-list{
+  overflow: visible !important;
+}

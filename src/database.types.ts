@@ -26,6 +26,7 @@ export type Database = {
           telegram_id: number | null
           updated_at: string | null
           username: string | null
+          rank: number
         }
         Insert: {
           coins?: number | null

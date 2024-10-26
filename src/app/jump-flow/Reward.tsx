@@ -1,4 +1,4 @@
-import React, {PropsWithChildren, useEffect} from 'react';
+import React, { PropsWithChildren, useEffect, useState } from "react";
 import Image from "next/image";
 import medal from "@/app/_assets/images/medal.png";
 import fire from "@/app/_assets/icons/Fire.svg";
@@ -8,100 +8,200 @@ import clockCountDown from "@/app/_assets/icons/ClockCountdown.svg";
 import Link from "next/link";
 import Button from "@/components/Button";
 import gift from "@/app/_assets/icons/Gift.svg";
-import {twMerge} from "tailwind-merge";
-import {Title} from "@telegram-apps/telegram-ui";
+import { twMerge } from "tailwind-merge";
+import { Title } from "@telegram-apps/telegram-ui";
 import useAnimatedNumber from "@/hooks/useAnimatedNumber";
-import {calculateCaloriesBurned, secondsToMinutesString} from "@/app/jump-flow/utils";
-import {supabase} from "@/components/Root/Root";
+import {
+  calculateCaloriesBurned,
+  secondsToMinutesString,
+} from "@/app/jump-flow/utils";
+import { supabase } from "@/components/Root/Root";
 import useGetUser from "@/hooks/api/useGetUser";
-import {useRouter} from "next/navigation";
-import {useQueryClient} from "react-query";
+// import { useRouter } from "next/navigation";
+import { useQueryClient } from "react-query";
+// import Confetti from "react-confetti";
+// import useWindowSize from "react-use/lib/useWindowSize";
 
-const StatCard = ({children, className}: PropsWithChildren & {className?: string}) => {
-    return (
-        <div className={twMerge('flex flex-col items-center h-fit gap-[4px] text-white bg-background rounded-[12px] py-[24px] px-[12px]', className)}>{children}</div>
-    )
-}
+const StatCard = ({
+  children,
+  className,
+}: PropsWithChildren & { className?: string }) => {
+  return (
+    <div
+      className={twMerge(
+        "flex h-fit flex-col items-center gap-[4px] rounded-[12px] bg-background px-[12px] py-[24px] text-white",
+        className,
+      )}
+    >
+      {children}
+    </div>
+  );
+};
 
 const coinsPerJump = 1;
 
-const Reward = ({jumps, time}:{jumps: number, time: number}) => {
-    const queryClient = useQueryClient()
-    const router = useRouter()
-    const coinsEarned = jumps * coinsPerJump;
-    const coinsEarnedAnimated = useAnimatedNumber(coinsEarned, 2, true);
-    const caloriesAnimated = useAnimatedNumber(calculateCaloriesBurned(jumps, time), 2, true);
-    const jumpsAnimated = useAnimatedNumber(jumps, 2, true);
-    const timeAnimated = useAnimatedNumber(time, 2, true);
-    const jumpsPerMinuteAnimated = useAnimatedNumber(Math.floor(jumps/time*60), 2, true);
-    const {user, isUserLoading} = useGetUser()
+const Reward = ({ jumps, time }: { jumps: number; time: number }) => {
+  const queryClient = useQueryClient();
+  const coinsEarned = jumps * coinsPerJump;
+  const coinsEarnedAnimated = useAnimatedNumber(coinsEarned, 2, true);
+  const caloriesAnimated = useAnimatedNumber(
+    calculateCaloriesBurned(jumps, time),
+    2,
+    true,
+  );
+  const jumpsAnimated = useAnimatedNumber(jumps, 2, true);
+  const timeAnimated = useAnimatedNumber(time, 2, true);
+  const jumpsPerMinuteAnimated = useAnimatedNumber(
+    Math.floor((jumps / time) * 60),
+    2,
+    true,
+  );
+  const { user, isUserLoading } = useGetUser();
+  const [prevValues, setPrevValues] = useState({
+    coins: 0,
+    energy: 0,
+    experience: 0,
+  });
+  // TODO: move to backend
+  const addReward = async () => {
+    if (!user) return;
+    try {
+      const now = new Date().toISOString();
 
-    // TODO: move to backend
-    const addCoins = async () => {
-       if(!user) return
-        try {
-           const now = new Date().toISOString()
-           await supabase
-               .from('user_parameters')
-                // @ts-ignore
-                .update({value: user?.user_parameters.coins.value + coinsEarned})
-                .eq('user_id', user.id)
-                .eq('name', 'coins')
+      setPrevValues({
+        //@ts-ignore
+        coins: user?.user_parameters.coins.value,
+        //@ts-ignore
+        energy: user?.user_parameters.energy.value,
+        experience: user.experience,
+      });
 
-            await supabase
-                .from('user_parameters')
-                .update({value: 0, updated_at: now})
-                .eq('user_id', user.id)
-                .eq('name', 'energy')
-            await queryClient.invalidateQueries('user')
+      await supabase
+        .from("user_parameters")
+        // @ts-ignore
+        .update({ value: user?.user_parameters.coins.value + coinsEarned })
+        .eq("user_id", user.id)
+        .eq("name", "coins");
 
-        } catch (e) {
+      await supabase
+        .from("user_parameters")
+        .update({ value: 0, updated_at: now })
+        .eq("user_id", user.id)
+        .eq("name", "energy");
 
-        }
-    }
+      // add experience
+      await supabase
+        .from("users")
+        .update({ experience: user.experience + jumps })
+        .eq("id", user.id);
 
-    useEffect(() => {
-        addCoins()
-    }, []);
+      await queryClient.invalidateQueries("user");
+    } catch (e) {}
+  };
 
-    return (
-        <div
-            className='relative z-[50] w-full h-[100vh] bg-background-dark px-[12px] py-[24px] flex flex-col items-center'>
-            <Image width={200} src={medal as any} alt='medal' className='mb-[32px]'/>
-            <Title className='text-[24px] font-[500] text-white'>Отлично!</Title>
-            <Title className='text-[48px] font-black text-white'>{coinsEarnedAnimated}</Title>
-            <Title className='text-[16px] font-[400] text-caption mb-[24px]'>Монет получено</Title>
-            <div className='grow w-full'>
-                <div className='grid grid-cols-2 w-full gap-[4px]'>
-                    <StatCard>
-                        <Image src={fire as any} alt='energy' width={24} height={24}/>
-                        <span className='text-[24px] font-[600]'>{caloriesAnimated}</span>
-                        <span className='text-caption'>Calories</span>
-                    </StatCard>
-                    <StatCard>
-                        <Image src={arrowUp as any} alt='energy' width={24} height={24}/>
-                        <span className='text-[24px] font-[600]'>{jumpsAnimated}</span>
-                        <span className='text-caption'>Jumps</span>
-                    </StatCard>
-                    <StatCard>
-                        <Image src={timer as any} alt='energy' width={24} height={24}/>
-                        <span className='text-[24px] font-[600]'>{secondsToMinutesString(timeAnimated)}</span>
-                        <span className='text-caption'>Total time</span>
-                    </StatCard>
-                    <StatCard>
-                        <Image src={clockCountDown as any} alt='energy' width={24} height={24}/>
-                        <span className='text-[24px] font-[600]'>{jumpsPerMinuteAnimated}</span>
-                        <span className='text-caption'>Jumps per minute</span>
-                    </StatCard>
-                </div>
-            </div>
-            <Link className='w-full' href='/?claim=true'>
-                <Button onClick={() => { router.push('/?claim=true')}} iconLeft={gift as any} variant='secondary'>
-                    Забрать награду
-                </Button>
-            </Link>
+  useEffect(() => {
+    addReward();
+  }, []);
+
+  // const { width, height } = useWindowSize();
+  return (
+    <div className="absolute top-0 z-[50] flex h-[100vh] w-full flex-col items-center bg-background-dark px-[12px] py-[24px]">
+      {/*<Confetti*/}
+      {/*  width={width}*/}
+      {/*  height={height}*/}
+      {/*  recycle={false}*/}
+      {/*  numberOfPieces={coinsEarned || 100}*/}
+      {/*  tweenDuration={5000}*/}
+      {/*  friction={0.98}*/}
+      {/*  gravity={0.1}*/}
+      {/*  drawShape={(ctx) => {*/}
+      {/*    ctx.beginPath();*/}
+      {/*    const centerX = ctx.canvas.width / 2;*/}
+      {/*    const centerY = ctx.canvas.height / 2;*/}
+      {/*    const radius = 10; // Radius of the coin*/}
+
+      {/*    ctx.arc(0, 0, radius, 0, 2 * Math.PI);*/}
+      {/*    const gradient = ctx.createRadialGradient(*/}
+      {/*      centerX,*/}
+      {/*      centerY,*/}
+      {/*      radius / 4,*/}
+      {/*      centerX,*/}
+      {/*      centerY,*/}
+      {/*      radius,*/}
+      {/*    );*/}
+
+      {/*    gradient.addColorStop(0, "#FFD700"); // gold*/}
+      {/*    gradient.addColorStop(0.5, "#FFC107"); // Slightly darker gold*/}
+      {/*    gradient.addColorStop(1, "#FFD70B"); // Dark gold for depth*/}
+
+      {/*    ctx.lineWidth = 5;*/}
+      {/*    ctx.strokeStyle = "#DAA520"; // Dark gold for ridges*/}
+      {/*    ctx.stroke();*/}
+
+      {/*    ctx.fillStyle = gradient;*/}
+      {/*    ctx.fill();*/}
+
+      {/*    // draw dollar sign in the center*/}
+      {/*    ctx.font = "bold 12px serif";*/}
+      {/*    ctx.textAlign = "center";*/}
+      {/*    ctx.textBaseline = "middle";*/}
+      {/*    ctx.fillStyle = "#DAA520";*/}
+      {/*    ctx.fillText("$", 0, 0);*/}
+
+      {/*    ctx.closePath();*/}
+      {/*  }}*/}
+      {/*/>*/}
+      <Image width={200} src={medal as any} alt="medal" className="mb-[32px]" />
+      <Title className="text-[24px] font-[500] text-white">Отлично!</Title>
+      <Title className="text-[48px] font-black text-white">
+        {coinsEarnedAnimated}
+      </Title>
+      <Title className="mb-[24px] text-[16px] font-[400] text-caption">
+        Монет получено
+      </Title>
+      <div className="w-full grow">
+        <div className="grid w-full grid-cols-2 gap-[4px]">
+          <StatCard>
+            <Image src={fire as any} alt="energy" width={24} height={24} />
+            <span className="text-[24px] font-[600]">{caloriesAnimated}</span>
+            <span className="text-caption">Calories</span>
+          </StatCard>
+          <StatCard>
+            <Image src={arrowUp as any} alt="energy" width={24} height={24} />
+            <span className="text-[24px] font-[600]">{jumpsAnimated}</span>
+            <span className="text-caption">Jumps</span>
+          </StatCard>
+          <StatCard>
+            <Image src={timer as any} alt="energy" width={24} height={24} />
+            <span className="text-[24px] font-[600]">
+              {secondsToMinutesString(timeAnimated)}
+            </span>
+            <span className="text-caption">Total time</span>
+          </StatCard>
+          <StatCard>
+            <Image
+              src={clockCountDown as any}
+              alt="energy"
+              width={24}
+              height={24}
+            />
+            <span className="text-[24px] font-[600]">
+              {jumpsPerMinuteAnimated}
+            </span>
+            <span className="text-caption">Jumps per minute</span>
+          </StatCard>
         </div>
-    );
+      </div>
+      <Link
+        className="fixed bottom-[24px] w-full px-[12px]"
+        href={`/?claim=true&coins=${prevValues.coins}&energy=${prevValues.energy}&experience=${prevValues.experience}`}
+      >
+        <Button iconLeft={gift as any} variant="secondary">
+          Забрать награду
+        </Button>
+      </Link>
+    </div>
+  );
 };
 
 export default Reward;
