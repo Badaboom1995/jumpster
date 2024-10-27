@@ -15,7 +15,7 @@ const Header = () => {
     >
       <div className="flex gap-[8px]">
         <Card className="rounded-[12px] px-[12px] py-[4px] font-medium text-white">
-          @{user.username}
+          @{user?.username || "unknown"}
         </Card>
         {/*<div className="font-boldtext-black flex items-center gap-[4px] rounded-[12px] bg-white px-[12px] py-[4px]">*/}
         {/*  <Image className="w-[20px]" src={basket as any} alt="basket" />*/}
