@@ -1,11 +1,19 @@
 // @ts-nocheck
-'use client';
-import {createClient} from "@supabase/supabase-js";
-
+"use client";
+import { createClient } from "@supabase/supabase-js";
+import { expandViewport } from "@telegram-apps/sdk";
 // TODO: move to baack or use env
-export const supabase = createClient('https://adrdxahjylqbmxomhrmi.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFkcmR4YWhqeWxxYm14b21ocm1pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mjc2Njc1NDAsImV4cCI6MjA0MzI0MzU0MH0.pe1KulD4qwauzZxD0PFIV0cfdnuVii12tdgUHsQsRiA')
+export const supabase = createClient(
+  "https://adrdxahjylqbmxomhrmi.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFkcmR4YWhqeWxxYm14b21ocm1pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mjc2Njc1NDAsImV4cCI6MjA0MzI0MzU0MH0.pe1KulD4qwauzZxD0PFIV0cfdnuVii12tdgUHsQsRiA",
+);
 
-import React, {type PropsWithChildren, useContext, useEffect, useMemo, useState} from 'react';
+import React, {
+  type PropsWithChildren,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import {
   SDKProvider,
   useLaunchParams,
@@ -15,19 +23,22 @@ import {
   bindMiniAppCSSVars,
   bindThemeParamsCSSVars,
   bindViewportCSSVars,
-} from '@telegram-apps/sdk-react';
-import { TonConnectUIProvider } from '@tonconnect/ui-react';
-import { AppRoot } from '@telegram-apps/telegram-ui';
+} from "@telegram-apps/sdk-react";
+import { TonConnectUIProvider } from "@tonconnect/ui-react";
+import { AppRoot } from "@telegram-apps/telegram-ui";
 
-import { ErrorBoundary } from '@/components/ErrorBoundary';
-import { ErrorPage } from '@/components/ErrorPage';
-import { useTelegramMock } from '@/hooks/useTelegramMock';
-import { useDidMount } from '@/hooks/useDidMount';
+import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { ErrorPage } from "@/components/ErrorPage";
+import { useTelegramMock } from "@/hooks/useTelegramMock";
+import { useDidMount } from "@/hooks/useDidMount";
 
-import './styles.css';
-import {QueryClient, QueryClientProvider} from "react-query";
+import "./styles.css";
+import { QueryClient, QueryClientProvider } from "react-query";
 
-export const StoreContext = React.createContext<any>({store: {}, setStore: () => {}});
+export const StoreContext = React.createContext<any>({
+  store: {},
+  setStore: () => {},
+});
 
 function App(props: PropsWithChildren) {
   const lp = useLaunchParams();
@@ -44,13 +55,14 @@ function App(props: PropsWithChildren) {
   }, [themeParams]);
 
   useEffect(() => {
+    expandViewport();
     return viewport && bindViewportCSSVars(viewport);
   }, [viewport]);
 
   return (
     <AppRoot
-      appearance={miniApp.isDark ? 'dark' : 'light'}
-      platform={['macos', 'ios'].includes(lp.platform) ? 'ios' : 'base'}
+      appearance={miniApp.isDark ? "dark" : "light"}
+      platform={["macos", "ios"].includes(lp.platform) ? "ios" : "base"}
     >
       {props.children}
     </AppRoot>
@@ -59,33 +71,33 @@ function App(props: PropsWithChildren) {
 
 function RootInner({ children }: PropsWithChildren) {
   // Mock Telegram environment in development mode if needed.
-  const [store, setStore] = useState({one:'two'})
+  const [store, setStore] = useState({ one: "two" });
 
-  if (process.env.NODE_ENV === 'development') {
+  if (process.env.NODE_ENV === "development") {
     // eslint-disable-next-line react-hooks/rules-of-hooks
     useTelegramMock();
   }
 
   const [queryClient] = useState(
-      () =>
-          new QueryClient({
-            defaultOptions: {
-              queries: {
-                placeholderData: (prev: any) => prev,
-              },
-            },
-          }),
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: {
+            placeholderData: (prev: any) => prev,
+          },
+        },
+      }),
   );
 
-  const debug = useLaunchParams().startParam === 'debug';
+  const debug = useLaunchParams().startParam === "debug";
   const manifestUrl = useMemo(() => {
-    return new URL('tonconnect-manifest.json', window.location.href).toString();
+    return new URL("tonconnect-manifest.json", window.location.href).toString();
   }, []);
 
   // Enable debug mode to see all the methods sent and events received.
   useEffect(() => {
     if (debug) {
-      import('eruda').then((lib) => lib.default.init());
+      import("eruda").then((lib) => lib.default.init());
     }
   }, [debug]);
 
@@ -94,7 +106,7 @@ function RootInner({ children }: PropsWithChildren) {
       <SDKProvider acceptCustomStyles debug={debug}>
         <App>
           <QueryClientProvider client={queryClient}>
-            <StoreContext.Provider value={{store, setStore}}>
+            <StoreContext.Provider value={{ store, setStore }}>
               {children}
             </StoreContext.Provider>
           </QueryClientProvider>
@@ -111,7 +123,9 @@ export function Root(props: PropsWithChildren) {
 
   return didMount ? (
     <ErrorBoundary fallback={ErrorPage}>
-      <RootInner {...props}/>
+      <RootInner {...props} />
     </ErrorBoundary>
-  ) : <div className="root__loading">Loading</div>;
+  ) : (
+    <div className="root__loading">Loading</div>
+  );
 }
