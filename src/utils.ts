@@ -120,7 +120,7 @@ export const ranks = [
     id: 11,
     name: "Супергерой",
     coins_per_jump: 300000,
-    passive_coins: 100,
+    passive_coins: 200000,
     experience: 20000,
     energyCapacity: 150000,
     recoveryRate: 41.667,

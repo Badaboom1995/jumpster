@@ -27,7 +27,7 @@ const Character = (character: CharacterProps) => {
         className={`${!current && "opacity-40"} mx-[4px] ${runAnimation && "animate-trembling"} mb-[32px] flex flex-col items-center justify-center rounded-[24px] p-[24px] text-white`}
       >
         <Image
-          className="-mt-[45px] h-[275px] w-auto"
+          className="-mt-[45px] h-[30vh] w-auto"
           src={rankImage}
           alt="roo"
         />

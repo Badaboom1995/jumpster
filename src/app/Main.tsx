@@ -182,7 +182,7 @@ const Main = () => {
 
   if (isUserLoading || !userParams || !userStats) return <div>Loading...</div>;
   return (
-    <div className="flex h-full w-[100vw] flex-col overflow-hidden">
+    <div className="flex h-full w-full flex-col overflow-hidden">
       {/*<FullscreenCanvas />*/}
       <Confetti
         width={width}

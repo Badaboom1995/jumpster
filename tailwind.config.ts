@@ -8,6 +8,16 @@ const config: Config | any = {
   ],
   theme: {
     extend: {
+      screens: {
+        tablet: "640px",
+        // => @media (min-width: 640px) { ... }
+
+        laptop: "1024px",
+        // => @media (min-width: 1024px) { ... }
+
+        desktop: "1280px",
+        // => @media (min-width: 1280px) { ... }
+      },
       colors: {
         primary: { DEFAULT: "#D2FA63", dark: "#A5C54C" },
         caption: { DEFAULT: "#848484" },

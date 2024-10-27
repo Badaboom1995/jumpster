@@ -20,8 +20,11 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: PropsWithChildren) {
   return (
-    <html lang="en" className={inter.className}>
-      <body className="bg-background-dark">
+    <html
+      lang="en"
+      className={`${inter.className} relative mx-auto h-[100vh] w-full max-w-[500px] overflow-hidden`}
+    >
+      <body className="h-[100vh] w-full bg-background-dark">
         <Root>
           {/*<div className='h-[100vh] fixed top-0 left-0 z-0'><MovingGradient/></div>*/}
           <div className="relative z-10 flex h-[100vh] flex-col overflow-hidden bg-opacity-10">
