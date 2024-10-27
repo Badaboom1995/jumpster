@@ -56,7 +56,7 @@ const PreJumpView = () => {
           </div>
         </div>
         <Link href="/jump-flow">
-          <Button className="px-[12px]" iconLeft={play as any}>
+          <Button className="mb-[8px] px-[12px]" iconLeft={play as any}>
             Включить камеру
           </Button>
         </Link>
