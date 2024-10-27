@@ -20,7 +20,7 @@ const Footer = () => {
   const visible = usePathCheck("/jump-flow");
   return (
     <div
-      className={`relative z-10 w-full px-[12px] py-[8px] pb-[24px] ${!visible && "hidden"}`}
+      className={`fixed bottom-[8px] left-0 z-10 w-full px-[12px] py-[8px] pb-[12px] ${!visible && "hidden"}`}
     >
       <ul className="flex w-full justify-between">
         <Navitem src={homeIcon as any}>Home</Navitem>

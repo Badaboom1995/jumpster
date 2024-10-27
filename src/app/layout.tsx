@@ -26,7 +26,7 @@ export default function RootLayout({ children }: PropsWithChildren) {
           {/*<div className='h-[100vh] fixed top-0 left-0 z-0'><MovingGradient/></div>*/}
           <div className="relative z-10 flex h-[100vh] flex-col overflow-hidden bg-opacity-10">
             <Header />
-            <div className="grow">{children}</div>
+            <div className="grow pb-[80px]">{children}</div>
             <Footer />
           </div>
         </Root>
