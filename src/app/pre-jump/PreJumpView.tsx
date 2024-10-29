@@ -45,7 +45,7 @@ const PreJumpView = () => {
           src={rank.url}
         />
       </div>
-      <div className="fixed bottom-[8px] left-0 w-full px-[12px]">
+      <div className="fixed bottom-[24px] left-0 w-full px-[12px]">
         <div className="mb-[12px] flex justify-between font-bold text-white">
           <div className="flex gap-[4px]">
             <Image src={energy as any} alt="energy" />
