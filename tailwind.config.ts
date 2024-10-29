@@ -154,7 +154,7 @@ const config: Config | any = {
         movingGradient: "movingGradient 1s ease infinite",
         tilt: "tilt 1s ease-in-out 0.25s 3",
         fade: "fade 4s ease-in-out 0.25s 3",
-        fadeReverse: "fadeReverse 1s ease 1",
+        fadeReverse: "fadeReverse 0.5s ease 1",
         tremblingSoft: "tremblingSoft 1.2s ease-in-out 0.25s 1",
         trembling: "trembling 2.7s ease-in-out 0.25s 1",
         scale: "scale 1.2s ease-in-out 0.25s 1",

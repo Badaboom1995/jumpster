@@ -13,5 +13,5 @@ export async function GET(request: NextRequest) {
     .from("users_parameters")
     .select("*")
     .eq("id", userId);
-  return Response.json(res.data);
+  // return Response.json(res.data);
 }
