@@ -192,10 +192,10 @@ const Main = () => {
       />
       <div className="flex grow flex-col justify-between">
         <div>
-          <div className="mb-[32px] p-[16px]">
-            <p className="mt-[16px] flex w-full items-center justify-center gap-[8px] text-center text-[52px] font-bold leading-[56px] text-white">
+          <div className="mb-[32px] p-[8px]">
+            <p className="flex w-full items-center justify-center gap-[8px] text-center text-[42px] font-bold leading-[52px] text-white">
               {/*TODO: use image instead*/}
-              <span className="text-[36px]">🟡</span>{" "}
+              <span className="text-[32px]">🟡</span>{" "}
               <span>{userParams?.coins.value}</span>
             </p>
             <p className="flex w-full items-center justify-center gap-[8px] text-center text-[20px] text-slate-400">

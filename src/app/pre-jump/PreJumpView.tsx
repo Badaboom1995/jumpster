@@ -19,8 +19,8 @@ const PreJumpView = () => {
   const rank = getRankData(user.experience);
 
   return (
-    <div className="animate-fadeReverse flex flex-col items-center bg-background-dark pt-[24px]">
-      <Title className="mb-[12px]">Готовы начать?</Title>
+    <div className="animate-fadeReverse fixed left-0 top-0 z-50 flex h-[100vh] w-full flex-col items-center bg-background-dark pt-[24px]">
+      <Title className="mb-[12px] text-[36px]">Готовы начать?</Title>
       <p className="mb-[24px] w-[300px] text-[16px] text-white">
         Проверьте свои <span className="text-primary">эффекты</span> за прыжок и
         используйте бустеры если нужно
@@ -39,9 +39,13 @@ const PreJumpView = () => {
         </div>
       </div>
       <div className="mb-[36px]">
-        <Image alt="rank" className="max-h-[300px] w-auto" src={rank.url} />
+        <Image
+          alt="rank"
+          className="h-[40vh] max-h-[300px] w-auto"
+          src={rank.url}
+        />
       </div>
-      <div className="fixed bottom-[82px] left-0 w-full px-[12px]">
+      <div className="fixed bottom-[8px] left-0 w-full px-[12px]">
         <div className="mb-[12px] flex justify-between font-bold text-white">
           <div className="flex gap-[4px]">
             <Image src={energy as any} alt="energy" />

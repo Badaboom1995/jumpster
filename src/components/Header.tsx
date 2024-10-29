@@ -11,7 +11,7 @@ const Header = () => {
   const visible = usePathCheck("/jump-flow");
   return (
     <div
-      className={`${!visible && "hidden"} flex items-start justify-between p-[16px] pt-[24px] font-bold`}
+      className={`${!visible && "hidden"} flex items-start justify-between p-[16px] pb-[12px] pt-[24px] font-bold`}
     >
       <div className="flex gap-[8px]">
         <Card className="rounded-[12px] px-[12px] py-[4px] font-medium text-white">
