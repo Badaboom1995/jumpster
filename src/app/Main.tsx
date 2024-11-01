@@ -7,7 +7,14 @@ import energy from "@/app/_assets/icons/Energy.svg";
 import saved from "@/app/_assets/icons/Saved.svg";
 import Image from "next/image";
 import useGetUser from "@/hooks/api/useGetUser";
-import { addEnergy, getObjectSearchParams, getRankData, ranks } from "@/utils";
+import {
+  addCoins,
+  addEnergy,
+  getObjectSearchParams,
+  getRankData,
+  ranks,
+  updateStreak,
+} from "@/utils";
 import "@tensorflow/tfjs-backend-webgl";
 import * as tf from "@tensorflow/tfjs-core";
 import * as poseDetection from "@tensorflow-models/pose-detection";
@@ -24,7 +31,15 @@ import useWindowSize from "react-use/lib/useWindowSize";
 import Confetti from "react-confetti";
 import useTimer from "@/hooks/useTimer";
 import Character from "@/components/Character";
-import FullscreenCanvas from "@/components/FullScreenCanvas";
+import Header from "@/components/Header";
+import usePassiveIncome from "@/hooks/usePassiveIncome";
+import useCurrentCoinsReward from "@/hooks/useCurrentCoinsReward";
+import Curtain from "@/components/Curtain";
+import CoinsReward from "@/components/CoinsReward";
+import { useQueryClient } from "react-query";
+import { twMerge } from "tailwind-merge";
+import fire from "@/app/_assets/icons/Fire.svg";
+import Card from "@/components/Card";
 
 type StatsProps = {
   coins: number;
@@ -32,7 +47,7 @@ type StatsProps = {
   experience: number;
 };
 
-var settings = {
+const settings = {
   dots: false,
   arrows: false,
   centerPadding: "20px",
@@ -47,6 +62,7 @@ var settings = {
 
 const Main = () => {
   const { store, setStore } = useContext(StoreContext);
+  const queryClient = useQueryClient();
   const searchParams = useSearchParams();
   const objectSearchParams = getObjectSearchParams(searchParams);
   const { user, isUserLoading } = useGetUser(false);
@@ -58,6 +74,9 @@ const Main = () => {
   const [runAnimation, setRunAnimation] = useState(false);
   const [userStats, setUserStats] = useState<StatsProps | null>(null);
   const [initialSlide, setInitialSlide] = useState(null);
+
+  const currentCoinsReward = useCurrentCoinsReward(user);
+  const passive_income = usePassiveIncome();
 
   const currentRankData = getRankData(userStats?.experience);
   const currentLevelProgress = currentRankData?.percent;
@@ -102,7 +121,6 @@ const Main = () => {
       }, 1500);
     }, 500);
   };
-
   const chooseBehaviour = () => {
     // if no search searchParams, then no animation
     if (!objectSearchParams) {
@@ -163,43 +181,43 @@ const Main = () => {
 
   useEffect(() => {
     if (!user) return;
-    const currentRank = getRankData(user?.experience);
-    const maxCapacity = currentRank?.energyCapacity;
-    const energyPerSecond = currentRank?.recoveryRate;
     // TODO: move to backend
-    addEnergy(
-      //   @ts-ignore
-      user.user_parameters?.energy.value,
-      //   @ts-ignore
-      user.user_parameters?.energy.last_update,
-      user?.id,
-      maxCapacity,
-      energyPerSecond,
-    ).then((energy) => {
+    addEnergy(user).then((energy) => {
       setUserStats((prev) => ({ ...prev, energy }));
+    });
+    updateStreak(user).then(() => {
+      queryClient.invalidateQueries("user");
     });
   }, [user]);
 
   if (isUserLoading || !userParams || !userStats) return <div>Loading...</div>;
   return (
     <div className="flex h-full w-full flex-col overflow-hidden">
-      {/*<FullscreenCanvas />*/}
       <Confetti
         width={width}
         height={height}
         recycle={false}
         numberOfPieces={numberOfPieces}
       />
-      <div className="flex grow flex-col justify-between">
-        <div>
-          <div className="mb-[32px] p-[8px]">
+      {/*<Curtain*/}
+      {/*  onClose={() => {*/}
+      {/*    setIsPopupOpen(false);*/}
+      {/*  }}*/}
+      {/*  isOpen={isPopupOpen}*/}
+      {/*>*/}
+      {/*  <CoinsReward user={user} setIsPopupOpen={setIsPopupOpen} />*/}
+      {/*</Curtain>*/}
+      <Header />
+      <div className="flex grow flex-col justify-center">
+        <div className="flex grow flex-col justify-center">
+          <div className="mb-[16px] mt-[12px] flex flex-col items-center p-[8px]">
             <p className="flex w-full items-center justify-center gap-[8px] text-center text-[42px] font-bold leading-[52px] text-white">
               {/*TODO: use image instead*/}
               <span className="text-[32px]">🟡</span>{" "}
-              <span>{userParams?.coins.value}</span>
+              <span>{userParams.coins.value.toLocaleString()}</span>
             </p>
             <p className="flex w-full items-center justify-center gap-[8px] text-center text-[20px] text-slate-400">
-              +{currentRankData.passive_coins} монет в час
+              +{passive_income} монет в час
             </p>
           </div>
           {initialSlide !== null && (
@@ -241,7 +259,6 @@ const Main = () => {
             <span>
               {Math.ceil(currentEnergy) || 0}/{currentRankData?.energyCapacity}
             </span>
-            {/*<span>150,000/150,000</span>*/}
           </div>
           <div className="flex gap-[4px]">
             <Image src={saved as any} alt="boost" />
@@ -249,11 +266,30 @@ const Main = () => {
           </div>
         </div>
       </div>
-      <Link href="/pre-jump" className="mb-[8px] px-[16px]">
-        <Button disabled={currentEnergy < 0} iconLeft={play as any}>
-          Начать прыжки
-        </Button>
-      </Link>
+      <div className="mb-[8px] px-[16px]">
+        {currentCoinsReward ? (
+          <Button
+            onClick={async () => {
+              try {
+                // TODO: move to backend
+                await addCoins(user);
+                await queryClient.invalidateQueries("user");
+              } catch (e) {
+                console.log(e);
+              }
+            }}
+            variant="secondary"
+          >
+            Забрать 🟡 {currentCoinsReward}
+          </Button>
+        ) : (
+          <Link href="/pre-jump">
+            <Button disabled={currentEnergy < 0} iconLeft={play as any}>
+              Начать прыжки
+            </Button>
+          </Link>
+        )}
+      </div>
     </div>
   );
 };

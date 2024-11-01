@@ -48,6 +48,22 @@ const config: Config | any = {
             opacity: "0",
           },
         },
+        slideIn: {
+          "0%": {
+            transform: "translateY(150%)",
+          },
+          "100%": {
+            transform: "translateY(0)",
+          },
+        },
+        slideOut: {
+          "0%": {
+            transform: "translateY(0)",
+          },
+          "100%": {
+            transform: "translateY(150%)",
+          },
+        },
         fadeReverse: {
           "0%": {
             opacity: "0",
@@ -147,10 +163,21 @@ const config: Config | any = {
             boxShadow: "0 0 8px 5px rgba(100, 100, 100, 0.8)",
           },
         },
+        glowBright: {
+          "0%, 100%": {
+            transform: "scale(1)",
+          },
+          "50%": {
+            transform: "scale(1.1)",
+          },
+        },
       },
       animation: {
+        slideIn: "slideIn 0.5s ease-in-out forwards",
+        slideOut: "slideOut 0.5s ease-in-out forwards",
         flash: "flash 1s ease-in-out 0.25s 3",
         glow: "glow 5s ease infinite",
+        glowBright: "glowBright 1s ease 3",
         movingGradient: "movingGradient 1s ease infinite",
         tilt: "tilt 1s ease-in-out 0.25s 3",
         fade: "fade 4s ease-in-out 0.25s 3",

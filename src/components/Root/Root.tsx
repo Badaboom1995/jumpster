@@ -2,6 +2,7 @@
 "use client";
 import { createClient } from "@supabase/supabase-js";
 import { expandViewport } from "@telegram-apps/sdk";
+import NextTopLoader from "nextjs-toploader";
 // TODO: move to baack or use env
 export const supabase = createClient(
   "https://adrdxahjylqbmxomhrmi.supabase.co",
@@ -107,7 +108,10 @@ function RootInner({ children }: PropsWithChildren) {
         <App>
           <QueryClientProvider client={queryClient}>
             <StoreContext.Provider value={{ store, setStore }}>
-              {children}
+              <div>
+                <NextTopLoader color="#D2FA63" showSpinner={false} />
+                {children}
+              </div>
             </StoreContext.Provider>
           </QueryClientProvider>
         </App>

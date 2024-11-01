@@ -26,6 +26,8 @@ import { getRankData } from "@/utils";
 
 const constraints = {
   video: true,
+  width: { ideal: 360 }, // Set ideal width (e.g., 640px)
+  height: { ideal: 640 },
 };
 
 const energyPerJump = 100;
@@ -134,6 +136,7 @@ const JumpFlow = () => {
       setHipsVisible(hipsVisible);
     }
   };
+
   useEffect(() => {
     detectorRef.current = store.detector;
   }, [store.detector]);

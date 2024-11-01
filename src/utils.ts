@@ -128,7 +128,7 @@ export const ranks = [
   },
 ];
 
-const getDifferenceInSeconds = (
+export const getDifferenceInSeconds = (
   timestamp1: string,
   timestamp2: string,
 ): number => {
@@ -140,21 +140,25 @@ const getDifferenceInSeconds = (
   // Convert milliseconds to seconds
   return Math.floor(diffInMilliseconds / 1000);
 };
+
 // TODO: move to backend
-export const addEnergy = async (
-  energy: number,
-  lastUpdate: string,
-  userId: number = 0,
-  maxCapacity: number,
-  energyPerSecond: number,
-) => {
+export const addEnergy = async (user: any) => {
+  const currentRank = getRankData(user?.experience);
+  const energy = user?.user_parameters?.energy.value;
+  const lastUpdate = user.user_parameters?.energy.last_update;
+  const userId = user.id;
+  const maxEnergyCapacity = currentRank?.energyCapacity;
+  const energyPerSecond = currentRank?.recoveryRate;
+
   const now = new Date().toISOString();
-  const secondsPassed = getDifferenceInSeconds(lastUpdate, now);
-  let totalEnergy = Math.ceil(energy + secondsPassed * energyPerSecond);
-  if (totalEnergy > maxCapacity) {
-    totalEnergy = maxCapacity;
+  const secondsPassedEnergy = getDifferenceInSeconds(lastUpdate, now);
+  let totalEnergy = Math.ceil(energy + secondsPassedEnergy * energyPerSecond);
+
+  if (totalEnergy > maxEnergyCapacity) {
+    totalEnergy = maxEnergyCapacity;
   }
-  const { data, error } = await supabase
+
+  const { data } = await supabase
     .from("user_parameters")
     .update({ value: totalEnergy, updated_at: now })
     .eq("user_id", userId)
@@ -162,8 +166,90 @@ export const addEnergy = async (
     .select()
     .single();
 
-  // @ts-ignore
   return data?.value;
+};
+
+export const addCoins = async (user: any) => {
+  const currentRank = getRankData(user?.experience);
+  const coins = user?.user_parameters?.coins.value;
+  const lastUpdate = user.user_parameters?.coins.last_update;
+  const userId = user.id;
+  const coinsPerHour =
+    currentRank?.passive_coins +
+    user?.user_cards.reduce(
+      (acc: number, item: any) => acc + item.passive_income,
+      0,
+    );
+
+  const now = new Date().toISOString();
+  const secondsPassed = getDifferenceInSeconds(lastUpdate, now);
+  const earnCoins = Math.ceil(secondsPassed * (coinsPerHour / 3600));
+
+  const { data } = await supabase
+    .from("user_parameters")
+    .update({
+      // @ts-ignore
+      value: coins + earnCoins,
+      updated_at: now,
+    })
+    .eq("user_id", userId)
+    .eq("name", "coins")
+    .select()
+    .single();
+
+  return data?.value;
+};
+
+export const updateStreak = async (user: any) => {
+  if (!user) return;
+  const currentStreak = user.streak_counter;
+  const lastUpdate = user.last_activity_date;
+  const userId = user.id;
+  const todayDate = new Date().getDate();
+  const now = new Date().toISOString();
+  const isLastActiveYesterday =
+    new Date(lastUpdate).getDate() === todayDate - 1 ||
+    (todayDate === 1 &&
+      new Date(lastUpdate).getDate() ===
+        new Date(new Date().setDate(0)).getDate());
+  const isLastActiveMoreThanTwoDays =
+    new Date(lastUpdate).getDate() < todayDate - 1;
+
+  console.log(todayDate, new Date(lastUpdate).getDate());
+
+  if (currentStreak === 0) {
+    await supabase
+      .from("users")
+      .update({
+        streak_counter: 1,
+        last_activity_date: now,
+      })
+      .eq("id", userId)
+      .single();
+    return;
+  }
+  if (isLastActiveMoreThanTwoDays) {
+    await supabase
+      .from("users")
+      .update({
+        streak_counter: 1,
+        last_activity_date: now,
+      })
+      .eq("id", userId)
+      .single();
+    return;
+  }
+  if (isLastActiveYesterday) {
+    await supabase
+      .from("users")
+      .update({
+        streak_counter: currentStreak + 1,
+        last_activity_date: now,
+      })
+      .eq("id", userId)
+      .single();
+    return;
+  }
 };
 
 export const getObjectSearchParams = (
