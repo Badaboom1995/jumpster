@@ -180,17 +180,20 @@ const JumpFlow = () => {
       stopCountDown();
       return;
     }
-    if (hipsVisible && !moveVectorY.standStill) {
+    //  && !moveVectorY.standStill
+    if (hipsVisible) {
       setFlowStatus("stayStill");
       stopCountDown();
       return;
     }
-    if (hipsVisible && moveVectorY.standStill && !isRunning) {
+    // && moveVectorY.standStill
+    if (hipsVisible && !isRunning) {
       setFlowStatus("countDown");
       startCountDown();
       return;
     }
-    if (hipsVisible && moveVectorY.standStill && seconds === 0) {
+    // && moveVectorY.standStill
+    if (hipsVisible && seconds === 0) {
       setFlowStatus("jump");
       startTimer();
       return;
@@ -218,7 +221,6 @@ const JumpFlow = () => {
     <div
       className={twMerge(
         "fixed left-0 top-0 h-full w-full bg-background-dark",
-        // availableEnergy < 50 && !flowStatus.includes('end') && 'animate-pulse',
         isRewardRunning && "animate-fade",
       )}
     >

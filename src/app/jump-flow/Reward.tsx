@@ -105,7 +105,7 @@ const Reward = ({ jumps, time }: { jumps: number; time: number }) => {
 
   // const { width, height } = useWindowSize();
   return (
-    <div className="absolute top-0 z-[50] flex h-[100vh] w-full flex-col items-center bg-background-dark px-[12px] py-[24px]">
+    <div className="fixed top-0 z-[50] flex h-[100vh] w-full flex-col items-center overflow-y-scroll bg-background-dark px-[12px] py-[24px] pb-[80px]">
       {/*<Confetti*/}
       {/*  width={width}*/}
       {/*  height={height}*/}

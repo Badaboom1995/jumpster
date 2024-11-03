@@ -11,7 +11,7 @@ import friendsOutlineIcon from "@/app/_assets/icons/PeopleOutlined.svg";
 import walletIcon from "@/app/_assets/icons/Wallet.svg";
 import walletOutlineIcon from "@/app/_assets/icons/WalletOutlined.svg";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 
 const Navitem = ({
   children,
@@ -42,7 +42,7 @@ const Footer = () => {
   };
   return (
     <div
-      className={`fixed bottom-[8px] left-1/2 z-10 w-full max-w-[500px] -translate-x-1/2 bg-background-dark px-[12px] py-[8px] pb-[12px] ${!visible && "hidden"}`}
+      className={`fixed bottom-[16px] left-1/2 z-10 w-full max-w-[500px] -translate-x-1/2 bg-background-dark px-[12px] py-[8px] pb-[12px] ${!visible && "hidden"}`}
     >
       <ul className="flex w-full justify-between">
         <Navitem

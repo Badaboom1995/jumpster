@@ -2,12 +2,10 @@
 import React, { useEffect, useState } from "react";
 import usePathCheck from "@/hooks/usePathCheck";
 import useGetUser from "@/hooks/api/useGetUser";
-import usePassiveIncome from "@/hooks/usePassiveIncome";
 import Curtain from "@/components/Curtain";
 import fire from "@/app/_assets/images/fire.png";
 import Image from "next/image";
 import Button from "@/components/Button";
-import Card from "@/components/Card";
 
 const Header = () => {
   const { user } = useGetUser();
@@ -28,7 +26,7 @@ const Header = () => {
 
   return (
     <div
-      className={`${!visible && "hidden"} flex items-start justify-between p-[12px] pb-[12px] pt-[24px] font-bold`}
+      className={`${!visible && "hidden"} flex items-start justify-between font-bold`}
     >
       <Curtain
         onClose={() => {

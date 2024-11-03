@@ -125,7 +125,7 @@ const EarnView = () => {
     },
   });
 
-  if (!data || !user_cards_ids) return <div>Loading...</div>;
+  if (!data || !user_cards_ids) return null;
 
   return (
     <div className="max-h-[100vh] overflow-y-scroll px-[16px] pb-[80px] pt-[36px]">

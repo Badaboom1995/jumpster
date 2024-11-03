@@ -190,7 +190,7 @@ const Main = () => {
     });
   }, [user]);
 
-  if (isUserLoading || !userParams || !userStats) return <div>Loading...</div>;
+  if (isUserLoading || !userParams || !userStats) return null;
   return (
     <div className="flex h-full w-full flex-col overflow-hidden">
       <Confetti
