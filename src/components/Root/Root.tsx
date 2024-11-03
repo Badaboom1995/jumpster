@@ -35,6 +35,7 @@ import { useDidMount } from "@/hooks/useDidMount";
 
 import "./styles.css";
 import { QueryClient, QueryClientProvider } from "react-query";
+import Loader from "@/app/Loader";
 
 export const StoreContext = React.createContext<any>({
   store: {},
@@ -130,6 +131,6 @@ export function Root(props: PropsWithChildren) {
       <RootInner {...props} />
     </ErrorBoundary>
   ) : (
-    <div className="root__loading">Loading</div>
+    <Loader />
   );
 }

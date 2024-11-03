@@ -40,6 +40,8 @@ import { useQueryClient } from "react-query";
 import { twMerge } from "tailwind-merge";
 import fire from "@/app/_assets/icons/Fire.svg";
 import Card from "@/components/Card";
+import JumpingCoinLoader from "@/app/Loader";
+import Loader from "@/app/Loader";
 
 type StatsProps = {
   coins: number;
@@ -148,6 +150,7 @@ const Main = () => {
         energy: objectSearchParams.energy,
         experience: objectSearchParams.experience,
       }));
+      window.history.pushState({}, document.title, "/");
       setTimeout(() => {
         setUserStats((prev) => ({
           ...prev,
@@ -207,6 +210,7 @@ const Main = () => {
       {/*>*/}
       {/*  <CoinsReward user={user} setIsPopupOpen={setIsPopupOpen} />*/}
       {/*</Curtain>*/}
+      {/*{<Loader></Loader>}*/}
       <Header />
       <div className="flex grow flex-col justify-center">
         <div className="flex grow flex-col justify-center">

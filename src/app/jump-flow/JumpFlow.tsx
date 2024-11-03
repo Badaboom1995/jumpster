@@ -181,11 +181,11 @@ const JumpFlow = () => {
       return;
     }
     //  && !moveVectorY.standStill
-    if (hipsVisible) {
-      setFlowStatus("stayStill");
-      stopCountDown();
-      return;
-    }
+    // if (hipsVisible) {
+    //   setFlowStatus("stayStill");
+    //   stopCountDown();
+    //   return;
+    // }
     // && moveVectorY.standStill
     if (hipsVisible && !isRunning) {
       setFlowStatus("countDown");

@@ -40,9 +40,10 @@ const Footer = () => {
       return true;
     }
   };
+
   return (
     <div
-      className={`fixed bottom-[16px] left-1/2 z-10 w-full max-w-[500px] -translate-x-1/2 bg-background-dark px-[12px] py-[8px] pb-[12px] ${!visible && "hidden"}`}
+      className={`fixed bottom-[0] left-1/2 z-10 w-full max-w-[500px] -translate-x-1/2 bg-background-dark px-[12px] py-[8px] pb-[32px] ${!visible && "hidden"}`}
     >
       <ul className="flex w-full justify-between">
         <Navitem

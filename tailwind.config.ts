@@ -171,6 +171,17 @@ const config: Config | any = {
             transform: "scale(1.1)",
           },
         },
+        jumpAndSpin: {
+          "0%": {
+            transform: "translateY(0) rotate(180deg)",
+          },
+          "50%": {
+            transform: "translateY(-15px) rotate(180deg)",
+          },
+          "100%": {
+            transform: "translateY(0) rotate(180deg)",
+          },
+        },
       },
       animation: {
         slideIn: "slideIn 0.5s ease-in-out forwards",
@@ -179,6 +190,7 @@ const config: Config | any = {
         glow: "glow 5s ease infinite",
         glowBright: "glowBright 1s ease 3",
         movingGradient: "movingGradient 1s ease infinite",
+        jumpAndSpin: "jumpAndSpin 1s ease-in-out infinite",
         tilt: "tilt 1s ease-in-out 0.25s 3",
         fade: "fade 4s ease-in-out 0.25s 3",
         fadeReverse: "fadeReverse 0.5s ease 1",

@@ -1,7 +1,8 @@
 import React from "react";
+import Loader from "@/app/Loader";
 
 const Loading = () => {
-  return <div className="h-[100vh] w-full animate-pulse"></div>;
+  return <Loader />;
 };
 
 export default Loading;
