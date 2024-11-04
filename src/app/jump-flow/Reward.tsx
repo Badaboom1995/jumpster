@@ -40,7 +40,15 @@ const StatCard = ({
 
 const coinsPerJump = 1;
 
-const Reward = ({ jumps, time }: { jumps: number; time: number }) => {
+const Reward = ({
+  jumps,
+  time,
+  energyLeft,
+}: {
+  jumps: number;
+  time: number;
+  energyLeft: number;
+}) => {
   const queryClient = useQueryClient();
   const coinsEarned = jumps * coinsPerJump;
   const coinsEarnedAnimated = useAnimatedNumber(coinsEarned, 2, true);
@@ -85,7 +93,7 @@ const Reward = ({ jumps, time }: { jumps: number; time: number }) => {
 
       await supabase
         .from("user_parameters")
-        .update({ value: 0, updated_at: now })
+        .update({ value: energyLeft || 0, updated_at: now })
         .eq("user_id", user.id)
         .eq("name", "energy");
 
@@ -151,9 +159,11 @@ const Reward = ({ jumps, time }: { jumps: number; time: number }) => {
       {/*    ctx.closePath();*/}
       {/*  }}*/}
       {/*/>*/}
-      <Image width={200} src={medal as any} alt="medal" className="mb-[32px]" />
-      <Title className="text-[24px] font-[500] text-white">Отлично!</Title>
-      <Title className="text-[48px] font-black text-white">
+      <Image width={130} src={medal as any} alt="medal" className="mb-[12px]" />
+      {/*<Title className="text-center text-[24px] font-[500] text-white">*/}
+      {/*  Отличная работа!*/}
+      {/*</Title>*/}
+      <Title className="text-[80px] font-black leading-[90px] text-white">
         {coinsEarnedAnimated}
       </Title>
       <Title className="mb-[24px] text-[16px] font-[400] text-caption">
@@ -163,17 +173,21 @@ const Reward = ({ jumps, time }: { jumps: number; time: number }) => {
         <div className="grid w-full grid-cols-2 gap-[4px]">
           <StatCard>
             <Image src={fire as any} alt="energy" width={24} height={24} />
-            <span className="text-[24px] font-[600]">{caloriesAnimated}</span>
+            <span className="text-[28px] font-[600] leading-[32px]">
+              {caloriesAnimated}
+            </span>
             <span className="text-caption">Calories</span>
           </StatCard>
           <StatCard>
             <Image src={arrowUp as any} alt="energy" width={24} height={24} />
-            <span className="text-[24px] font-[600]">{jumpsAnimated}</span>
+            <span className="text-[28px] font-[600] leading-[32px]">
+              {jumpsAnimated}
+            </span>
             <span className="text-caption">Jumps</span>
           </StatCard>
           <StatCard>
             <Image src={timer as any} alt="energy" width={24} height={24} />
-            <span className="text-[24px] font-[600]">
+            <span className="text-[28px] font-[600] leading-[32px]">
               {secondsToMinutesString(timeAnimated)}
             </span>
             <span className="text-caption">Total time</span>
@@ -185,7 +199,7 @@ const Reward = ({ jumps, time }: { jumps: number; time: number }) => {
               width={24}
               height={24}
             />
-            <span className="text-[24px] font-[600]">
+            <span className="text-[28px] font-[600] leading-[32px]">
               {jumpsPerMinuteAnimated}
             </span>
             <span className="text-caption">Jumps per minute</span>

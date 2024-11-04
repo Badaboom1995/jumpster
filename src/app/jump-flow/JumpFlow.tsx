@@ -23,6 +23,7 @@ import Reward from "@/app/jump-flow/Reward";
 import { StoreContext } from "@/components/Root/Root";
 import { Title } from "@/components/Title";
 import { getRankData } from "@/utils";
+import Button from "@/components/Button";
 
 const constraints = {
   video: true,
@@ -224,12 +225,26 @@ const JumpFlow = () => {
         isRewardRunning && "animate-fade",
       )}
     >
-      {flowStatus !== "end" && (
+      {flowStatus !== "end" && flowStatus !== "jump" && (
         <Link href="/" className="block">
           <button className="relative z-50 rotate-90 rounded-full p-[20px] text-white transition active:bg-slate-900">
             <Image src={arrow as any} alt="arrow-down" width={24} height={24} />
           </button>
         </Link>
+      )}
+      {flowStatus === "jump" && (
+        <Button
+          className="fixed bottom-[32px] left-1/2 z-10 w-[200px] -translate-x-1/2"
+          variant="secondary"
+          onClick={() => {
+            setFlowStatus("endCountdown");
+            stopTimer();
+            startRewardCountdown();
+          }}
+        >
+          <span className="block h-[16px] w-[16px] rounded-[4px] bg-background-dark"></span>
+          <span>Забрать награду</span>
+        </Button>
       )}
       <div className="absolute left-1/2 top-[240px] z-50 w-full -translate-x-1/2">
         <Title>{statusText}</Title>
@@ -250,7 +265,11 @@ const JumpFlow = () => {
         </div>
       )}
       {flowStatus === "end" && (
-        <Reward jumps={jumpsCounter} time={currentSeconds} />
+        <Reward
+          energyLeft={availableEnergy}
+          jumps={jumpsCounter}
+          time={currentSeconds}
+        />
       )}
       {/*{<Reward jumps={jumpsCounter} time={currentSeconds} />}*/}
       <video ref={videoRef} autoPlay playsInline className="hidden"></video>

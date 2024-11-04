@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Image from "next/image";
 import medal from "@/app/_assets/images/medal.png";
 import muscle from "@/app/_assets/icons/muscle3D.png";
@@ -12,6 +12,7 @@ import { twMerge } from "tailwind-merge";
 import useGetUser from "@/hooks/api/useGetUser";
 import check from "@/app/_assets/icons/check.svg";
 import Modal from "@/components/Modal";
+import Tabs from "@/components/Tabs";
 
 const thumbnailsMap = {
   medal,
@@ -35,6 +36,7 @@ const Card = ({
   const { user } = useGetUser();
   // @ts-ignore
   const insuficientCoins = user?.user_parameters?.coins.value < cost;
+
   return (
     <div className="flex items-center gap-[12px] rounded-[8px] bg-background px-2 py-2 pr-4">
       <Image className="h-[60px] w-[60px]" src={thumbnailsMap[icon]} alt="" />
@@ -128,13 +130,13 @@ const EarnView = () => {
   if (!data || !user_cards_ids) return null;
 
   return (
-    <div className="max-h-[100vh] overflow-y-scroll px-[16px] pb-[80px] pt-[36px]">
+    <div className="max-h-[100vh] overflow-y-scroll px-[16px] pb-[90px] pt-[16px]">
       <div className="mb-[24px]">
         <h1 className="text-[32px] font-bold text-white">Улучшения</h1>
         <p className="mb-[24px] text-gray-300">
           Тренируйся, подписывай рекламные контракты и зарабатывай пассивно
         </p>
-        <p className="mx-auto mb-[12px] w-fit rounded-[12px] px-[12px] py-[8px] text-center text-[32px] font-semibold text-white">
+        <p className="mx-auto mb-[0px] w-fit rounded-[12px] px-[12px] text-center text-[32px] font-semibold text-white">
           {/*@ts-ignore*/}
           🟡 {user?.user_parameters?.coins?.value}
         </p>
@@ -164,28 +166,35 @@ const EarnView = () => {
           </button>
         </div>
       </Modal>
-      <div className="flex flex-col gap-[12px]">
-        {data?.map((card) =>
-          isFetching ? (
-            <div
-              key={card.id}
-              className="h-[76px] w-full animate-pulse rounded-[12px] bg-background"
-            ></div>
-          ) : (
-            <Card
-              isBought={user_cards_ids?.includes(card.id)}
-              setIsOpen={setIsOpen}
-              user_id={user?.id}
-              key={card.id}
-              id={card.id}
-              cost={card.buy_price || 0}
-              income={card.passive_income || 0}
-              title={card.name || ""}
-              icon={card.thumbnail_name || ""}
-            />
-          ),
-        )}
-      </div>
+      <Tabs tabs={["Медиа", "Спонсоры", "Атлет", "Снаряжение"]}>
+        <div>
+          <div className="flex flex-col gap-[12px]">
+            {data?.map((card) =>
+              isFetching ? (
+                <div
+                  key={card.id}
+                  className="h-[76px] w-full animate-pulse rounded-[12px] bg-background"
+                ></div>
+              ) : (
+                <Card
+                  isBought={user_cards_ids && user_cards_ids?.includes(card.id)}
+                  setIsOpen={setIsOpen}
+                  user_id={user?.id}
+                  key={card.id}
+                  id={card.id}
+                  cost={card.buy_price || 0}
+                  income={card.passive_income || 0}
+                  title={card.name || ""}
+                  icon={card.thumbnail_name || ""}
+                />
+              ),
+            )}
+          </div>
+        </div>
+        <div>2</div>
+        <div>3</div>
+        <div>4</div>
+      </Tabs>
     </div>
   );
 };

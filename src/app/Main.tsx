@@ -288,7 +288,7 @@ const Main = () => {
           </Button>
         ) : (
           <Link href="/pre-jump">
-            <Button disabled={currentEnergy < 0} iconLeft={play as any}>
+            <Button disabled={currentEnergy < 1000} iconLeft={play as any}>
               Начать прыжки
             </Button>
           </Link>
