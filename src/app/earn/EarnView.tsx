@@ -177,15 +177,18 @@ const EarnView = () => {
                 ></div>
               ) : (
                 <Card
-                  isBought={user_cards_ids && user_cards_ids?.includes(card.id)}
+                  isBought={
+                    true
+                    // user_cards_ids && user_cards_ids?.includes(card?.id)
+                  }
                   setIsOpen={setIsOpen}
                   user_id={user?.id}
-                  key={card.id}
-                  id={card.id}
-                  cost={card.buy_price || 0}
-                  income={card.passive_income || 0}
-                  title={card.name || ""}
-                  icon={card.thumbnail_name || ""}
+                  key={card?.id}
+                  id={card?.id}
+                  cost={card?.buy_price || 0}
+                  income={card?.passive_income || 0}
+                  title={card?.name || ""}
+                  icon={card?.thumbnail_name || ""}
                 />
               ),
             )}
