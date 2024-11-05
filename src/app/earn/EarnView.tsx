@@ -13,7 +13,6 @@ import useGetUser from "@/hooks/api/useGetUser";
 import check from "@/app/_assets/icons/check.svg";
 import Modal from "@/components/Modal";
 import Tabs from "@/components/Tabs";
-import { hasOwnProperty } from "node";
 
 const thumbnailsMap = {
   medal,
