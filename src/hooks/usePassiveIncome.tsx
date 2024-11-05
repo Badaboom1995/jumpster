@@ -30,8 +30,10 @@ const usePassiveIncome = () => {
       );
     },
   });
-
-  return cards_income + currentRank?.passive_coins;
+  if (!currentRank) return 0;
+  return cards_income
+    ? cards_income + currentRank?.passive_coins
+    : currentRank?.passive_coins;
 };
 
 export default usePassiveIncome;

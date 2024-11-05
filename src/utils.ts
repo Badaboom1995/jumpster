@@ -182,8 +182,11 @@ export const addCoins = async (user: any) => {
     );
 
   const now = new Date().toISOString();
-  const secondsPassed = getDifferenceInSeconds(lastUpdate, now);
-  const earnCoins = Math.ceil(secondsPassed * (coinsPerHour / 3600));
+  const hoursPassed = Math.floor(
+    getDifferenceInSeconds(lastUpdate, now) / 3600,
+  );
+  const hoursToUse = hoursPassed > 3 ? 3 : hoursPassed;
+  const earnCoins = Math.ceil(hoursToUse * coinsPerHour);
 
   const { data } = await supabase
     .from("user_parameters")
