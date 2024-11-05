@@ -196,12 +196,12 @@ const Main = () => {
   if (isUserLoading || !userParams || !userStats) return null;
   return (
     <div className="flex h-full w-full flex-col overflow-hidden">
-      <Confetti
-        width={width}
-        height={height}
-        recycle={false}
-        numberOfPieces={numberOfPieces}
-      />
+      {/*<Confetti*/}
+      {/*  width={width}*/}
+      {/*  height={height}*/}
+      {/*  recycle={false}*/}
+      {/*  numberOfPieces={numberOfPieces}*/}
+      {/*/>*/}
       {/*<Curtain*/}
       {/*  onClose={() => {*/}
       {/*    setIsPopupOpen(false);*/}
@@ -211,7 +211,7 @@ const Main = () => {
       {/*  <CoinsReward user={user} setIsPopupOpen={setIsPopupOpen} />*/}
       {/*</Curtain>*/}
       {/*{<Loader></Loader>}*/}
-      <Header />
+      {/*<Header />*/}
       <div className="flex grow flex-col justify-center">
         <div className="flex grow flex-col justify-center">
           <div className="mb-[16px] mt-[12px] flex flex-col items-center p-[8px]">
