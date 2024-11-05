@@ -13,6 +13,7 @@ import useGetUser from "@/hooks/api/useGetUser";
 import check from "@/app/_assets/icons/check.svg";
 import Modal from "@/components/Modal";
 import Tabs from "@/components/Tabs";
+import { hasOwnProperty } from "node";
 
 const thumbnailsMap = {
   medal,
@@ -128,7 +129,7 @@ const EarnView = () => {
   });
 
   if (!data || !user_cards_ids) return null;
-
+  console.log(user_cards_ids);
   return (
     <div className="max-h-[100vh] overflow-y-scroll px-[16px] pb-[90px] pt-[16px]">
       <div className="mb-[24px]">
@@ -178,8 +179,10 @@ const EarnView = () => {
               ) : (
                 <Card
                   isBought={
-                    true
-                    // user_cards_ids && user_cards_ids?.includes(card?.id)
+                    user_cards_ids &&
+                    Array.isArray(user_cards_ids) &&
+                    user_cards_ids.hasOwnProperty("includes") &&
+                    user_cards_ids?.includes(card?.id)
                   }
                   setIsOpen={setIsOpen}
                   user_id={user?.id}
