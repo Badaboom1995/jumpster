@@ -212,7 +212,7 @@ const Main = () => {
       {/*  <CoinsReward user={user} setIsPopupOpen={setIsPopupOpen} />*/}
       {/*</Curtain>*/}
       {/*{<Loader></Loader>}*/}
-      {/*<Header />*/}
+      <Header />
       <div className="flex grow flex-col justify-center">
         <div className="flex grow flex-col justify-center">
           <div className="mb-[16px] mt-[12px] flex flex-col items-center p-[8px]">
