@@ -22,7 +22,6 @@
     "@tensorflow/tfjs-core": "^4.20.0",
     "@tonconnect/ui-react": "^2.0.5",
     "classnames": "^2.5.1",
-    "eruda": "^3.0.1",
     "next": "14.2.4",
     "nextjs-toploader": "^3.7.15",
     "normalize.css": "^8.0.1",

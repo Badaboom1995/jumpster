@@ -36,7 +36,6 @@ import { useDidMount } from "@/hooks/useDidMount";
 import "./styles.css";
 import { QueryClient, QueryClientProvider } from "react-query";
 import Loader from "@/app/Loader";
-import eruda from "eruda";
 
 export const StoreContext = React.createContext<any>({
   store: {},
@@ -50,7 +49,6 @@ function App(props: PropsWithChildren) {
   const viewport = useViewport();
 
   useEffect(() => {
-    eruda.init();
     return bindMiniAppCSSVars(miniApp, themeParams);
   }, [miniApp, themeParams]);
 
