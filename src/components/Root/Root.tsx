@@ -97,11 +97,11 @@ function RootInner({ children }: PropsWithChildren) {
   }, []);
 
   // Enable debug mode to see all the methods sent and events received.
-  useEffect(() => {
-    if (debug) {
-      import("eruda").then((lib) => lib.default.init());
-    }
-  }, [debug]);
+  // useEffect(() => {
+  //   if (debug) {
+  //     import("eruda").then((lib) => lib.default.init());
+  //   }
+  // }, [debug]);
 
   return (
     <TonConnectUIProvider manifestUrl={manifestUrl}>
