@@ -218,8 +218,6 @@ export const updateStreak = async (user: any) => {
   const isLastActiveMoreThanTwoDays =
     new Date(lastUpdate).getDate() < todayDate - 1;
 
-  console.log(todayDate, new Date(lastUpdate).getDate());
-
   if (currentStreak === 0) {
     await supabase
       .from("users")

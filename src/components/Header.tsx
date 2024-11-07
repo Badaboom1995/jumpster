@@ -19,7 +19,6 @@ const Header = () => {
     }
     if (prevStreak && user?.streak_counter > prevStreak) {
       setIsModalOpen(true);
-      console.log("increased");
     }
     setPrevStreak(user?.streak_counter);
   }, [user?.streak_counter]);

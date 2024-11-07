@@ -15,6 +15,7 @@ import {
   ranks,
   updateStreak,
 } from "@/utils";
+
 import "@tensorflow/tfjs-backend-webgl";
 import * as tf from "@tensorflow/tfjs-core";
 import * as poseDetection from "@tensorflow-models/pose-detection";
@@ -34,14 +35,14 @@ import Character from "@/components/Character";
 import Header from "@/components/Header";
 import usePassiveIncome from "@/hooks/usePassiveIncome";
 import useCurrentCoinsReward from "@/hooks/useCurrentCoinsReward";
-import Curtain from "@/components/Curtain";
-import CoinsReward from "@/components/CoinsReward";
+// import Curtain from "@/components/Curtain";
+// import CoinsReward from "@/components/CoinsReward";
 import { useQueryClient } from "react-query";
-import { twMerge } from "tailwind-merge";
-import fire from "@/app/_assets/icons/Fire.svg";
-import Card from "@/components/Card";
-import JumpingCoinLoader from "@/app/Loader";
-import Loader from "@/app/Loader";
+// import { twMerge } from "tailwind-merge";
+// import fire from "@/app/_assets/icons/Fire.svg";
+// import Card from "@/components/Card";
+// import JumpingCoinLoader from "@/app/Loader";
+// import Loader from "@/app/Loader";
 
 type StatsProps = {
   coins: number;
@@ -216,14 +217,18 @@ const Main = () => {
       <div className="flex grow flex-col justify-center">
         <div className="flex grow flex-col justify-center">
           <div className="mb-[16px] mt-[12px] flex flex-col items-center p-[8px]">
-            <p className="flex w-full items-center justify-center gap-[8px] text-center text-[42px] font-bold leading-[52px] text-white">
+            <p className="mb-[8px] flex w-full items-center justify-center gap-[8px] text-center text-[42px] font-bold leading-[52px] text-white">
               {/*TODO: use image instead*/}
               <span className="text-[32px]">🟡</span>{" "}
               <span>{userParams.coins.value.toLocaleString()}</span>
             </p>
-            <p className="flex w-full items-center justify-center gap-[8px] text-center text-[20px] text-slate-400">
-              +{passive_income} монет в час
-            </p>
+            {passive_income ? (
+              <p className="flex w-full items-center justify-center gap-[8px] text-center text-[20px] text-slate-400">
+                +{passive_income} монет в час
+              </p>
+            ) : (
+              <div className="h-[30px] w-[150px] animate-pulse rounded bg-background"></div>
+            )}
           </div>
           {initialSlide !== null && (
             <Slider {...settings} initialSlide={initialSlide}>

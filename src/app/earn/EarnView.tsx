@@ -128,7 +128,6 @@ const EarnView = () => {
   });
 
   if (!data || !user_cards_ids) return null;
-  console.log(user_cards_ids);
   return (
     <div className="max-h-[100vh] overflow-y-scroll px-[16px] pb-[90px] pt-[16px]">
       <div className="mb-[24px]">
