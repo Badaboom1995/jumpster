@@ -276,7 +276,7 @@ const Main = () => {
           </div>
         </div>
       </div>
-      <div className="mb-[8px] px-[16px]">
+      <div className="mb-[12px] px-[16px]">
         {currentCoinsReward ? (
           <Button
             onClick={async () => {

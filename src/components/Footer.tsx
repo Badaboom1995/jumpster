@@ -65,9 +65,9 @@ const Footer = () => {
           Доход
         </Navitem>
         <Navitem
-          href="/pals"
+          href="/onboarding"
           src={
-            !checkIfActive("/pals")
+            !checkIfActive("/onboarding")
               ? (friendsIcon as any)
               : (friendsOutlineIcon as any)
           }
