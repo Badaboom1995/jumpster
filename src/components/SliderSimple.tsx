@@ -1,4 +1,5 @@
 import React, { useState, createContext } from "react";
+import { twMerge } from "tailwind-merge";
 
 // Context to share the slider functions with slides
 export const SliderContext = createContext({});
@@ -33,15 +34,17 @@ const Slider = ({ children }) => {
     <SliderContext.Provider value={sliderFunctions}>
       <div className="relative w-full overflow-hidden">
         <div className="flex transition-transform">
-          {React.Children.map(
-            children,
-            (child, index) =>
-              currentSlide === index && (
-                <div key={index} className="w-full flex-shrink-0">
-                  {child}
-                </div>
-              ),
-          )}
+          {React.Children.map(children, (child, index) => (
+            <div
+              key={index}
+              className={twMerge(
+                "hidden w-full flex-shrink-0",
+                currentSlide === index && "block",
+              )}
+            >
+              {child}
+            </div>
+          ))}
         </div>
       </div>
     </SliderContext.Provider>
