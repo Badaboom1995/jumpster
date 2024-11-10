@@ -18,7 +18,7 @@ const SlideTemplate = (props: SlideProps) => {
   const { icon, title, description } = props;
   const { next, prev } = useSlider();
   return (
-    <div className="flex h-[100vh] flex-col p-[24px] pt-[50px] text-white">
+    <div className="flex h-[100vh] flex-col p-[24px] pt-[100px] text-white">
       <div className="fixed left-0 top-0 flex w-full justify-between px-[24px] py-[32px]">
         <button className="rotate-90" onClick={prev}>
           <Image className="" src={arrow} alt="arrow" />
