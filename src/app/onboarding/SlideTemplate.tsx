@@ -31,7 +31,7 @@ const SlideTemplate = (props: SlideProps) => {
         </button>
       </div>
       <div className="mb-[28px] flex items-end">
-        <Image src={icon} alt="coin" className="mx-auto h-[260px] w-auto" />
+        <Image src={icon} alt="coin" className="mx-auto h-[35vh] w-auto" />
       </div>
 
       <h2 className="mb-[32px] text-[32px] font-black">{title}</h2>
