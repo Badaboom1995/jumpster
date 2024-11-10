@@ -12,13 +12,19 @@ import prize from "@/app/_assets/images/prize.png";
 
 const OnboardingView = () => {
   return (
-    <div className="fixed left-0 top-0 z-50 h-[100vh] w-full overflow-scroll bg-[#1F2127]">
+    <div className="fixed left-0 top-0 z-50 h-[100vh] w-full overflow-scroll bg-[#1F2126]">
       <Slider>
         <SlideOne />
         <SlideTemplate
           icon={coin}
           title="Получай долю"
-          description="До 70% дохода от рекламы отправляется в общий пул, который распределяется среди игроков. Прыгай, получай монеты и участвуй в эйрдропах"
+          description={
+            <p>
+              <b>До 70% дохода</b> от рекламы отправляется в общий пул, который
+              распределяется среди игроков. Прыгай, получай монеты и участвуй в
+              эйрдропах
+            </p>
+          }
         />
         <SlideTemplate
           icon={prize}
@@ -38,7 +44,7 @@ const OnboardingView = () => {
         <SlideTemplate
           icon={celeb}
           title="Собери команду"
-          description="За каждого приглашенного друга ты получаешь 25% от всего его дохода, а так же 10% от дохода всех его друзей. Вместе вы добъетесь большего!"
+          description="За каждого приглашенного друга ты получаешь 25% от всех его доходов, а так же 10% от доходов его друзей. Вместе вы добъетесь большего!"
         />
         <SlideTemplate
           icon={tasks}
