@@ -14,7 +14,7 @@ interface ButtonProps {
   loaderText?: string;
   loaderIcon?: React.ReactNode;
   disabled?: boolean;
-  onClick?: () => void;
+  onClick?: (e: React.MouseEvent) => void;
 }
 
 const Button: React.FC<ButtonProps> = ({

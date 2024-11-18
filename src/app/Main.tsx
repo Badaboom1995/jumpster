@@ -21,7 +21,7 @@ import * as tf from "@tensorflow/tfjs-core";
 import * as poseDetection from "@tensorflow-models/pose-detection";
 import { requestWithRetry } from "@/app/jump-flow/utils";
 import { StoreContext } from "@/components/Root/Root";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import Slider from "react-slick";
 import "./main.css";
@@ -43,6 +43,10 @@ import { useQueryClient } from "react-query";
 // import Card from "@/components/Card";
 // import JumpingCoinLoader from "@/app/Loader";
 // import Loader from "@/app/Loader";
+import { BoostersList } from "@/components/Boosters/BoostersList";
+import CoinsFirework, {
+  CoinsFireworkRef,
+} from "@/components/CoinsFirework/CoinsFirework";
 
 type StatsProps = {
   coins: number;
@@ -77,7 +81,7 @@ const Main = () => {
   const [runAnimation, setRunAnimation] = useState(false);
   const [userStats, setUserStats] = useState<StatsProps | null>(null);
   const [initialSlide, setInitialSlide] = useState(null);
-
+  const router = useRouter();
   const currentCoinsReward = useCurrentCoinsReward(user);
   const passive_income = usePassiveIncome();
 
@@ -85,6 +89,40 @@ const Main = () => {
   const currentLevelProgress = currentRankData?.percent;
   const currentEnergy = userStats?.energy;
   const currentCharacterImage = currentRankData?.url;
+
+  const coinsFireworkRef = useRef<CoinsFireworkRef>(null);
+
+  const handleClaimCoins = async (event: React.MouseEvent) => {
+    try {
+      let particleCount = { min: 10, max: 20 };
+      if (currentCoinsReward > 1000 && currentCoinsReward < 5000) {
+        particleCount = { min: 30, max: 50 };
+      }
+      if (currentCoinsReward > 5000 && currentCoinsReward < 10000) {
+        particleCount = { min: 50, max: 80 };
+      }
+      if (currentCoinsReward > 10000 && currentCoinsReward < 20000) {
+        particleCount = { min: 80, max: 120 };
+      }
+      if (currentCoinsReward > 20000 && currentCoinsReward < 50000) {
+        particleCount = { min: 120, max: 150 };
+      }
+      if (currentCoinsReward > 50000) {
+        particleCount = { min: 150, max: 200 };
+      }
+
+      coinsFireworkRef.current?.triggerAnimation(
+        event.clientX,
+        event.clientY,
+        particleCount,
+      );
+
+      await addCoins(user);
+      await queryClient.invalidateQueries("user");
+    } catch (e) {
+      console.log(e);
+    }
+  };
 
   const loadModel = async () => {
     if (store.detector) return;
@@ -178,6 +216,10 @@ const Main = () => {
   }, [currentRankData]);
 
   useEffect(() => {
+    // @ts-ignore
+    if (user && !user?.onboarding_done) {
+      router.push("/onboarding");
+    }
     loadModel();
     if (!user) return;
     setInitialSlide(getRankData(user?.experience)?.id - 1);
@@ -195,7 +237,7 @@ const Main = () => {
     });
   }, [user]);
 
-  if (isUserLoading || !userParams || !userStats) return null;
+  if (!user || isUserLoading || !userParams || !userStats) return null;
   return (
     <div className="flex h-full w-full flex-col overflow-hidden">
       <Confetti
@@ -204,15 +246,7 @@ const Main = () => {
         recycle={false}
         numberOfPieces={numberOfPieces}
       />
-      {/*<Curtain*/}
-      {/*  onClose={() => {*/}
-      {/*    setIsPopupOpen(false);*/}
-      {/*  }}*/}
-      {/*  isOpen={isPopupOpen}*/}
-      {/*>*/}
-      {/*  <CoinsReward user={user} setIsPopupOpen={setIsPopupOpen} />*/}
-      {/*</Curtain>*/}
-      {/*{<Loader></Loader>}*/}
+      <CoinsFirework ref={coinsFireworkRef} />
       <Header />
       <div className="flex grow flex-col justify-center">
         <div className="flex grow flex-col justify-center">
@@ -270,26 +304,15 @@ const Main = () => {
               {Math.ceil(currentEnergy) || 0}/{currentRankData?.energyCapacity}
             </span>
           </div>
-          <div className="flex gap-[4px]">
+          <Link href="/boosters" className="flex items-center gap-[4px]">
             <Image src={saved as any} alt="boost" />
             <span>Буст</span>
-          </div>
+          </Link>
         </div>
       </div>
       <div className="mb-[12px] px-[16px]">
         {currentCoinsReward ? (
-          <Button
-            onClick={async () => {
-              try {
-                // TODO: move to backend
-                await addCoins(user);
-                await queryClient.invalidateQueries("user");
-              } catch (e) {
-                console.log(e);
-              }
-            }}
-            variant="secondary"
-          >
+          <Button onClick={handleClaimCoins} variant="secondary">
             Забрать 🟡 {currentCoinsReward}
           </Button>
         ) : (

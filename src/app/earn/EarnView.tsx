@@ -32,10 +32,9 @@ const Card = ({
   user_id,
   setIsOpen,
 }) => {
-  const [isDone, setIsDone] = useState(isBought);
   const { user } = useGetUser();
   // @ts-ignore
-  const insuficientCoins = user?.user_parameters?.coins.value < cost;
+  const insufficientCoins = user?.user_parameters?.coins.value < cost;
 
   return (
     <div className="flex items-center gap-[12px] rounded-[8px] bg-background px-2 py-2 pr-4">
@@ -46,21 +45,21 @@ const Card = ({
           <p className="text-gray-400">+{income} 🟡 в час</p>
         </div>
         <button
-          onClick={() => setIsOpen(id)}
-          disabled={insuficientCoins || isDone}
+          onClick={() => !isBought && setIsOpen(id)}
+          disabled={insufficientCoins || isBought}
           className={twMerge(
-            "background-light flex flex-col rounded-[8px] border border-background-light px-3 py-2 transition active:bg-background-light",
-            isDone || insuficientCoins ? "opacity-30 active:bg-background" : "",
+            "background-light flex flex-col rounded-[8px] border px-3 py-2 transition",
+            isBought
+              ? "border-background-light bg-background-light"
+              : "border-background-light active:bg-background-light",
+            insufficientCoins ? "opacity-30" : "",
           )}
         >
-          {/*<button>Купить</button>*/}
-          <span>
-            {isDone ? (
-              <Image className="w-[16px]" src={check} alt={"check"} />
-            ) : (
-              `🟡 ${cost}`
-            )}
-          </span>
+          {isBought ? (
+            <Image className="w-[16px]" src={check} alt={"check"} />
+          ) : (
+            `🟡 ${cost}`
+          )}
         </button>
       </div>
     </div>
@@ -72,13 +71,30 @@ const EarnView = () => {
   const [isOpen, setIsOpen] = useState<number | null>(null);
   const queryClient = useQueryClient();
 
-  const buy = async (cardId, userId, cost) => {
-    const { data, error } = await supabase.from("user_cards").insert([
+  const buy = async (cardId: number, userId: string, cost: number) => {
+    // Check if card is already bought
+    const { data: existingCard } = await supabase
+      .from("user_cards")
+      .select("*")
+      .eq("user_id", userId)
+      .eq("card_id", cardId)
+      .single();
+
+    if (existingCard) {
+      setIsOpen(null);
+      return; // Card already bought
+    }
+
+    const { error } = await supabase.from("user_cards").insert([
       {
         user_id: userId,
         card_id: cardId,
       },
     ]);
+
+    if (error) throw error;
+
+    // Update user coins
     await supabase
       .from("user_parameters")
       .update({
@@ -88,16 +104,11 @@ const EarnView = () => {
       .eq("user_id", userId)
       .eq("name", "coins");
 
-    if (error) throw error;
     setIsOpen(null);
-    await queryClient.invalidateQueries({
-      queryKey: ["user_cards"],
-      exact: true,
-    });
-    await queryClient.invalidateQueries({
-      queryKey: ["user"],
-      exact: true,
-    });
+
+    // Update queries
+    await queryClient.invalidateQueries(["user_cards"]);
+    await queryClient.invalidateQueries(["user"]);
   };
 
   const { data } = useQuery({
@@ -128,6 +139,7 @@ const EarnView = () => {
   });
 
   if (!data || !user_cards_ids) return null;
+
   return (
     <div className="max-h-[100vh] overflow-y-scroll px-[16px] pb-[90px] pt-[16px]">
       <div className="mb-[24px]">
@@ -137,7 +149,7 @@ const EarnView = () => {
         </p>
         <p className="mx-auto mb-[0px] w-fit rounded-[12px] px-[12px] text-center text-[32px] font-semibold text-white">
           {/*@ts-ignore*/}
-          🟡 {user?.user_parameters?.coins?.value}
+          🟡 {user?.user_parameters?.coins?.value.toLocaleString()}
         </p>
       </div>
       <Modal isOpen={isOpen} setOpen={setIsOpen}>
@@ -173,23 +185,18 @@ const EarnView = () => {
                 <div
                   key={card.id}
                   className="h-[76px] w-full animate-pulse rounded-[12px] bg-background"
-                ></div>
+                />
               ) : (
                 <Card
-                  isBought={
-                    user_cards_ids &&
-                    Array.isArray(user_cards_ids) &&
-                    user_cards_ids.hasOwnProperty("includes") &&
-                    user_cards_ids?.includes(card?.id)
-                  }
+                  key={card.id}
+                  isBought={user_cards_ids?.includes(card.id)}
                   setIsOpen={setIsOpen}
                   user_id={user?.id}
-                  key={card?.id}
-                  id={card?.id}
-                  cost={card?.buy_price || 0}
-                  income={card?.passive_income || 0}
-                  title={card?.name || ""}
-                  icon={card?.thumbnail_name || ""}
+                  id={card.id}
+                  cost={card.buy_price || 0}
+                  income={card.passive_income || 0}
+                  title={card.name || ""}
+                  icon={card.thumbnail_name || ""}
                 />
               ),
             )}

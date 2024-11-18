@@ -10,12 +10,13 @@ type SlideProps = {
   title: string | React.ReactNode;
   description: string | React.ReactNode;
   icon: any;
+  onSkip?: () => void;
+  onNext?: () => void;
+  nextText?: string;
 };
 
 const SlideTemplate = (props: SlideProps) => {
-  const router = useRouter();
-
-  const { icon, title, description } = props;
+  const { icon, title, description, onSkip, onNext, nextText } = props;
   const { next, prev } = useSlider();
   return (
     <div className="flex h-[100vh] flex-col p-[24px] pt-[100px] text-white">
@@ -25,7 +26,7 @@ const SlideTemplate = (props: SlideProps) => {
         </button>
         <button
           className="text-[14px] underline active:bg-caption"
-          onClick={() => router.push("/")}
+          onClick={onSkip}
         >
           Пропустить
         </button>
@@ -36,7 +37,7 @@ const SlideTemplate = (props: SlideProps) => {
 
       <h2 className="mb-[32px] text-[32px] font-black">{title}</h2>
       <p className="mb-[40px] grow text-[16px]">{description}</p>
-      <Button onClick={next}>Дальше</Button>
+      <Button onClick={onNext || next}>{nextText || "Дальше"}</Button>
     </div>
   );
 };

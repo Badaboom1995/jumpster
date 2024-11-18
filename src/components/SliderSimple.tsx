@@ -4,7 +4,12 @@ import { twMerge } from "tailwind-merge";
 // Context to share the slider functions with slides
 export const SliderContext = createContext({});
 
-const Slider = ({ children }) => {
+interface SliderProps {
+  children: React.ReactNode;
+  onFinish?: () => void;
+}
+
+const Slider = ({ children, onFinish }: SliderProps) => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isMounted, setIsMounted] = useState(true);
   const totalSlides = React.Children.count(children);
@@ -26,6 +31,10 @@ const Slider = ({ children }) => {
     currentSlide,
     toLastSlide,
     finish,
+  };
+
+  const handleFinish = () => {
+    onFinish?.();
   };
 
   if (!isMounted) return;

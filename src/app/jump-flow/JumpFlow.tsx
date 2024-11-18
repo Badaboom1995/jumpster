@@ -24,6 +24,10 @@ import { StoreContext } from "@/components/Root/Root";
 import { Title } from "@/components/Title";
 import { getRankData } from "@/utils";
 import Button from "@/components/Button";
+import { useRewards } from "@/hooks/api/useRewards";
+import { supabase } from "@/lib/supabase";
+import toast from "react-hot-toast";
+import { useQueryClient } from "react-query";
 
 const constraints = {
   video: true,
@@ -53,6 +57,8 @@ const JumpFlow = () => {
   const statusText = getStatusText(flowStatus);
   const { user, isUserLoading } = useGetUser();
   const currentRankData = getRankData(user?.experience);
+  const queryClient = useQueryClient();
+  const calculateRewards = useRewards();
 
   useEffect(() => {
     if (isUserLoading) return;
@@ -217,6 +223,47 @@ const JumpFlow = () => {
       stopRewardCountdown();
     }
   }, [flowStatus, secondsUntilReward, isRewardRunning]);
+
+  const handleSessionComplete = async () => {
+    if (!user) return;
+
+    try {
+      const rewards = await calculateRewards.mutateAsync({
+        userExperience: user.experience,
+        jumpCount: jumpsCounter,
+        perfectJumps: 0,
+        comboMultiplier: 1,
+      });
+
+      // Update user parameters
+      const { error } = await supabase
+        .from("user_parameters")
+        .update({
+          "coins.value": user.user_parameters.coins.value + rewards.coins,
+          "energy.value":
+            user.user_parameters.energy.value - rewards.energyCost,
+        })
+        .eq("user_id", user.id);
+
+      if (error) throw error;
+
+      // Update user experience separately
+      await supabase
+        .from("users")
+        .update({
+          experience: user.experience + rewards.experience,
+        })
+        .eq("id", user.id);
+
+      // Invalidate user query to refresh data
+      queryClient.invalidateQueries("user");
+
+      toast.success("Награды получены!");
+    } catch (error) {
+      console.error("Error updating rewards:", error);
+      toast.error("Ошибка при получении наград");
+    }
+  };
 
   return (
     <div

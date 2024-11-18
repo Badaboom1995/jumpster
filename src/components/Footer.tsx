@@ -10,8 +10,11 @@ import friendsIcon from "@/app/_assets/icons/People.svg";
 import friendsOutlineIcon from "@/app/_assets/icons/PeopleOutlined.svg";
 import walletIcon from "@/app/_assets/icons/Wallet.svg";
 import walletOutlineIcon from "@/app/_assets/icons/WalletOutlined.svg";
+import barbel from "@/app/_assets/icons/Barbell-1.svg";
+import barbelOutline from "@/app/_assets/icons/Barbell.svg";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import saved from "@/app/_assets/icons/Saved.svg";
 
 const Navitem = ({
   children,
@@ -24,7 +27,7 @@ const Navitem = ({
 }) => {
   return (
     <Link href={href}>
-      <li className="flex h-[50px] flex-col items-center gap-[4px] rounded-[12px] px-[12px] py-[4px] transition active:bg-background">
+      <li className="flex h-[50px] flex-col items-center gap-[4px] rounded-[12px] px-[8px] py-[4px] transition active:bg-background">
         <Image src={src} width={24} height={24} alt="menu item" />
         <p className="text-[12px] text-white">{children}</p>
       </li>
@@ -55,9 +58,9 @@ const Footer = () => {
           Главная
         </Navitem>
         <Navitem
-          href="/earn"
+          href="/quests"
           src={
-            !checkIfActive("/earn")
+            !checkIfActive("/quests")
               ? (earnIcon as any)
               : (earnOutlineIcon as any)
           }
@@ -65,16 +68,24 @@ const Footer = () => {
           Доход
         </Navitem>
         <Navitem
-          href="/onboarding"
+          href="/earn"
           src={
-            !checkIfActive("/onboarding")
+            !checkIfActive("/earn") ? (barbel as any) : (barbelOutline as any)
+          }
+        >
+          Атлет
+        </Navitem>
+        <Navitem
+          href="/pals"
+          src={
+            !checkIfActive("/pals")
               ? (friendsIcon as any)
               : (friendsOutlineIcon as any)
           }
         >
           Друзья
         </Navitem>
-        <Navitem
+        {/* <Navitem
           href="/wallet"
           src={
             !checkIfActive("/wallet")
@@ -83,7 +94,7 @@ const Footer = () => {
           }
         >
           Кошелек
-        </Navitem>
+        </Navitem> */}
       </ul>
     </div>
   );

@@ -266,19 +266,27 @@ export const getObjectSearchParams = (
 
 export const getRankData = (experience: number) => {
   if (experience === null || experience === undefined) return null;
-  const nextRankIndex = ranks.findIndex((rank) => {
-    return rank.experience > experience;
-  });
+  
+  // Handle max level case
+  if (experience >= ranks[ranks.length - 1].experience) {
+    return {
+      ...ranks[ranks.length - 1],
+      percent: 100,
+      nextRankExp: null,
+    };
+  }
+
+  const nextRankIndex = ranks.findIndex((rank) => rank.experience > experience);
   const currentRankIndex = nextRankIndex - 1;
 
   const currentRank = ranks[currentRankIndex];
-  const nextRank = ranks[currentRankIndex + 1];
+  const nextRank = ranks[nextRankIndex];
   const levelExp = nextRank.experience - currentRank.experience;
   const gainThisLevel = experience - currentRank.experience;
 
   return {
     ...currentRank,
     percent: Math.ceil((gainThisLevel / levelExp) * 100),
-    nextRankExp: nextRank?.experience,
+    nextRankExp: nextRank.experience,
   };
 };

@@ -10,6 +10,7 @@ const usePassiveIncome = () => {
   const { user } = useGetUser();
 
   const currentRank = getRankData(user?.experience);
+  console.log(user?.experience);
 
   const { data: cards_income, isFetching: isCardsFetching } = useQuery({
     queryKey: ["user_cards"],
