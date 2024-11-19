@@ -71,7 +71,7 @@ const EarnView = () => {
   const [isOpen, setIsOpen] = useState<number | null>(null);
   const queryClient = useQueryClient();
 
-  const buy = async (cardId: number, userId: string, cost: number) => {
+  const buy = async (cardId: number, userId: number, cost: number) => {
     // Check if card is already bought
     const { data: existingCard } = await supabase
       .from("user_cards")

@@ -224,46 +224,46 @@ const JumpFlow = () => {
     }
   }, [flowStatus, secondsUntilReward, isRewardRunning]);
 
-  const handleSessionComplete = async () => {
-    if (!user) return;
+  // const handleSessionComplete = async () => {
+  //   if (!user) return;
 
-    try {
-      const rewards = await calculateRewards.mutateAsync({
-        userExperience: user.experience,
-        jumpCount: jumpsCounter,
-        perfectJumps: 0,
-        comboMultiplier: 1,
-      });
+  //   try {
+  //     const rewards = await calculateRewards.mutateAsync({
+  //       userExperience: user.experience,
+  //       jumpCount: jumpsCounter,
+  //       perfectJumps: 0,
+  //       comboMultiplier: 1,
+  //     });
 
-      // Update user parameters
-      const { error } = await supabase
-        .from("user_parameters")
-        .update({
-          "coins.value": user.user_parameters.coins.value + rewards.coins,
-          "energy.value":
-            user.user_parameters.energy.value - rewards.energyCost,
-        })
-        .eq("user_id", user.id);
+  //     // Update user parameters
+  //     const { error } = await supabase
+  //       .from("user_parameters")
+  //       .update({
+  //         "coins.value": user.user_parameters.coins.value + rewards.coins,
+  //         "energy.value":
+  //           user.user_parameters.energy.value - rewards.energyCost,
+  //       })
+  //       .eq("user_id", user.id);
 
-      if (error) throw error;
+  //     if (error) throw error;
 
-      // Update user experience separately
-      await supabase
-        .from("users")
-        .update({
-          experience: user.experience + rewards.experience,
-        })
-        .eq("id", user.id);
+  //     // Update user experience separately
+  //     await supabase
+  //       .from("users")
+  //       .update({
+  //         experience: user.experience + rewards.experience,
+  //       })
+  //       .eq("id", user.id);
 
-      // Invalidate user query to refresh data
-      queryClient.invalidateQueries("user");
+  //     // Invalidate user query to refresh data
+  //     queryClient.invalidateQueries("user");
 
-      toast.success("Награды получены!");
-    } catch (error) {
-      console.error("Error updating rewards:", error);
-      toast.error("Ошибка при получении наград");
-    }
-  };
+  //     toast.success("Награды получены!");
+  //   } catch (error) {
+  //     console.error("Error updating rewards:", error);
+  //     toast.error("Ошибка при получении наград");
+  //   }
+  // };
 
   return (
     <div
