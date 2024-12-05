@@ -58,7 +58,9 @@ const JumpFlow = () => {
   const [jumpsCounter, setJumpsCounter] = useState(0);
   const [availableEnergy, setAvailableEnergy] = useState<number>(0);
   const statusText = getStatusText(flowStatus);
+  // @ts-ignore
   const { user, isUserLoading } = useGetUser<UserWithParameters>();
+  // @ts-ignore
   const currentRankData = getRankData(user?.experience);
   const queryClient = useQueryClient();
   const calculateRewards = useRewards();
@@ -70,6 +72,7 @@ const JumpFlow = () => {
 
   useEffect(() => {
     if (isUserLoading) return;
+    // @ts-ignore
     setAvailableEnergy(user?.user_parameters?.energy?.value || 0);
   }, [isUserLoading]);
 

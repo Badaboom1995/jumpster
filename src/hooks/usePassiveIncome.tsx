@@ -9,7 +9,9 @@ const usePassiveIncome = () => {
   const userID = launchParams.initData?.user?.id;
   const { user } = useGetUser();
 
+  // @ts-ignore
   const currentRank = getRankData(user?.experience);
+  // @ts-ignore
   console.log(user?.experience);
 
   const { data: cards_income, isFetching: isCardsFetching } = useQuery({

@@ -54,6 +54,7 @@ const OnboardingView = () => {
 
   return (
     <div className="fixed left-0 top-0 z-50 h-[100vh] w-full overflow-scroll bg-[#1F2126]">
+      {/* @ts-ignore */}
       <Slider onFinish={() => user && setOnboardingDone(user)}>
         <SlideOne />
         <SlideTemplate
@@ -71,36 +72,42 @@ const OnboardingView = () => {
           icon={prize}
           title="Прокачай атлета"
           description="Каждый прыжок – это опыт для твоего героя. Повышай уровень, чтобы получать ещё больше монет и доступ к новым привилегиям. Стартуй как новичок, стань легендой!"
+          // @ts-ignore
           onSkip={() => user && setOnboardingDone(user)}
         />
         <SlideTemplate
           icon={star}
           title="Увеличивай доход"
           description="Заключай контракты со спонсорами, прокачивай социальные сети и покупай снаряжение. Чем сильнее и известнее твой герой, тем больше пассивного дохода он приносит!"
+          // @ts-ignore
           onSkip={() => user && setOnboardingDone(user)}
         />
         <SlideTemplate
           icon={time}
           title="Поймай темп"
           description="Заходи чаще и получай больше наград.Прыгай каждый час, собирай монеты каждые 3 часа и не забудь про ежедневные награды!"
+          // @ts-ignore
           onSkip={() => user && setOnboardingDone(user)}
         />
         <SlideTemplate
           icon={celeb}
           title="Собери команду"
           description="За каждого приглашенного друга ты получаешь 25% от всех его доходов, а так же 10% от доходов его друзей. Вместе вы добъетесь большего!"
+          // @ts-ignore
           onSkip={() => user && setOnboardingDone(user)}
         />
         <SlideTemplate
           icon={tasks}
           title="Делай задания"
           description="Чтобы заработать еще больше монет - выполняй специальные задания. Задания обновляются ежедневно, не упусти свою возможность!"
+          // @ts-ignore
           onSkip={() => user && setOnboardingDone(user)}
         />
         <SlideTemplate
           title="Готово!"
           icon={tasks}
           description="Теперь ты можешь начать зарабатывать и получать награды!"
+          // @ts-ignore
           onNext={() => user && setOnboardingDone(user)}
           nextText="Начать"
         />

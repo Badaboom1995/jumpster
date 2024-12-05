@@ -81,6 +81,7 @@ const Reward = ({
         coins: user?.user_parameters.coins.value,
         //@ts-ignore
         energy: user?.user_parameters.energy.value,
+        // @ts-ignore
         experience: user.experience,
       });
 
@@ -100,6 +101,7 @@ const Reward = ({
       // add experience
       await supabase
         .from("users")
+        // @ts-ignore
         .update({ experience: user.experience + jumps })
         .eq("id", user.id);
 

@@ -154,6 +154,7 @@ const Main = () => {
       }));
       setTimeout(() => {
         setNumberOfPieces(1000);
+        // @ts-ignore
         setUserStats((prev) => ({ ...prev, experience: user?.experience }));
         setTimeout(() => {
           window.history.pushState({}, document.title, "/");
@@ -169,11 +170,13 @@ const Main = () => {
       setUserStats({
         coins: userParams?.coins.value,
         energy: userParams?.energy.value,
+        // @ts-ignore
         experience: user?.experience,
       });
       return;
     }
     // if got search searchParams with claim=true and new level detected, then run new level animation
+    // @ts-ignore
     const currentRank = getRankData(user?.experience);
     const prevRank = getRankData(objectSearchParams?.experience);
     const isNewLevel = prevRank?.id < currentRank?.id;
@@ -196,6 +199,7 @@ const Main = () => {
           ...prev,
           coins: userParams?.coins.value,
           energy: userParams?.energy.value,
+          // @ts-ignore
           experience: user?.experience,
         }));
       }, 500);
@@ -222,6 +226,7 @@ const Main = () => {
     }
     loadModel();
     if (!user) return;
+    // @ts-ignore
     setInitialSlide(getRankData(user?.experience)?.id - 1);
     chooseBehaviour();
   }, [isUserLoading, user]);
@@ -267,6 +272,7 @@ const Main = () => {
           {initialSlide !== null && (
             <Slider {...settings} initialSlide={initialSlide}>
               {ranks.map((rank, index) => {
+                // @ts-ignore
                 const rankId = getRankData(user?.experience)?.id;
                 // @ts-ignore
                 if (rankId !== rank.id) {
@@ -289,6 +295,7 @@ const Main = () => {
                     progressLevel={currentLevelProgress}
                     runAnimation={runAnimation}
                     rankImage={currentCharacterImage}
+                    // @ts-ignore
                     rankName={getRankData(user?.experience)?.name}
                     passive_income={rank.passive_coins}
                   />

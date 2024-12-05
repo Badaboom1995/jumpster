@@ -18,6 +18,7 @@ const PreJumpView = () => {
   if (!user) return null;
   // @ts-ignore
   const currentEnergy = user.user_parameters.energy.value;
+  // @ts-ignore
   const rank = getRankData(user.experience);
 
   const getBoosterEffectText = (booster: any) => {

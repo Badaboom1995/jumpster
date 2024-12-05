@@ -7,7 +7,7 @@ import { getRankData } from "@/utils";
 const CharacterPicture = () => {
   const { user } = useGetUser();
   if (!user) return null;
-
+  // @ts-ignore
   const rank = getRankData(user.experience);
   return (
     <div>

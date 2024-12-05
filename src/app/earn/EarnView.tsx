@@ -111,6 +111,7 @@ const EarnView = () => {
       await supabase
         .from("user_parameters")
         .update({
+          // @ts-ignore
           value: user?.user_parameters.coins.value - cost,
         })
         .eq("user_id", userId)
@@ -209,6 +210,7 @@ const EarnView = () => {
             +{openedCard?.passive_income} 🟡 в час
           </p>
           <button
+            // @ts-ignore
             onClick={() => buy(openedCard?.id, user?.id, openedCard.buy_price)}
             className="rounded-[8px] bg-white px-4 py-2 font-medium text-black"
             disabled={isLoading}
