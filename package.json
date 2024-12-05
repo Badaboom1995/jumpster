@@ -8,7 +8,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "admin:quests": "ts-node scripts/admin-quests.ts"
+    "admin:quests": "ts-node scripts/admin-quests.ts",
+    "update-types": "ts-node scripts/update-types.ts"
   },
   "dependencies": {
     "@supabase/auth-helpers-nextjs": "^0.10.0",

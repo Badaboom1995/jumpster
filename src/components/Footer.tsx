@@ -73,7 +73,7 @@ const Footer = () => {
             !checkIfActive("/earn") ? (barbel as any) : (barbelOutline as any)
           }
         >
-          Атлет
+          Фарминг
         </Navitem>
         <Navitem
           href="/pals"

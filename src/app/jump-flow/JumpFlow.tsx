@@ -28,6 +28,9 @@ import { useRewards } from "@/hooks/api/useRewards";
 import { supabase } from "@/lib/supabase";
 import toast from "react-hot-toast";
 import { useQueryClient } from "react-query";
+import { Database } from "@/types/database.types";
+import { User } from "@supabase/supabase-js";
+import CoinsFirework from "@/components/CoinsFirework/CoinsFirework";
 
 const constraints = {
   video: true,
@@ -55,15 +58,19 @@ const JumpFlow = () => {
   const [jumpsCounter, setJumpsCounter] = useState(0);
   const [availableEnergy, setAvailableEnergy] = useState<number>(0);
   const statusText = getStatusText(flowStatus);
-  const { user, isUserLoading } = useGetUser();
+  const { user, isUserLoading } = useGetUser<UserWithParameters>();
   const currentRankData = getRankData(user?.experience);
   const queryClient = useQueryClient();
   const calculateRewards = useRewards();
+  const coinsFireworkRef = useRef<any>(null);
+  const [lastJumpPosition, setLastJumpPosition] = React.useState({
+    x: 0,
+    y: 0,
+  });
 
   useEffect(() => {
     if (isUserLoading) return;
-    // @ts-ignore
-    setAvailableEnergy(user?.user_parameters.energy.value || 0);
+    setAvailableEnergy(user?.user_parameters?.energy?.value || 0);
   }, [isUserLoading]);
 
   const { currentSeconds, stop: stopTimer, start: startTimer } = useTimer();
@@ -74,6 +81,13 @@ const JumpFlow = () => {
     stopCountDown: stopRewardCountdown,
     isRunning: isRewardRunning,
   } = useCountdown();
+
+  const getRandomTopPosition = () => {
+    const x = Math.random() * window.innerWidth;
+    const y = 0;
+
+    return { x, y };
+  };
 
   const detectUpAndDown = (vector: any) => {
     if (vector > 5 && jumpState === "down") {
@@ -86,6 +100,16 @@ const JumpFlow = () => {
       setJumpState("up");
       setJumpsCounter((prev) => prev + 1);
       setAvailableEnergy((prev) => prev - energyPerJump);
+
+      // Trigger coins animation at random border position
+      const position = getRandomTopPosition();
+      setLastJumpPosition(position);
+      if (coinsFireworkRef.current) {
+        coinsFireworkRef.current.triggerAnimation(position.x, position.y, {
+          min: 10,
+          max: 20,
+        });
+      }
     }
     if (vector < 0 && jumpState === "up") {
       setJumpState("down");
@@ -272,6 +296,7 @@ const JumpFlow = () => {
         isRewardRunning && "animate-fade",
       )}
     >
+      <CoinsFirework ref={coinsFireworkRef} />
       {flowStatus !== "end" && flowStatus !== "jump" && (
         <Link href="/" className="block">
           <button className="relative z-50 rotate-90 rounded-full p-[20px] text-white transition active:bg-slate-900">

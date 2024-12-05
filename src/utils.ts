@@ -119,7 +119,7 @@ export const ranks = [
   {
     id: 11,
     name: "Супергерой",
-    coins_per_jump: 300000,
+    coins_per_jump: 1000,
     passive_coins: 200000,
     experience: 20000,
     energyCapacity: 100000,
@@ -266,7 +266,7 @@ export const getObjectSearchParams = (
 
 export const getRankData = (experience: number) => {
   if (experience === null || experience === undefined) return null;
-  
+
   // Handle max level case
   if (experience >= ranks[ranks.length - 1].experience) {
     return {

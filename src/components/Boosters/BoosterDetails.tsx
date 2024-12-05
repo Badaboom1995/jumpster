@@ -4,11 +4,17 @@ import Button from "@/components/Button";
 import { twMerge } from "tailwind-merge";
 import { usePurchaseBooster } from "@/hooks/api/useBoosters";
 import toast from "react-hot-toast";
+import Image from "next/image";
+import lightning from "@/app/_assets/images/lightning.png";
 
 interface BoosterDetailsProps {
   booster: Booster;
   userId: string;
   onClose: () => void;
+  onBuy: () => void;
+  isAvailable: boolean;
+  isLoading: boolean;
+  timeRemaining: string | null;
 }
 
 const RARITY_CLASSES = {
@@ -32,13 +38,19 @@ export const BoosterDetails: React.FC<BoosterDetailsProps> = ({
   booster,
   userId,
   onClose,
+  onBuy,
+  isAvailable,
+  isLoading,
+  timeRemaining,
 }) => {
   const purchaseBooster = usePurchaseBooster();
 
   const handlePurchase = async () => {
-    console.log(userId);
     try {
-      await purchaseBooster.mutateAsync({ boosterId: booster.id, userId });
+      await purchaseBooster.mutateAsync({
+        boosterId: booster.id,
+        userId,
+      });
       toast.success("Бустер успешно приобретен!");
       onClose();
     } catch (error) {
@@ -66,12 +78,29 @@ export const BoosterDetails: React.FC<BoosterDetailsProps> = ({
       case "experience_multiplier":
         return `Множитель опыта ${booster.effect_value}x`;
       case "jump_power":
-        return `Сила прыжка ${booster.effect_value}x`;
+        return `Дополнительно ${booster.effect_value} монет за каждый прыжок`;
       case "energy_cost_reduction":
         return `Снижение затрат энергии на ${booster.effect_value * 100}%`;
       default:
         return "";
     }
+  };
+
+  const getHoursTextByNumber = (number: string) => {
+    const num = parseInt(number);
+    const lastDigit = num % 10;
+    if (lastDigit === 2 || lastDigit === 3 || lastDigit === 4) return "часа";
+    if (
+      lastDigit === 5 ||
+      lastDigit === 6 ||
+      lastDigit === 7 ||
+      lastDigit === 8 ||
+      lastDigit === 9 ||
+      lastDigit === 0
+    )
+      return "часов";
+    if (lastDigit === 1) return "час";
+    return "";
   };
 
   return (
@@ -91,8 +120,14 @@ export const BoosterDetails: React.FC<BoosterDetailsProps> = ({
               {booster.rarity === "legendary" && "ЛЕГЕНДАРНЫЙ"}
             </p>
           </div>
-          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-background-light">
-            <span className="text-2xl">⚡️</span>
+          <div className="rounded-full bg-background p-4">
+            <Image
+              src={lightning}
+              alt="card"
+              width={32}
+              height={32}
+              className="h-[50px] w-[50px]"
+            />
           </div>
         </div>
 
@@ -117,13 +152,33 @@ export const BoosterDetails: React.FC<BoosterDetailsProps> = ({
       </div>
 
       <div className="border-t border-background-light p-4">
-        <Button
-          onClick={handlePurchase}
-          disabled={purchaseBooster.isLoading}
-          className="w-full"
-        >
-          {purchaseBooster.isLoading ? "Покупка..." : "Купить за 200 монет"}
-        </Button>
+        {!isAvailable ? (
+          <div className="rounded-md bg-gray-700/50 p-4 text-center">
+            <div className="flex items-center justify-center gap-2">
+              <div className="h-2 w-2 rounded-full bg-green-400"></div>
+              <span className="text-sm font-medium text-green-400">
+                Активен
+              </span>
+            </div>
+            {timeRemaining && (
+              <span className="mt-2 block text-sm text-gray-300">
+                Осталось: {timeRemaining} {getHoursTextByNumber(timeRemaining)}
+              </span>
+            )}
+          </div>
+        ) : (
+          <Button
+            onClick={handlePurchase}
+            disabled={purchaseBooster.isLoading || !isAvailable}
+            className="w-full"
+          >
+            {purchaseBooster.isLoading
+              ? "Покупка..."
+              : `Купить за ${
+                  booster.price === 0 ? "бесплатно" : `${booster.price} монет`
+                }`}
+          </Button>
+        )}
       </div>
     </div>
   );

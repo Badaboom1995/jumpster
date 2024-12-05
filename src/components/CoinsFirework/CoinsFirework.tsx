@@ -4,7 +4,7 @@ import React, {
   useImperativeHandle,
   forwardRef,
 } from "react";
-import coinIcon from "@/app/_assets/images/coin.png"; // Make sure this path matches your project structure
+import coinIcon from "@/app/_assets/images/coin.png";
 
 interface Particle {
   x: number;
@@ -17,6 +17,11 @@ interface Particle {
   rotationSpeed: number;
 }
 
+interface ParticleSystem {
+  id: number;
+  particles: Particle[];
+}
+
 export interface CoinsFireworkRef {
   triggerAnimation: (
     x: number,
@@ -27,22 +32,25 @@ export interface CoinsFireworkRef {
 
 const CoinsFirework = forwardRef<CoinsFireworkRef>((_, ref) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const particlesRef = useRef<Particle[]>([]);
+  const particleSystemsRef = useRef<ParticleSystem[]>([]);
   const animationFrameRef = useRef<number>();
   const coinImageRef = useRef<HTMLImageElement>();
+  const systemIdCounterRef = useRef(0);
+  const isAnimatingRef = useRef(false);
 
   useEffect(() => {
-    // Preload the coin image
     const coinImage = new Image();
     coinImage.src = coinIcon.src;
-    coinImageRef.current = coinImage;
+    coinImage.onload = () => {
+      coinImageRef.current = coinImage;
+    };
   }, []);
 
   const createParticles = (
     x: number,
     y: number,
     customParticleCount?: { min: number; max: number },
-  ) => {
+  ): ParticleSystem => {
     const particles: Particle[] = [];
     const minParticles = customParticleCount?.min || 20;
     const maxParticles = customParticleCount?.max || 40;
@@ -50,82 +58,79 @@ const CoinsFirework = forwardRef<CoinsFireworkRef>((_, ref) => {
       minParticles + Math.random() * (maxParticles - minParticles),
     );
 
-    for (let i = 0; i < particleCount; i++) {
-      const angle = (Math.PI * 2 * i) / particleCount;
-      const speed = 2 + Math.random() * 4;
+    const arcRange = (Math.PI * 2) / 3;
+    const startAngle = Math.PI + (Math.PI - arcRange) / 2;
 
-      const baseSize = 20;
-      const variance = 10;
-      const size = baseSize + Math.random() * variance;
+    for (let i = 0; i < particleCount; i++) {
+      const angle = startAngle + (arcRange * i) / particleCount;
+      const speed = 2 + Math.random() * 4;
 
       particles.push({
         x,
         y,
-        vx: Math.cos(angle) * speed + 1,
-        vy: Math.sin(angle) * speed - 1,
+        vx: Math.cos(angle) * speed + (Math.random() - 0.5) * 2,
+        vy: Math.sin(angle) * speed - 2,
         opacity: 1,
-        size,
+        size: 24,
         rotation: Math.random() * Math.PI * 2,
         rotationSpeed: (Math.random() - 0.5) * 0.2,
       });
     }
 
-    return particles;
-  };
-
-  const isParticleOutOfScreen = (
-    particle: Particle,
-    canvas: HTMLCanvasElement,
-  ) => {
-    const buffer = particle.size; // Add a small buffer equal to particle size
-    return (
-      particle.x + buffer < 0 ||
-      particle.x - buffer > canvas.width ||
-      particle.y + buffer < 0 ||
-      particle.y - buffer > canvas.height
-    );
+    return {
+      id: ++systemIdCounterRef.current,
+      particles,
+    };
   };
 
   const animate = () => {
     const canvas = canvasRef.current;
-    const ctx = canvas?.getContext("2d");
+    const ctx = canvas?.getContext("2d", { alpha: true });
     const coinImage = coinImageRef.current;
+
     if (!canvas || !ctx || !coinImage) return;
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = "high";
 
-    particlesRef.current = particlesRef.current.filter((particle) => {
-      particle.x += particle.vx;
-      particle.y += particle.vy;
-      particle.vy += 0.1; // Gravity
-      particle.rotation += particle.rotationSpeed + 0.2;
-
-      // Only reduce opacity when particle is out of screen
-      if (isParticleOutOfScreen(particle, canvas)) {
-        particle.opacity -= 0.1; // Faster fade out when out of screen
+    particleSystemsRef.current = particleSystemsRef.current.filter((system) => {
+      system.particles = system.particles.filter((particle) => {
         if (particle.opacity <= 0) return false;
-      }
 
-      ctx.save();
-      ctx.globalAlpha = particle.opacity;
-      ctx.translate(particle.x, particle.y);
-      ctx.rotate(particle.rotation);
+        particle.x += particle.vx;
+        particle.y += particle.vy;
+        particle.vy += 0.2;
+        particle.rotation += particle.rotationSpeed;
 
-      ctx.drawImage(
-        coinImage,
-        -particle.size / 2,
-        -particle.size / 2,
-        particle.size,
-        particle.size,
-      );
+        if (particle.y > canvas.height) {
+          particle.opacity -= 0.1;
+        }
 
-      ctx.restore();
+        ctx.save();
+        ctx.globalAlpha = particle.opacity;
+        ctx.translate(particle.x, particle.y);
+        ctx.rotate(particle.rotation);
 
-      return true;
+        ctx.drawImage(
+          coinImage,
+          -particle.size / 2,
+          -particle.size / 2,
+          particle.size,
+          particle.size,
+        );
+
+        ctx.restore();
+        return true;
+      });
+
+      return system.particles.length > 0;
     });
 
-    if (particlesRef.current.length > 0) {
+    if (particleSystemsRef.current.length > 0) {
       animationFrameRef.current = requestAnimationFrame(animate);
+    } else {
+      isAnimatingRef.current = false;
     }
   };
 
@@ -135,11 +140,13 @@ const CoinsFirework = forwardRef<CoinsFireworkRef>((_, ref) => {
       y: number,
       particleCount?: { min: number; max: number },
     ) => {
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
+      const newSystem = createParticles(x, y, particleCount);
+      particleSystemsRef.current.push(newSystem);
+
+      if (!isAnimatingRef.current) {
+        isAnimatingRef.current = true;
+        animate();
       }
-      particlesRef.current = createParticles(x, y, particleCount);
-      animate();
     },
   }));
 
@@ -148,8 +155,16 @@ const CoinsFirework = forwardRef<CoinsFireworkRef>((_, ref) => {
     if (!canvas) return;
 
     const resizeCanvas = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = window.innerWidth * dpr;
+      canvas.height = window.innerHeight * dpr;
+      canvas.style.width = `${window.innerWidth}px`;
+      canvas.style.height = `${window.innerHeight}px`;
+
+      const ctx = canvas.getContext("2d");
+      if (ctx) {
+        ctx.scale(dpr, dpr);
+      }
     };
 
     resizeCanvas();
@@ -159,6 +174,7 @@ const CoinsFirework = forwardRef<CoinsFireworkRef>((_, ref) => {
       window.removeEventListener("resize", resizeCanvas);
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
+        isAnimatingRef.current = false;
       }
     };
   }, []);

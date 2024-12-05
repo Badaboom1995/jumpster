@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "react-query";
 import { Booster, UserBooster } from "@/types/boosters";
 import { supabase } from "@/components/Root/Root";
+import { getRankData } from "@/utils/getRewards";
 
 export const useAvailableBoosters = () => {
   return useQuery<Booster[]>(["available-boosters"], async () => {
@@ -11,22 +12,47 @@ export const useAvailableBoosters = () => {
   });
 };
 
+const is23HoursPassedFromActivation = (activatedAt: string) => {
+  const activatedDate = new Date(activatedAt);
+  const now = new Date();
+  const timeDifference = now.getTime() - activatedDate.getTime();
+  return timeDifference > 23 * 60 * 60 * 1000;
+};
+
 export const useUserBoosters = (userId: string) => {
   return useQuery<UserBooster[]>(
     ["user-boosters", userId],
     async () => {
-      //   const { data, error } = await supabase
-      //     .from('user_boosters')
-      //     .select(`
-      //       *,
-      //       booster:boosters(*)
-      //     `)
-      //     .eq('user_id', userId)
-      //     .eq('is_active', true);
+      const { data, error } = await supabase
+        .from("user_boosters")
+        .select(
+          `
+          *,
+          booster:boosters(*)
+        `,
+        )
+        .eq("user_id", userId);
 
-      //   if (error) throw error;
-      //   return data;
-      return [];
+      const expiredBoosterIds = data
+        ?.filter((booster) => {
+          return is23HoursPassedFromActivation(booster.activated_at);
+        })
+        .map((booster) => booster.id);
+
+      const activeBoosters = data?.filter(
+        (booster) => !expiredBoosterIds?.includes(booster.id),
+      );
+
+      // delete expired boosters
+      if (expiredBoosterIds && expiredBoosterIds.length > 0) {
+        await supabase
+          .from("user_boosters")
+          .delete()
+          .in("id", expiredBoosterIds);
+      }
+
+      if (error) throw error;
+      return activeBoosters || [];
     },
     {
       enabled: !!userId,
@@ -39,35 +65,30 @@ export const useActivateBooster = () => {
 
   return useMutation(
     async ({ userId, boosterId }: { userId: string; boosterId: string }) => {
-      const { data: booster } = await supabase
-        .from("boosters")
-        .select("*")
-        .eq("id", boosterId)
-        .single();
+      const response = await fetch("/api/boosters/apply", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userId,
+          boosterId,
+        }),
+      });
+      console.log("ping");
 
-      let expiresAt = null;
-      if (booster.duration_type === "timed") {
-        expiresAt = new Date(
-          Date.now() + booster.duration_value * 1000,
-        ).toISOString();
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to apply booster");
       }
 
-      const { data, error } = await supabase
-        .from("user_boosters")
-        .insert({
-          user_id: userId,
-          booster_id: boosterId,
-          expires_at: expiresAt,
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-      return data;
+      return response.json();
     },
     {
       onSuccess: () => {
-        queryClient.invalidateQueries("user-boosters");
+        // Invalidate both user boosters and user data
+        queryClient.invalidateQueries(["user-boosters"]);
+        queryClient.invalidateQueries(["user"]); // To refresh user's energy
       },
     },
   );
@@ -78,13 +99,15 @@ export const usePurchaseBooster = () => {
 
   return useMutation(
     async ({ boosterId, userId }: { boosterId: string; userId: string }) => {
-      console.log(userId);
       const response = await fetch("/api/boosters/purchase", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ userId, boosterId }),
+        body: JSON.stringify({
+          userId,
+          boosterId,
+        }),
       });
 
       if (!response.ok) {

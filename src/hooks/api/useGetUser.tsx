@@ -2,7 +2,8 @@
 import { useQuery } from "react-query";
 import { supabase } from "@/components/Root/Root";
 import { useLaunchParams } from "@telegram-apps/sdk-react";
-import { User } from "@/database.types";
+import { Database } from "@/types/database.types";
+import { User } from "@supabase/supabase-js";
 
 type GetUserResponse = {
   isUserLoading: boolean;
