@@ -57,7 +57,7 @@ function App(props: PropsWithChildren) {
   }, [themeParams]);
 
   useEffect(() => {
-    expandViewport();
+    // expandViewport();
     return viewport && bindViewportCSSVars(viewport);
   }, [viewport]);
 
