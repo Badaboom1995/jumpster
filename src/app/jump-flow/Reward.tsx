@@ -19,6 +19,8 @@ import { supabase } from "@/components/Root/Root";
 import useGetUser from "@/hooks/api/useGetUser";
 // import { useRouter } from "next/navigation";
 import { useQueryClient } from "react-query";
+import { calculateReward } from "@/utils";
+import { useUserBoosters } from "@/hooks/api/useBoosters";
 // import Confetti from "react-confetti";
 // import useWindowSize from "react-use/lib/useWindowSize";
 
@@ -50,8 +52,20 @@ const Reward = ({
   energyLeft: number;
 }) => {
   const queryClient = useQueryClient();
+  const { user, isUserLoading } = useGetUser();
+  const { data: activeBoosters } = useUserBoosters(user?.id || "");
+
   const coinsEarned = jumps * coinsPerJump;
-  const coinsEarnedAnimated = useAnimatedNumber(coinsEarned, 2, true);
+
+  const coinsEarned2 = calculateReward({
+    jumps,
+    // @ts-ignore
+    experience: user?.experience,
+    boostersImpact: activeBoosters
+      ?.filter((booster) => booster.booster.effect_type === "jump_power")
+      .reduce((acc, booster) => acc + booster.booster.effect_value, 0),
+  });
+  const coinsEarnedAnimated = useAnimatedNumber(coinsEarned2, 2, true);
   const caloriesAnimated = useAnimatedNumber(
     calculateCaloriesBurned(jumps, time),
     2,
@@ -64,7 +78,7 @@ const Reward = ({
     2,
     true,
   );
-  const { user, isUserLoading } = useGetUser();
+
   const [prevValues, setPrevValues] = useState({
     coins: 0,
     energy: 0,

@@ -290,3 +290,19 @@ export const getRankData = (experience: number) => {
     nextRankExp: nextRank.experience,
   };
 };
+
+interface RewardParams {
+  jumps: number;
+  experience: number;
+  boostersImpact: number;
+}
+
+export const calculateReward = ({
+  jumps,
+  experience,
+  boostersImpact,
+}: RewardParams): number => {
+  const coinsPerJump =
+    ranks[getRankData(experience)?.id - 1].coins_per_jump + boostersImpact;
+  return jumps * coinsPerJump;
+};

@@ -31,6 +31,8 @@ import { useQueryClient } from "react-query";
 import { Database } from "@/types/database.types";
 import { User } from "@supabase/supabase-js";
 import CoinsFirework from "@/components/CoinsFirework/CoinsFirework";
+import coinBag from "@/app/_assets/audio/coin.mp3";
+import finishSound from "@/app/_assets/audio/done.wav";
 
 const constraints = {
   video: true,
@@ -69,6 +71,9 @@ const JumpFlow = () => {
     x: 0,
     y: 0,
   });
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [isMuted, setIsMuted] = useState(false);
+  const finishAudioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     if (isUserLoading) return;
@@ -92,29 +97,61 @@ const JumpFlow = () => {
     return { x, y };
   };
 
+  const getRandomCoinParams = () => {
+    return {
+      count: {
+        min: Math.floor(Math.random() * 5) + 8, // Random between 8-12
+        max: Math.floor(Math.random() * 10) + 15, // Random between 15-24
+      },
+      size: {
+        min: Math.floor(Math.random() * 15) + 30, // Random between 30-44px
+        max: Math.floor(Math.random() * 20) + 45, // Random between 45-64px
+      },
+    };
+  };
+
   const detectUpAndDown = (vector: any) => {
     if (vector > 5 && jumpState === "down") {
       if (availableEnergy < energyPerJump) {
         setFlowStatus("endCountdown");
         stopTimer();
         startRewardCountdown();
+        // Play finish sound when energy runs out
+        if (finishAudioRef.current) {
+          finishAudioRef.current.currentTime = 0;
+          finishAudioRef.current.play().catch((error) => {
+            console.warn("Audio playback failed:", error);
+          });
+        }
         return;
       }
       setJumpState("up");
       setJumpsCounter((prev) => prev + 1);
       setAvailableEnergy((prev) => prev - energyPerJump);
 
-      // Trigger coins animation at random border position
-      const position = getRandomTopPosition();
-      setLastJumpPosition(position);
-      if (coinsFireworkRef.current) {
-        coinsFireworkRef.current.triggerAnimation(position.x, position.y, {
-          min: 10,
-          max: 20,
+      if (audioRef.current) {
+        audioRef.current.currentTime = 0;
+        audioRef.current.play().catch((error) => {
+          console.warn("Audio playback failed:", error);
         });
       }
     }
     if (vector < 0 && jumpState === "up") {
+      // Get random parameters for coins
+      const coinParams = getRandomCoinParams();
+
+      // Trigger coins animation at random border position
+      const position = getRandomTopPosition();
+      setLastJumpPosition(position);
+
+      if (coinsFireworkRef.current) {
+        coinsFireworkRef.current.triggerAnimation(
+          position.x,
+          position.y,
+          coinParams.count,
+          { min: 80, max: 100 },
+        );
+      }
       setJumpState("down");
     }
   };
@@ -251,6 +288,29 @@ const JumpFlow = () => {
     }
   }, [flowStatus, secondsUntilReward, isRewardRunning]);
 
+  // Add test function for periodic coin throws
+  // useEffect(() => {
+  //   const throwCoinsTest = () => {
+  //     const position = getRandomTopPosition();
+  //     const coinParams = getRandomCoinParams();
+
+  //     if (coinsFireworkRef.current) {
+  //       coinsFireworkRef.current.triggerAnimation(
+  //         position.x,
+  //         position.y,
+  //         coinParams.count,
+  //         coinParams.size,
+  //       );
+  //     }
+  //   };
+
+  //   // Start periodic coin throwing
+  //   const intervalId = setInterval(throwCoinsTest, 1000);
+
+  //   // Cleanup interval on component unmount
+  //   return () => clearInterval(intervalId);
+  // }, []); // Empty dependency array means this runs once on mount
+
   // const handleSessionComplete = async () => {
   //   if (!user) return;
 
@@ -285,12 +345,49 @@ const JumpFlow = () => {
   //     // Invalidate user query to refresh data
   //     queryClient.invalidateQueries("user");
 
-  //     toast.success("Награды получены!");
+  //     toast.success("Нрады получены!");
   //   } catch (error) {
   //     console.error("Error updating rewards:", error);
   //     toast.error("Ошибка при получении наград");
   //   }
   // };
+
+  useEffect(() => {
+    audioRef.current = new Audio(coinBag);
+    // Set volume to 20%
+    if (audioRef.current) {
+      audioRef.current.volume = 0.2;
+    }
+  }, []);
+
+  useEffect(() => {
+    finishAudioRef.current = new Audio(finishSound);
+    if (finishAudioRef.current) {
+      finishAudioRef.current.volume = 0.2;
+    }
+  }, []);
+
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.muted = isMuted;
+    }
+    if (finishAudioRef.current) {
+      finishAudioRef.current.muted = isMuted;
+    }
+  }, [isMuted]);
+
+  const handleJumpingFinished = () => {
+    setFlowStatus("endCountdown");
+    stopTimer();
+    startRewardCountdown();
+    // Play finish sound
+    if (finishAudioRef.current) {
+      finishAudioRef.current.currentTime = 0;
+      finishAudioRef.current.play().catch((error) => {
+        console.warn("Audio playback failed:", error);
+      });
+    }
+  };
 
   return (
     <div
@@ -307,15 +404,17 @@ const JumpFlow = () => {
           </button>
         </Link>
       )}
+      <button
+        onClick={() => setIsMuted(!isMuted)}
+        className="fixed right-[20px] top-[20px] z-50 rounded-full bg-background px-[16px] py-[8px] text-white transition hover:bg-background-light active:bg-slate-900"
+      >
+        {isMuted ? "🔇" : "🔊"}
+      </button>
       {flowStatus === "jump" && (
         <Button
           className="fixed bottom-[32px] left-1/2 z-10 w-[200px] -translate-x-1/2"
           variant="secondary"
-          onClick={() => {
-            setFlowStatus("endCountdown");
-            stopTimer();
-            startRewardCountdown();
-          }}
+          onClick={handleJumpingFinished}
         >
           <span className="block h-[16px] w-[16px] rounded-[4px] bg-background-dark"></span>
           <span>Забрать награду</span>
