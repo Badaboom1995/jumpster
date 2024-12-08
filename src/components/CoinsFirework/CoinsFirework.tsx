@@ -27,8 +27,8 @@ export interface CoinsFireworkRef {
   triggerAnimation: (
     x: number,
     y: number,
-    count: { min: number; max: number },
-    size: { min: number; max: number },
+    count?: { min: number; max: number },
+    size?: { min: number; max: number },
   ) => void;
 }
 
