@@ -251,7 +251,7 @@ const Main = () => {
         recycle={false}
         numberOfPieces={numberOfPieces}
       />
-      <CoinsFirework ref={coinsFireworkRef} />
+      {/* <CoinsFirework ref={coinsFireworkRef} /> */}
       <Header />
       <div className="flex grow flex-col justify-center">
         <div className="flex grow flex-col justify-center">
