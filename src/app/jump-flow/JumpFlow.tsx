@@ -396,7 +396,7 @@ const JumpFlow = () => {
         isRewardRunning && "animate-fade",
       )}
     >
-      <CoinsFirework ref={coinsFireworkRef} />
+      {/* <CoinsFirework ref={coinsFireworkRef} /> */}
       {flowStatus !== "end" && flowStatus !== "jump" && (
         <Link href="/" className="block">
           <button className="relative z-50 rotate-90 rounded-full p-[20px] text-white transition active:bg-slate-900">
