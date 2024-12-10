@@ -32,9 +32,12 @@ export interface CoinsFireworkRef {
   ) => void;
 }
 
+const FPS = 30;
+const FRAME_TIME = 1000 / FPS;
+
 const CoinsFirework = forwardRef<CoinsFireworkRef>((_, ref) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const particleSystemsRef = useRef<ParticleSystem[]>([]);
+  const particleSystemsRef = useRef<Particle[]>([]);
   const animationFrameRef = useRef<number>();
   const coinImageRef = useRef<HTMLImageElement>();
   const systemIdCounterRef = useRef(0);
@@ -53,10 +56,10 @@ const CoinsFirework = forwardRef<CoinsFireworkRef>((_, ref) => {
     y: number,
     customParticleCount?: { min: number; max: number },
     customParticleSize?: { min: number; max: number },
-  ): ParticleSystem => {
+  ): Particle[] => {
     const particles: Particle[] = [];
-    const minParticles = customParticleCount?.min || 100;
-    const maxParticles = customParticleCount?.max || 40;
+    const minParticles = customParticleCount?.min || 1;
+    const maxParticles = customParticleCount?.max || 1;
     const particleCount = Math.floor(
       minParticles + Math.random() * (maxParticles - minParticles),
     );
@@ -78,19 +81,16 @@ const CoinsFirework = forwardRef<CoinsFireworkRef>((_, ref) => {
         x,
         y: startY,
         vx: Math.cos(angle - Math.PI) * speed + (Math.random() - 0.5) * 2,
-        vy: -10 - Math.random() * 5,
+        vy: -20 - Math.random() * 30,
         opacity: 1,
         size: randomSize,
         rotation: Math.random() * Math.PI * 2,
-        rotationSpeed: (Math.random() - 0.5) * 0.2,
+        rotationSpeed: (Math.random() - 0.5) * 0.4,
         bounceCount: 0,
       });
     }
 
-    return {
-      id: ++systemIdCounterRef.current,
-      particles,
-    };
+    return particles;
   };
 
   const animate = () => {
@@ -103,62 +103,57 @@ const CoinsFirework = forwardRef<CoinsFireworkRef>((_, ref) => {
 
     if (!canvas || !ctx || !coinImage) return;
 
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.imageSmoothingEnabled = true;
-    ctx.imageSmoothingQuality = "high";
+    let lastFrameTime = 0;
 
-    particleSystemsRef.current = particleSystemsRef.current.filter((system) => {
-      system.particles = system.particles.filter((particle) => {
-        if (particle.opacity <= 0) return false;
+    const animateFrame = (timestamp: number) => {
+      if (timestamp - lastFrameTime >= FRAME_TIME) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = "high";
 
-        // Apply velocity
-        particle.x += particle.vx;
-        particle.y += particle.vy;
+        const leftParticles = particleSystemsRef.current.filter(
+          (particle, index) => {
+            if (particle.y > window.innerHeight + 50) return false;
 
-        // Apply gravity and air resistance
-        particle.vy += 0.3;
-        particle.vx *= 0.99;
+            // Apply velocity
+            particle.x += particle.vx;
+            particle.y += particle.vy;
 
-        // Handle bouncing
-        if (particle.y > window.innerHeight && particle.bounceCount < 2) {
-          particle.y = window.innerHeight;
-          particle.vy = particle.vy * -0.4; // Reduce velocity on bounce
-          particle.vx *= 0.8; // Reduce horizontal velocity on bounce
-          particle.bounceCount++;
-        }
+            // Apply gravity and air resistance
+            particle.vy += 2;
 
-        // Start fading out after second bounce or when falling below screen
-        if (particle.bounceCount >= 2 || particle.y > window.innerHeight + 50) {
-          particle.opacity -= 0.05;
-        }
+            particle.rotation += particle.rotationSpeed;
 
-        particle.rotation += particle.rotationSpeed;
+            ctx.save();
+            ctx.globalAlpha = particle.opacity;
+            ctx.translate(particle.x, particle.y);
+            ctx.rotate(particle.rotation);
 
-        ctx.save();
-        ctx.globalAlpha = particle.opacity;
-        ctx.translate(particle.x, particle.y);
-        ctx.rotate(particle.rotation);
+            ctx.drawImage(
+              coinImage,
+              -particle.size / 2,
+              -particle.size / 2,
+              particle.size,
+              particle.size,
+            );
 
-        ctx.drawImage(
-          coinImage,
-          -particle.size / 2,
-          -particle.size / 2,
-          particle.size,
-          particle.size,
+            ctx.restore();
+            return true;
+          },
         );
 
-        ctx.restore();
-        return true;
-      });
+        particleSystemsRef.current = leftParticles;
+        lastFrameTime = timestamp;
+      }
 
-      return system.particles.length > 0;
-    });
+      if (particleSystemsRef.current.length > 0) {
+        animationFrameRef.current = requestAnimationFrame(animateFrame);
+      } else {
+        isAnimatingRef.current = false;
+      }
+    };
 
-    if (particleSystemsRef.current.length > 0) {
-      animationFrameRef.current = requestAnimationFrame(animate);
-    } else {
-      isAnimatingRef.current = false;
-    }
+    animationFrameRef.current = requestAnimationFrame(animateFrame);
   };
 
   useImperativeHandle(ref, () => ({
@@ -168,8 +163,8 @@ const CoinsFirework = forwardRef<CoinsFireworkRef>((_, ref) => {
       count: { min: number; max: number },
       size: { min: number; max: number },
     ) => {
-      const newSystem = createParticles(x, y, count);
-      particleSystemsRef.current.push(newSystem);
+      const newParticlesGroup = createParticles(x, y, count);
+      particleSystemsRef.current.push(...newParticlesGroup);
 
       if (!isAnimatingRef.current) {
         isAnimatingRef.current = true;

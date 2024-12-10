@@ -137,12 +137,20 @@ export function calculateCaloriesBurned(
 //         });
 //     });
 // };
-console.log("to");
+
+let lastDrawTime = 0;
+const frameInterval = 1000 / 30; // 30 FPS = 33.33ms between frames
+
 export const drawVideoFrame2 = (
   context: any,
   videoElement: any,
   canvasElement: any,
 ) => {
+  const currentTime = performance.now();
+  const shouldDrawFrame = currentTime - lastDrawTime >= frameInterval;
+  if (!shouldDrawFrame) return;
+  lastDrawTime = currentTime;
+
   const videoWidth = videoElement.videoWidth;
   const videoHeight = videoElement.videoHeight;
   const canvasWidth = canvasElement.width;

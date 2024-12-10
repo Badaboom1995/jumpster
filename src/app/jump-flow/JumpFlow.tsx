@@ -42,6 +42,9 @@ const constraints = {
 
 const energyPerJump = 100;
 
+const FPS = 24;
+const FRAME_TIME = 1000 / FPS;
+
 const JumpFlow = () => {
   const { store } = useContext(StoreContext);
   const videoRef = useRef(null);
@@ -81,7 +84,7 @@ const JumpFlow = () => {
     setAvailableEnergy(user?.user_parameters?.energy?.value || 0);
   }, [isUserLoading]);
 
-  const { currentSeconds, stop: stopTimer, start: startTimer } = useTimer();
+  // const { currentSeconds, stop: stopTimer, start: startTimer } = useTimer();
   const { seconds, startCountDown, stopCountDown, isRunning } = useCountdown();
   const {
     seconds: secondsUntilReward,
@@ -114,7 +117,7 @@ const JumpFlow = () => {
     if (vector > 5 && jumpState === "down") {
       if (availableEnergy < energyPerJump) {
         setFlowStatus("endCountdown");
-        stopTimer();
+        // stopTimer();
         startRewardCountdown();
         // Play finish sound when energy runs out
         if (finishAudioRef.current) {
@@ -145,12 +148,10 @@ const JumpFlow = () => {
       setLastJumpPosition(position);
 
       if (coinsFireworkRef.current) {
-        coinsFireworkRef.current.triggerAnimation(
-          position.x,
-          position.y,
-          coinParams.count,
-          { min: 80, max: 100 },
-        );
+        coinsFireworkRef.current.triggerAnimation(position.x, position.y, {
+          min: 1,
+          max: 1,
+        });
       }
       setJumpState("down");
     }
@@ -199,6 +200,7 @@ const JumpFlow = () => {
     const video: any = videoRef.current;
     const canvas: any = canvasRef.current;
     const ctx = canvas.getContext("2d");
+
     if (detectorRef.current && video.readyState === 4) {
       drawVideoFrame2(ctx, video, canvas);
       const poses = await detectorRef.current.estimatePoses(video);
@@ -207,6 +209,38 @@ const JumpFlow = () => {
       setHipsVisible(hipsVisible);
     }
   };
+
+  useEffect(() => {
+    let lastFrameTime = 0;
+    let animationFrameId: number;
+
+    const animate = async (timestamp: number) => {
+      if (timestamp - lastFrameTime >= FRAME_TIME) {
+        await mainLoop();
+        lastFrameTime = timestamp;
+      }
+      animationFrameId = requestAnimationFrame(animate);
+    };
+
+    // Start the animation loop
+    animationFrameId = requestAnimationFrame(animate);
+
+    // Set canvas dimensions
+    const canvas = canvasRef.current;
+    if (canvas) {
+      // @ts-ignore
+      canvas.width = window.innerWidth;
+      // @ts-ignore
+      canvas.height = window.innerHeight;
+    }
+
+    // Cleanup function
+    return () => {
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     detectorRef.current = store.detector;
@@ -228,19 +262,19 @@ const JumpFlow = () => {
     }
   }, [cameraReady, detectorRef.current]);
 
-  useEffect(() => {
-    const intervalId = setInterval(mainLoop, 50);
-    const canvas = canvasRef.current;
-    if (canvas) {
-      // @ts-ignore
-      canvas.width = window.innerWidth;
-      // @ts-ignore
-      canvas.height = window.innerHeight;
-    }
-    return () => {
-      clearInterval(intervalId);
-    };
-  }, []);
+  // useEffect(() => {
+  // const intervalId = setInterval(mainLoop, 50);
+  // const canvas = canvasRef.current;
+  // if (canvas) {
+  //   // @ts-ignore
+  //   canvas.width = window.innerWidth;
+  //   // @ts-ignore
+  //   canvas.height = window.innerHeight;
+  // }
+  // return () => {
+  //   clearInterval(intervalId);
+  // };
+  // }, []);
 
   // track hips and stillness
   useEffect(() => {
@@ -266,7 +300,7 @@ const JumpFlow = () => {
     // && moveVectorY.standStill
     if (hipsVisible && seconds === 0) {
       setFlowStatus("jump");
-      startTimer();
+      // startTimer();
       return;
     }
   }, [hipsVisible, moveVectorY.standStill, seconds, isRunning, flowStatus]);
@@ -295,17 +329,15 @@ const JumpFlow = () => {
   //     const coinParams = getRandomCoinParams();
 
   //     if (coinsFireworkRef.current) {
-  //       coinsFireworkRef.current.triggerAnimation(
-  //         position.x,
-  //         position.y,
-  //         coinParams.count,
-  //         coinParams.size,
-  //       );
+  //       coinsFireworkRef.current.triggerAnimation(position.x, position.y, {
+  //         min: 1,
+  //         max: 1,
+  //       });
   //     }
   //   };
 
   //   // Start periodic coin throwing
-  //   const intervalId = setInterval(throwCoinsTest, 1000);
+  //   const intervalId = setInterval(throwCoinsTest, 300);
 
   //   // Cleanup interval on component unmount
   //   return () => clearInterval(intervalId);
@@ -345,7 +377,7 @@ const JumpFlow = () => {
   //     // Invalidate user query to refresh data
   //     queryClient.invalidateQueries("user");
 
-  //     toast.success("Нрады получены!");
+  //     toast.success("Нра��ы получены!");
   //   } catch (error) {
   //     console.error("Error updating rewards:", error);
   //     toast.error("Ошибка при получении наград");
@@ -378,7 +410,7 @@ const JumpFlow = () => {
 
   const handleJumpingFinished = () => {
     setFlowStatus("endCountdown");
-    stopTimer();
+    // stopTimer();
     startRewardCountdown();
     // Play finish sound
     if (finishAudioRef.current) {
@@ -426,9 +458,9 @@ const JumpFlow = () => {
       </div>
       {flowStatus === "jump" && (
         <div className="absolute left-1/2 top-[72px] z-50 w-full -translate-x-1/2">
-          <h1 className="flex items-center justify-center text-[54px] font-bold text-white">
+          {/* <h1 className="flex items-center justify-center text-[54px] font-bold text-white">
             {secondsToMinutesString(currentSeconds)}
-          </h1>
+          </h1> */}
           <div className="-ml-[32px] mb-[80px] flex items-center justify-center text-[32px] font-bold text-primary">
             <Image height={32} src={energy as any} alt="energy" />
             {availableEnergy}/{currentRankData.energyCapacity}
@@ -439,11 +471,7 @@ const JumpFlow = () => {
         </div>
       )}
       {flowStatus === "end" && (
-        <Reward
-          energyLeft={availableEnergy}
-          jumps={jumpsCounter}
-          time={currentSeconds}
-        />
+        <Reward energyLeft={availableEnergy} jumps={jumpsCounter} time={0} />
       )}
       {/*{<Reward jumps={jumpsCounter} time={currentSeconds} />}*/}
       <video ref={videoRef} autoPlay playsInline className="hidden"></video>
