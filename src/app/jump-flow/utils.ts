@@ -137,7 +137,7 @@ export function calculateCaloriesBurned(
 //         });
 //     });
 // };
-
+console.log("to");
 export const drawVideoFrame2 = (
   context: any,
   videoElement: any,
