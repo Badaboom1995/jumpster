@@ -34,18 +34,36 @@ import CoinsFirework from "@/components/CoinsFirework/CoinsFirework";
 import coinBag from "@/app/_assets/audio/coin.mp3";
 import finishSound from "@/app/_assets/audio/done.wav";
 
-const constraints = {
-  video: {
-    width: { ideal: 360 },
-    height: { ideal: 640 },
-    frameRate: { ideal: 24, max: 24 },
-  },
-};
-
 const energyPerJump = 100;
 
-const TARGET_FPS = 24;
+const TARGET_FPS = 30;
 const FRAME_INTERVAL = 1000 / TARGET_FPS; // approximately 41.67ms between frames
+
+const getVideoConstraints = () => {
+  const aspectRatio = window.innerWidth / window.innerHeight;
+
+  // For portrait mode
+  if (aspectRatio < 1) {
+    return {
+      video: {
+        width: { ideal: window.innerWidth },
+        height: { ideal: window.innerHeight },
+        aspectRatio: { ideal: aspectRatio },
+        frameRate: { ideal: 30, max: 30 },
+      },
+    };
+  }
+
+  // For landscape mode
+  return {
+    video: {
+      width: { ideal: window.innerHeight * aspectRatio },
+      height: { ideal: window.innerHeight },
+      aspectRatio: { ideal: aspectRatio },
+      frameRate: { ideal: 24, max: 24 },
+    },
+  };
+};
 
 const JumpFlow = () => {
   const { store } = useContext(StoreContext);
@@ -177,6 +195,7 @@ const JumpFlow = () => {
   const setupCamera = async () => {
     const video: any = videoRef.current;
     try {
+      const constraints = getVideoConstraints();
       const stream = await navigator?.mediaDevices.getUserMedia(constraints);
       video.srcObject = stream;
       video.play();
@@ -450,6 +469,21 @@ const JumpFlow = () => {
     }
   };
 
+  // Add resize handler
+  useEffect(() => {
+    const handleResize = async () => {
+      if (videoRef.current?.srcObject) {
+        // Stop existing stream
+        stopCamera();
+        // Restart camera with new constraints
+        await setupCamera();
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   return (
     <div
       className={twMerge(
@@ -510,7 +544,7 @@ const JumpFlow = () => {
       <video ref={videoRef} autoPlay playsInline className="hidden"></video>
       <canvas
         ref={canvasRef}
-        className="absolute left-1/2 top-0 h-[100vh] w-full -translate-x-1/2 -scale-x-100 opacity-50"
+        className="absolute left-1/2 top-0 h-[100vh] w-full -translate-x-1/2 -scale-x-100 bg-red-300 opacity-50"
       ></canvas>
     </div>
   );

@@ -183,7 +183,7 @@ export const setMoveVector = (keypoints: any, setVector: any) => {
     (keypoint: any) => keypoint.name === "right_hip",
   );
   // if(!(leftHip.score > 0.5) || !(rightHip > 0.5)) return;
-  if (leftHip.score > 0.5 && rightHip.score > 0.5) {
+  if (leftHip.score > 0.3 && rightHip.score > 0.3) {
     const avgHipY = (leftHip.y + rightHip.y) / 2;
     setVector((prev: any) => {
       if (prev.prevValue === 0)
