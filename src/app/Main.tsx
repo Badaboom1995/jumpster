@@ -115,6 +115,10 @@ const Main = () => {
         event.clientX,
         event.clientY,
         particleCount,
+        {
+          min: 1,
+          max: 1,
+        },
       );
 
       await addCoins(user);
