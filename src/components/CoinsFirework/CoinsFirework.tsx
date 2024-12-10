@@ -68,9 +68,9 @@ const CoinsFirework = forwardRef<CoinsFireworkRef>((_, ref) => {
       const angle = startAngle + (arcRange * i) / particleCount;
       const speed = 2 + Math.random() * 4;
       const randomSize =
-        (customParticleSize?.min || 30) +
+        (customParticleSize?.min || 40) +
         Math.random() *
-          ((customParticleSize?.max || 54) - (customParticleSize?.min || 30));
+          ((customParticleSize?.max || 50) - (customParticleSize?.min || 40));
 
       const startY = window.innerHeight;
 
@@ -78,7 +78,7 @@ const CoinsFirework = forwardRef<CoinsFireworkRef>((_, ref) => {
         x,
         y: startY,
         vx: Math.cos(angle - Math.PI) * speed + (Math.random() - 0.5) * 2,
-        vy: -10 - Math.random() * 5,
+        vy: -10 - Math.random() * 7,
         opacity: 1,
         size: randomSize,
         rotation: Math.random() * Math.PI * 2,
@@ -92,8 +92,15 @@ const CoinsFirework = forwardRef<CoinsFireworkRef>((_, ref) => {
       particles,
     };
   };
+  // skip frame if not enough time has elapsed
+  const FRAME_INTERVAL = 1000 / 60;
+  const lastFrameTimeRef = useRef(performance.now());
 
   const animate = () => {
+    const currentTime = performance.now();
+    const elapsed = currentTime - lastFrameTimeRef.current;
+    const shouldDraw = elapsed > FRAME_INTERVAL || elapsed === 0;
+    // console.log(elapsed, shouldDraw);
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext("2d", {
       alpha: true,
@@ -102,50 +109,38 @@ const CoinsFirework = forwardRef<CoinsFireworkRef>((_, ref) => {
     const coinImage = coinImageRef.current;
 
     if (!canvas || !ctx || !coinImage) return;
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.imageSmoothingEnabled = true;
-    ctx.imageSmoothingQuality = "high";
+    if (shouldDraw) {
+      lastFrameTimeRef.current = currentTime;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = "medium";
+    }
 
     particleSystemsRef.current = particleSystemsRef.current.filter((system) => {
       system.particles = system.particles.filter((particle) => {
-        if (particle.opacity <= 0) return false;
+        if (particle.y > window.innerHeight + 100) return false;
 
         // Apply velocity
         particle.x += particle.vx;
         particle.y += particle.vy;
 
         // Apply gravity and air resistance
-        particle.vy += 0.3;
-        particle.vx *= 0.99;
-
-        // Handle bouncing
-        if (particle.y > window.innerHeight && particle.bounceCount < 2) {
-          particle.y = window.innerHeight;
-          particle.vy = particle.vy * -0.4; // Reduce velocity on bounce
-          particle.vx *= 0.8; // Reduce horizontal velocity on bounce
-          particle.bounceCount++;
-        }
-
-        // Start fading out after second bounce or when falling below screen
-        if (particle.bounceCount >= 2 || particle.y > window.innerHeight + 50) {
-          particle.opacity -= 0.05;
-        }
-
-        particle.rotation += particle.rotationSpeed;
+        particle.vy += 0.5;
 
         ctx.save();
         ctx.globalAlpha = particle.opacity;
         ctx.translate(particle.x, particle.y);
         ctx.rotate(particle.rotation);
 
-        ctx.drawImage(
-          coinImage,
-          -particle.size / 2,
-          -particle.size / 2,
-          particle.size,
-          particle.size,
-        );
+        if (shouldDraw) {
+          ctx.drawImage(
+            coinImage,
+            -particle.size / 2,
+            -particle.size / 2,
+            particle.size,
+            particle.size,
+          );
+        }
 
         ctx.restore();
         return true;
@@ -214,6 +209,24 @@ const CoinsFirework = forwardRef<CoinsFireworkRef>((_, ref) => {
       }
     };
   }, []);
+
+  // Add test interval
+  // useEffect(() => {
+  //   const testInterval = setInterval(() => {
+  //     const x = Math.random() * window.innerWidth;
+  //     const y = window.innerHeight - 100;
+
+  //     // Trigger with smaller particle count for testing
+  //     const count = { min: 10, max: 15 };
+  //     const size = { min: 20, max: 40 };
+
+  //     if (ref && typeof ref === "object" && "current" in ref && ref.current) {
+  //       ref.current.triggerAnimation(x, y, count, size);
+  //     }
+  //   }, 300);
+
+  //   return () => clearInterval(testInterval);
+  // }, []);
 
   return (
     <canvas

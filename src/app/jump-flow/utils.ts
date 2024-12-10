@@ -139,50 +139,39 @@ export function calculateCaloriesBurned(
 // };
 
 export const drawVideoFrame2 = (
-  context: any,
-  videoElement: any,
-  canvasElement: any,
+  ctx: CanvasRenderingContext2D,
+  video: HTMLVideoElement,
+  canvas: HTMLCanvasElement,
 ) => {
-  const videoWidth = videoElement.videoWidth;
-  const videoHeight = videoElement.videoHeight;
-  const canvasWidth = canvasElement.width;
-  const canvasHeight = canvasElement.height;
+  if (!video.videoWidth || !video.videoHeight) return;
 
-  const videoAspectRatio = videoWidth / videoHeight;
-  const canvasAspectRatio = canvasWidth / canvasHeight;
+  // Calculate aspect ratios
+  const videoAspect = video.videoWidth / video.videoHeight;
+  const canvasAspect = canvas.width / canvas.height;
 
-  let sx, sy, sWidth, sHeight;
+  let drawWidth = canvas.width;
+  let drawHeight = canvas.height;
+  let offsetX = 0;
+  let offsetY = 0;
 
-  if (videoAspectRatio > canvasAspectRatio) {
-    // Video is wider than canvas; crop the sides
-    sHeight = videoHeight;
-    sWidth = sHeight * canvasAspectRatio;
-    sx = (videoWidth - sWidth) / 2;
-    sy = 0;
+  // Maintain aspect ratio while filling canvas
+  if (videoAspect > canvasAspect) {
+    drawHeight = canvas.width / videoAspect;
+    offsetY = (canvas.height - drawHeight) / 2;
   } else {
-    // Video is taller than canvas; crop the top and bottom
-    sWidth = videoWidth;
-    sHeight = sWidth / canvasAspectRatio;
-    sx = 0;
-    sy = (videoHeight - sHeight) / 2;
+    drawWidth = canvas.height * videoAspect;
+    offsetX = (canvas.width - drawWidth) / 2;
   }
 
-  // Clear canvas and draw the video frame
-  context.clearRect(0, 0, canvasWidth, canvasHeight);
-  context.drawImage(
-    videoElement,
-    sx,
-    sy,
-    sWidth,
-    sHeight,
-    0,
-    0,
-    canvasWidth,
-    canvasHeight,
-  );
+  // Clear the canvas before drawing
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  // Optionally, return values if needed for further processing
-  return { sx, sy, sWidth, sHeight, scale: canvasWidth / sWidth };
+  try {
+    // Draw video frame
+    ctx.drawImage(video, offsetX, offsetY, drawWidth, drawHeight);
+  } catch (error) {
+    console.warn("Error drawing video frame:", error);
+  }
 };
 
 export const setMoveVector = (keypoints: any, setVector: any) => {

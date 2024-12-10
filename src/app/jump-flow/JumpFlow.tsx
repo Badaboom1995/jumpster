@@ -35,12 +35,17 @@ import coinBag from "@/app/_assets/audio/coin.mp3";
 import finishSound from "@/app/_assets/audio/done.wav";
 
 const constraints = {
-  video: true,
-  width: { ideal: 360 }, // Set ideal width (e.g., 640px)
-  height: { ideal: 640 },
+  video: {
+    width: { ideal: 360 },
+    height: { ideal: 640 },
+    frameRate: { ideal: 24, max: 24 },
+  },
 };
 
 const energyPerJump = 100;
+
+const TARGET_FPS = 24;
+const FRAME_INTERVAL = 1000 / TARGET_FPS; // approximately 41.67ms between frames
 
 const JumpFlow = () => {
   const { store } = useContext(StoreContext);
@@ -74,6 +79,10 @@ const JumpFlow = () => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [isMuted, setIsMuted] = useState(false);
   const finishAudioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Add these refs for frame timing
+  const lastFrameTimeRef = useRef<number>(0);
+  const frameCountRef = useRef<number>(0);
 
   useEffect(() => {
     if (isUserLoading) return;
@@ -167,14 +176,21 @@ const JumpFlow = () => {
 
   const setupCamera = async () => {
     const video: any = videoRef.current;
-    const stream = await navigator?.mediaDevices.getUserMedia(constraints);
-    video.srcObject = stream;
-    setCameraReady(true);
-    return new Promise((resolve) => {
-      video.onloadedmetadata = () => {
-        resolve(video);
-      };
-    });
+    try {
+      const stream = await navigator?.mediaDevices.getUserMedia(constraints);
+      video.srcObject = stream;
+      video.play();
+      setCameraReady(true);
+
+      return new Promise((resolve) => {
+        video.onloadedmetadata = () => {
+          resolve(video);
+        };
+      });
+    } catch (error) {
+      console.error("Error accessing camera:", error);
+      throw error;
+    }
   };
 
   const stopCamera = () => {
@@ -198,14 +214,49 @@ const JumpFlow = () => {
   const mainLoop = async () => {
     const video: any = videoRef.current;
     const canvas: any = canvasRef.current;
-    const ctx = canvas.getContext("2d");
-    if (detectorRef.current && video.readyState === 4) {
-      drawVideoFrame2(ctx, video, canvas);
-      const poses = await detectorRef.current.estimatePoses(video);
-      setMoveVector(poses[0]?.keypoints, setMoveVectorY);
-      const hipsVisible = detectHips(poses);
-      setHipsVisible(hipsVisible);
+
+    if (!video || !canvas) return;
+
+    // Calculate time since last frame
+    const currentTime = performance.now();
+    const elapsed = currentTime - lastFrameTimeRef.current;
+
+    // Skip frame if not enough time has elapsed
+    if (elapsed < FRAME_INTERVAL) {
+      requestAnimationFrame(mainLoop);
+      return;
     }
+
+    // Update last frame time, accounting for any excess time
+    lastFrameTimeRef.current = currentTime - (elapsed % FRAME_INTERVAL);
+
+    const ctx = canvas.getContext("2d", { alpha: false });
+
+    // Set canvas size once
+    if (
+      canvas.width !== window.innerWidth ||
+      canvas.height !== window.innerHeight
+    ) {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+
+    // Always draw the video frame
+    drawVideoFrame2(ctx, video, canvas);
+
+    // Only run pose detection if detector is ready
+    if (detectorRef.current && video.readyState === 4) {
+      try {
+        const poses = await detectorRef.current.estimatePoses(video);
+        setMoveVector(poses[0]?.keypoints, setMoveVectorY);
+        setHipsVisible(detectHips(poses));
+      } catch (error) {
+        console.warn("Pose detection error:", error);
+      }
+    }
+
+    // Request next frame
+    requestAnimationFrame(mainLoop);
   };
 
   useEffect(() => {
@@ -229,18 +280,28 @@ const JumpFlow = () => {
   }, [cameraReady, detectorRef.current]);
 
   useEffect(() => {
-    const intervalId = setInterval(mainLoop, 50);
-    const canvas = canvasRef.current;
-    if (canvas) {
-      // @ts-ignore
-      canvas.width = window.innerWidth;
-      // @ts-ignore
-      canvas.height = window.innerHeight;
-    }
-    return () => {
-      clearInterval(intervalId);
+    let animationFrameId: number;
+    let isLooping = true;
+
+    const loop = async () => {
+      if (!isLooping) return;
+
+      animationFrameId = requestAnimationFrame(mainLoop);
     };
-  }, []);
+
+    if (appReady) {
+      // Initialize the last frame time when starting the loop
+      lastFrameTimeRef.current = performance.now();
+      loop();
+    }
+
+    return () => {
+      isLooping = false;
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+      }
+    };
+  }, [appReady]);
 
   // track hips and stillness
   useEffect(() => {
@@ -396,7 +457,7 @@ const JumpFlow = () => {
         isRewardRunning && "animate-fade",
       )}
     >
-      {/* <CoinsFirework ref={coinsFireworkRef} /> */}
+      <CoinsFirework ref={coinsFireworkRef} />
       {flowStatus !== "end" && flowStatus !== "jump" && (
         <Link href="/" className="block">
           <button className="relative z-50 rotate-90 rounded-full p-[20px] text-white transition active:bg-slate-900">
