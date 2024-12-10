@@ -151,7 +151,7 @@ const JumpFlow = () => {
         coinsFireworkRef.current.triggerAnimation(position.x, position.y, {
           min: 1,
           max: 1,
-        });
+        }, {min:1, max:1});
       }
       setJumpState("down");
     }

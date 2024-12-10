@@ -92,7 +92,18 @@ const QuestsView: React.FC = () => {
   });
 
   const handleTestFirework = (event: React.MouseEvent) => {
-    coinsFireworkRef.current?.triggerAnimation(event.clientX, event.clientY);
+    coinsFireworkRef.current?.triggerAnimation(
+      event.clientX,
+      event.clientY,
+      {
+        min: 1,
+        max: 1,
+      },
+      {
+        min: 1,
+        max: 1,
+      },
+    );
   };
   // if (!quests) return null;
 
