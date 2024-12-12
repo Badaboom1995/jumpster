@@ -441,12 +441,7 @@ const JumpFlow = () => {
           <span>Забрать награду</span>
         </Button>
       )}
-      {/* <button
-        className="relative z-50 bg-red-500 p-4"
-        onClick={() => stopCamera()}
-      >
-        stop
-      </button> */}
+
       <div className="absolute left-1/2 top-[240px] z-50 w-full -translate-x-1/2">
         <Title>{statusText}</Title>
         {isRunning && seconds > 0 && <Title>Старт через {seconds}</Title>}
