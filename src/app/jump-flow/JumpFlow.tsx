@@ -177,6 +177,7 @@ const JumpFlow = () => {
 
         // Play finish sound using pool
         const audio = finishAudioPool[currentFinishAudioIndex];
+        // @ts-ignore
         if (audio && !audio.playing) {
           audio.currentTime = 0;
           audio
@@ -195,6 +196,7 @@ const JumpFlow = () => {
 
       // Play coin sound using pool
       const audio = coinAudioPool[currentCoinAudioIndex];
+      // @ts-ignore
       if (audio && !audio.playing) {
         audio.currentTime = 0;
         audio
