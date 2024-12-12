@@ -465,10 +465,10 @@ const JumpFlow = () => {
       )}
       {/*{<Reward jumps={jumpsCounter} time={currentSeconds} />}*/}
       <video ref={videoRef} className="w-full" autoPlay playsInline></video>
-      <canvas
+      {/* <canvas
         ref={canvasRef}
         className="absolute left-1/2 top-0 h-[100vh] w-full -translate-x-1/2 -scale-x-100 opacity-50"
-      ></canvas>
+      ></canvas> */}
     </div>
   );
 };
