@@ -148,10 +148,15 @@ const JumpFlow = () => {
       setLastJumpPosition(position);
 
       if (coinsFireworkRef.current) {
-        coinsFireworkRef.current.triggerAnimation(position.x, position.y, {
-          min: 1,
-          max: 1,
-        }, {min:1, max:1});
+        coinsFireworkRef.current.triggerAnimation(
+          position.x,
+          position.y,
+          {
+            min: 1,
+            max: 1,
+          },
+          { min: 1, max: 1 },
+        );
       }
       setJumpState("down");
     }
@@ -179,18 +184,15 @@ const JumpFlow = () => {
   };
 
   const stopCamera = () => {
-    const video: any = videoRef.current;
+    const video = videoRef.current;
     if (video && video.srcObject) {
       const stream = video.srcObject as MediaStream;
-      // Stop all media tracks (audio and video)
-      stream.getTracks().forEach((track) => {
-        track.stop(); // Stop each track completely
-      });
-      // Clear the video element's source and pause playback
+      // Stop all tracks
+      stream.getTracks().forEach((track) => track.stop());
+      // Detach the stream from the video element
       video.srcObject = null;
       video.pause();
-      video.removeAttribute("src"); // Clear any lingering src reference
-      video.load(); // Reload the video element to reset
+      video.load();
     } else {
       console.warn("No active camera stream found.");
     }
@@ -262,20 +264,6 @@ const JumpFlow = () => {
     }
   }, [cameraReady, detectorRef.current]);
 
-  // useEffect(() => {
-  // const intervalId = setInterval(mainLoop, 50);
-  // const canvas = canvasRef.current;
-  // if (canvas) {
-  //   // @ts-ignore
-  //   canvas.width = window.innerWidth;
-  //   // @ts-ignore
-  //   canvas.height = window.innerHeight;
-  // }
-  // return () => {
-  //   clearInterval(intervalId);
-  // };
-  // }, []);
-
   // track hips and stillness
   useEffect(() => {
     if (flowStatus === "jump" || !appReady || flowStatus.includes("end"))
@@ -319,6 +307,7 @@ const JumpFlow = () => {
     ) {
       setFlowStatus("end");
       stopRewardCountdown();
+      setTimeout(stopCamera, 1000);
     }
   }, [flowStatus, secondsUntilReward, isRewardRunning]);
 
@@ -452,6 +441,12 @@ const JumpFlow = () => {
           <span>Забрать награду</span>
         </Button>
       )}
+      {/* <button
+        className="relative z-50 bg-red-500 p-4"
+        onClick={() => stopCamera()}
+      >
+        stop
+      </button> */}
       <div className="absolute left-1/2 top-[240px] z-50 w-full -translate-x-1/2">
         <Title>{statusText}</Title>
         {isRunning && seconds > 0 && <Title>Старт через {seconds}</Title>}
@@ -474,7 +469,7 @@ const JumpFlow = () => {
         <Reward energyLeft={availableEnergy} jumps={jumpsCounter} time={0} />
       )}
       {/*{<Reward jumps={jumpsCounter} time={currentSeconds} />}*/}
-      <video ref={videoRef} autoPlay playsInline className="hidden"></video>
+      <video ref={videoRef} className="w-full" autoPlay playsInline></video>
       <canvas
         ref={canvasRef}
         className="absolute left-1/2 top-0 h-[100vh] w-full -translate-x-1/2 -scale-x-100 opacity-50"

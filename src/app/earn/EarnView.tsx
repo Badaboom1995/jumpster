@@ -13,6 +13,7 @@ import useGetUser from "@/hooks/api/useGetUser";
 import check from "@/app/_assets/icons/check.svg";
 import Modal from "@/components/Modal";
 import Tabs from "@/components/Tabs";
+import coin from "@/app/_assets/images/coin.png";
 
 const thumbnailsMap = {
   medal,
@@ -48,7 +49,17 @@ const Card = ({
       <div className="flex w-full items-center justify-between text-white">
         <div>
           <h2 className="mb-[4px] text-[16px] font-medium">{title}</h2>
-          <p className="text-gray-400">+{income} 🟡 в час</p>
+          <p className="text-gray-400">
+            +{income}{" "}
+            <Image
+              src={coin}
+              width={16}
+              height={16}
+              alt="coin"
+              className="inline"
+            />{" "}
+            в час
+          </p>
         </div>
         <button
           onClick={() => !isBought && setIsOpen(id)}
@@ -187,8 +198,15 @@ const EarnView = () => {
           Тренируйся, подписывай рекламные контракты и зарабатывай пассивно
         </p>
         <p className="mx-auto mb-[0px] w-fit rounded-[12px] px-[12px] text-center text-[32px] font-semibold text-white">
+          <Image
+            src={coin}
+            width={48}
+            height={48}
+            alt="coin"
+            className="mr-2 inline"
+          />
           {/*@ts-ignore*/}
-          🟡 {user?.user_parameters?.coins?.value.toLocaleString()}
+          {user?.user_parameters?.coins?.value.toLocaleString()}
         </p>
       </div>
       <Modal isOpen={isOpen} setOpen={setIsOpen}>
@@ -207,7 +225,15 @@ const EarnView = () => {
             {openedCard?.description}
           </p>
           <p className="mb-[24px] text-white">
-            +{openedCard?.passive_income} 🟡 в час
+            +{openedCard?.passive_income}{" "}
+            <Image
+              src={coin}
+              width={24}
+              height={24}
+              alt="coin"
+              className="inline"
+            />{" "}
+            в час
           </p>
           <button
             // @ts-ignore
@@ -221,7 +247,16 @@ const EarnView = () => {
                 <span>Покупка...</span>
               </div>
             ) : (
-              `Купить за ${openedCard?.buy_price} 🟡`
+              <div className="flex items-center gap-1">
+                <span>Купить за {openedCard?.buy_price}</span>
+                <Image
+                  src={coin}
+                  width={24}
+                  height={24}
+                  alt="coin"
+                  className="inline"
+                />
+              </div>
             )}
           </button>
         </div>

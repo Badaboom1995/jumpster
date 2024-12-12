@@ -1,6 +1,7 @@
 import React from "react";
 import Card from "@/components/Card";
 import Image from "next/image";
+import coin from "@/app/_assets/images/coin.png";
 
 type CharacterProps = {
   current: boolean;
@@ -33,7 +34,10 @@ const Character = (character: CharacterProps) => {
         />
         <div className="flex w-full flex-wrap justify-between">
           <span>{rankName}</span>
-          <span>+{passive_income || 0} 🟡 в час</span>
+          <span className="flex items-center gap-[4px]">
+            +{passive_income || 0}{" "}
+            <Image src={coin as any} alt="coin" width={24} /> в час
+          </span>
           <div className="mt-[8px] w-full rounded-full border border-white p-1">
             <div
               style={{

@@ -16,6 +16,8 @@ import {
   updateStreak,
 } from "@/utils";
 
+import coin from "@/app/_assets/images/coin.png";
+
 import "@tensorflow/tfjs-backend-webgl";
 import * as tf from "@tensorflow/tfjs-core";
 import * as poseDetection from "@tensorflow-models/pose-detection";
@@ -47,6 +49,8 @@ import { BoostersList } from "@/components/Boosters/BoostersList";
 import CoinsFirework, {
   CoinsFireworkRef,
 } from "@/components/CoinsFirework/CoinsFirework";
+import coinSound from "@/app/_assets/audio/collect.mp3";
+import VideoMirror from "@/components/VideoMirror";
 
 type StatsProps = {
   coins: number;
@@ -84,6 +88,7 @@ const Main = () => {
   const router = useRouter();
   const currentCoinsReward = useCurrentCoinsReward(user);
   const passive_income = usePassiveIncome();
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const currentRankData = getRankData(userStats?.experience);
   const currentLevelProgress = currentRankData?.percent;
@@ -92,25 +97,36 @@ const Main = () => {
 
   const coinsFireworkRef = useRef<CoinsFireworkRef>(null);
 
+  useEffect(() => {
+    audioRef.current = new Audio(coinSound);
+    if (audioRef.current) {
+      audioRef.current.volume = 0.2;
+      // Preload the audio
+      audioRef.current.load();
+    }
+  }, []);
+
   const handleClaimCoins = async (event: React.MouseEvent) => {
     try {
       let particleCount = { min: 10, max: 20 };
       if (currentCoinsReward > 1000 && currentCoinsReward < 5000) {
-        particleCount = { min: 30, max: 50 };
+        particleCount = { min: 3, max: 5 };
       }
       if (currentCoinsReward > 5000 && currentCoinsReward < 10000) {
-        particleCount = { min: 50, max: 80 };
+        particleCount = { min: 5, max: 8 };
       }
       if (currentCoinsReward > 10000 && currentCoinsReward < 20000) {
-        particleCount = { min: 80, max: 120 };
+        particleCount = { min: 8, max: 12 };
       }
       if (currentCoinsReward > 20000 && currentCoinsReward < 50000) {
-        particleCount = { min: 120, max: 150 };
+        particleCount = { min: 12, max: 15 };
       }
       if (currentCoinsReward > 50000) {
-        particleCount = { min: 150, max: 200 };
+        particleCount = { min: 15, max: 20 };
       }
 
+      // Start both sound and animation simultaneously
+      const playPromise = audioRef.current?.play();
       coinsFireworkRef.current?.triggerAnimation(
         event.clientX,
         event.clientY,
@@ -120,6 +136,18 @@ const Main = () => {
           max: 1,
         },
       );
+
+      // Reset audio position
+      if (audioRef.current) {
+        audioRef.current.currentTime = 0;
+      }
+
+      // Handle any audio play errors silently
+      if (playPromise) {
+        playPromise.catch((error) => {
+          console.warn("Audio playback failed:", error);
+        });
+      }
 
       await addCoins(user);
       await queryClient.invalidateQueries("user");
@@ -247,6 +275,7 @@ const Main = () => {
   }, [user]);
 
   if (!user || isUserLoading || !userParams || !userStats) return null;
+
   return (
     <div className="flex h-full w-full flex-col overflow-hidden">
       <Confetti
@@ -262,7 +291,7 @@ const Main = () => {
           <div className="mb-[16px] mt-[12px] flex flex-col items-center p-[8px]">
             <p className="mb-[8px] flex w-full items-center justify-center gap-[8px] text-center text-[42px] font-bold leading-[52px] text-white">
               {/*TODO: use image instead*/}
-              <span className="text-[32px]">🟡</span>{" "}
+              <Image src={coin as any} width={48} height={48} alt="coin" />
               <span>{userParams.coins.value.toLocaleString()}</span>
             </p>
             {passive_income ? (
@@ -324,7 +353,17 @@ const Main = () => {
       <div className="mb-[12px] px-[16px]">
         {currentCoinsReward ? (
           <Button onClick={handleClaimCoins} variant="secondary">
-            Забрать 🟡 {currentCoinsReward}
+            <div className="flex gap-[2px]">
+              <span className="mr-[4px]">Забрать</span>
+              <Image
+                src={coin as any}
+                width={28}
+                height={28}
+                // className="ml-[4px]"
+                alt="coin"
+              />{" "}
+              {currentCoinsReward}
+            </div>
           </Button>
         ) : (
           <Link href="/pre-jump">

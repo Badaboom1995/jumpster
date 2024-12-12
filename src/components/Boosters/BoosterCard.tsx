@@ -5,7 +5,7 @@ import arrowRight from "@/app/_assets/icons/arrowRight.svg";
 import Curtain from "@/components/Curtain";
 import { BoosterDetails } from "./BoosterDetails";
 import lightning from "@/app/_assets/images/lightning.png";
-
+import fire from "@/app/_assets/images/fire.png";
 interface BoosterCardProps {
   booster: UserBooster;
   userId: string;
@@ -102,7 +102,9 @@ export const BoosterCard: React.FC<BoosterCardProps> = ({
       >
         <div className="flex items-start gap-3">
           <Image
-            src={lightning}
+            src={
+              booster.booster.effect_type === "jump_power" ? fire : lightning
+            }
             alt="lightning"
             width={100}
             height={100}

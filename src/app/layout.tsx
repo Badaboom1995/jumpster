@@ -7,7 +7,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import MovingGradient from "@/app/Back";
 import { Inter } from "next/font/google";
-import { Toaster } from 'react-hot-toast';
+import { Toaster } from "react-hot-toast";
 
 // If loading a variable font, you don't need to specify the font weight
 const inter = Inter({

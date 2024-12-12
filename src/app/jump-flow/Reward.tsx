@@ -1,4 +1,4 @@
-import React, { PropsWithChildren, useEffect, useState } from "react";
+import React, { PropsWithChildren, useEffect, useState, useRef } from "react";
 import Image from "next/image";
 import medal from "@/app/_assets/images/medal.png";
 import fire from "@/app/_assets/icons/Fire.svg";
@@ -9,7 +9,6 @@ import Link from "next/link";
 import Button from "@/components/Button";
 import gift from "@/app/_assets/icons/Gift.svg";
 import { twMerge } from "tailwind-merge";
-import { Title } from "@telegram-apps/telegram-ui";
 import useAnimatedNumber from "@/hooks/useAnimatedNumber";
 import {
   calculateCaloriesBurned,
@@ -23,6 +22,8 @@ import { calculateReward } from "@/utils";
 import { useUserBoosters } from "@/hooks/api/useBoosters";
 // import Confetti from "react-confetti";
 // import useWindowSize from "react-use/lib/useWindowSize";
+import finishSound from "@/app/_assets/audio/harp_money.wav";
+import coin from "@/app/_assets/images/coin.png";
 
 const StatCard = ({
   children,
@@ -57,14 +58,15 @@ const Reward = ({
 
   const coinsEarned = jumps * coinsPerJump;
 
-  const coinsEarned2 = calculateReward({
-    jumps,
-    // @ts-ignore
-    experience: user?.experience,
-    boostersImpact: activeBoosters
-      ?.filter((booster) => booster.booster.effect_type === "jump_power")
-      .reduce((acc, booster) => acc + booster.booster.effect_value, 0),
-  });
+  const coinsEarned2 =
+    calculateReward({
+      jumps,
+      // @ts-ignore
+      experience: user?.experience,
+      boostersImpact: activeBoosters
+        ?.filter((booster) => booster.booster.effect_type === "jump_power")
+        .reduce((acc, booster) => acc + booster.booster.effect_value, 0),
+    }) || 502;
   const coinsEarnedAnimated = useAnimatedNumber(coinsEarned2, 2, true);
   const caloriesAnimated = useAnimatedNumber(
     calculateCaloriesBurned(jumps, time),
@@ -102,7 +104,7 @@ const Reward = ({
       await supabase
         .from("user_parameters")
         // @ts-ignore
-        .update({ value: user?.user_parameters.coins.value + coinsEarned })
+        .update({ value: user?.user_parameters.coins.value + coinsEarned2 })
         .eq("user_id", user.id)
         .eq("name", "coins");
 
@@ -127,64 +129,31 @@ const Reward = ({
     addReward();
   }, []);
 
-  // const { width, height } = useWindowSize();
+  const finishAudioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Initialize audio
+  useEffect(() => {
+    finishAudioRef.current = new Audio(finishSound);
+    if (finishAudioRef.current) {
+      finishAudioRef.current.volume = 0.2;
+    }
+    if (finishAudioRef.current) {
+      finishAudioRef.current.currentTime = 0;
+      finishAudioRef.current.play().catch((error) => {
+        console.warn("Audio playback failed:", error);
+      });
+    }
+  }, []);
+
   return (
     <div className="fixed top-0 z-[50] flex h-[100vh] w-full flex-col items-center overflow-y-scroll bg-background-dark px-[12px] py-[24px] pb-[80px]">
-      {/*<Confetti*/}
-      {/*  width={width}*/}
-      {/*  height={height}*/}
-      {/*  recycle={false}*/}
-      {/*  numberOfPieces={coinsEarned || 100}*/}
-      {/*  tweenDuration={5000}*/}
-      {/*  friction={0.98}*/}
-      {/*  gravity={0.1}*/}
-      {/*  drawShape={(ctx) => {*/}
-      {/*    ctx.beginPath();*/}
-      {/*    const centerX = ctx.canvas.width / 2;*/}
-      {/*    const centerY = ctx.canvas.height / 2;*/}
-      {/*    const radius = 10; // Radius of the coin*/}
-
-      {/*    ctx.arc(0, 0, radius, 0, 2 * Math.PI);*/}
-      {/*    const gradient = ctx.createRadialGradient(*/}
-      {/*      centerX,*/}
-      {/*      centerY,*/}
-      {/*      radius / 4,*/}
-      {/*      centerX,*/}
-      {/*      centerY,*/}
-      {/*      radius,*/}
-      {/*    );*/}
-
-      {/*    gradient.addColorStop(0, "#FFD700"); // gold*/}
-      {/*    gradient.addColorStop(0.5, "#FFC107"); // Slightly darker gold*/}
-      {/*    gradient.addColorStop(1, "#FFD70B"); // Dark gold for depth*/}
-
-      {/*    ctx.lineWidth = 5;*/}
-      {/*    ctx.strokeStyle = "#DAA520"; // Dark gold for ridges*/}
-      {/*    ctx.stroke();*/}
-
-      {/*    ctx.fillStyle = gradient;*/}
-      {/*    ctx.fill();*/}
-
-      {/*    // draw dollar sign in the center*/}
-      {/*    ctx.font = "bold 12px serif";*/}
-      {/*    ctx.textAlign = "center";*/}
-      {/*    ctx.textBaseline = "middle";*/}
-      {/*    ctx.fillStyle = "#DAA520";*/}
-      {/*    ctx.fillText("$", 0, 0);*/}
-
-      {/*    ctx.closePath();*/}
-      {/*  }}*/}
-      {/*/>*/}
       <Image width={130} src={medal as any} alt="medal" className="mb-[12px]" />
-      {/*<Title className="text-center text-[24px] font-[500] text-white">*/}
-      {/*  Отличная работа!*/}
-      {/*</Title>*/}
-      <Title className="text-[80px] font-black leading-[90px] text-white">
-        {coinsEarnedAnimated}
-      </Title>
-      <Title className="mb-[24px] text-[16px] font-[400] text-caption">
+      <h2 className="flex items-center gap-[4px] text-[64px] font-bold leading-[90px] text-white">
+        {coinsEarnedAnimated.toLocaleString()}
+      </h2>
+      <h3 className="mb-[24px] text-[16px] font-[400] text-caption">
         Монет получено
-      </Title>
+      </h3>
       <div className="w-full grow">
         <div className="grid w-full grid-cols-2 gap-[4px]">
           <StatCard>

@@ -121,6 +121,7 @@ const CoinsFirework = forwardRef<CoinsFireworkRef>((_, ref) => {
 
             // Apply gravity and air resistance
             particle.vy += 2;
+            particle.vx *= 0.99;
 
             particle.rotation += particle.rotationSpeed;
 

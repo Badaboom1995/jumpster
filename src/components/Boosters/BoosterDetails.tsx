@@ -6,6 +6,7 @@ import { usePurchaseBooster } from "@/hooks/api/useBoosters";
 import toast from "react-hot-toast";
 import Image from "next/image";
 import lightning from "@/app/_assets/images/lightning.png";
+import fire from "@/app/_assets/images/fire.png";
 
 interface BoosterDetailsProps {
   booster: Booster;
@@ -63,6 +64,7 @@ export const BoosterDetails: React.FC<BoosterDetailsProps> = ({
     if (booster.duration_type === "permanent") return "Навсегда";
     if (booster.duration_type === "one_session") return "Одна тренировка";
     if (booster.duration_type === "timed") {
+      if (booster.duration_value === null) return "24 часа";
       const minutes = Math.floor(booster.duration_value / 60);
       return `${minutes} минут`;
     }
@@ -72,9 +74,9 @@ export const BoosterDetails: React.FC<BoosterDetailsProps> = ({
   const getEffectText = () => {
     switch (booster.effect_type) {
       case "coins_multiplier":
-        return `Множитель монет ${booster.effect_value}x`;
+        return `Множитель монет ${booster.effect_value}`;
       case "energy_recovery":
-        return `Восстановление энергии ${booster.effect_value}x`;
+        return `Восстановление энергии ${booster.effect_value ? `${booster.effect_value}x` : "100%"}`;
       case "experience_multiplier":
         return `Множитель опыта ${booster.effect_value}x`;
       case "jump_power":
@@ -122,7 +124,7 @@ export const BoosterDetails: React.FC<BoosterDetailsProps> = ({
           </div>
           <div className="rounded-full bg-background p-4">
             <Image
-              src={lightning}
+              src={booster.effect_type === "jump_power" ? fire : lightning}
               alt="card"
               width={32}
               height={32}
