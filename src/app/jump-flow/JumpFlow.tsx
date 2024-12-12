@@ -444,7 +444,7 @@ const JumpFlow = () => {
         )}
         <button
           onClick={() => setIsMuted(!isMuted)}
-          className="ml-auto h-[64px] rounded-full bg-background px-[16px] py-[16px] text-white transition hover:bg-background-light active:bg-slate-900"
+          className="m-[30px] ml-auto mt-[16px] h-[30px] w-[30px] rounded-full bg-black bg-opacity-50 text-white transition hover:bg-background-light active:bg-slate-900"
         >
           {isMuted ? "🔇" : "🔊"}
         </button>
@@ -483,7 +483,12 @@ const JumpFlow = () => {
         <Reward energyLeft={availableEnergy} jumps={jumpsCounter} time={0} />
       )}
       {/*{<Reward jumps={jumpsCounter} time={currentSeconds} />}*/}
-      <video ref={videoRef} className="w-full" autoPlay playsInline></video>
+      <video
+        ref={videoRef}
+        className="fixed left-1/2 top-0 -z-10 h-[100vh] -translate-x-1/2"
+        autoPlay
+        playsInline
+      ></video>
       {/* <canvas
         ref={canvasRef}
         className="absolute left-1/2 top-0 h-[100vh] w-full -translate-x-1/2 -scale-x-100 opacity-50"
