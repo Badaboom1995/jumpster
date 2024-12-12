@@ -114,7 +114,7 @@ const JumpFlow = () => {
   };
 
   const detectUpAndDown = (vector: any) => {
-    if (vector > 5 && jumpState === "down") {
+    if (vector > 10 && jumpState === "down") {
       if (availableEnergy < energyPerJump) {
         setFlowStatus("endCountdown");
         // stopTimer();
@@ -173,7 +173,17 @@ const JumpFlow = () => {
 
   const setupCamera = async () => {
     const video: any = videoRef.current;
+    console.log("start");
+    const constraints = {
+      video: {
+        width: { ideal: 640 },
+        height: { ideal: 480 },
+        frameRate: { ideal: 15, max: 30 },
+      },
+      audio: false,
+    };
     const stream = await navigator?.mediaDevices.getUserMedia(constraints);
+    console.log("finish");
     video.srcObject = stream;
     setCameraReady(true);
     return new Promise((resolve) => {
@@ -200,11 +210,11 @@ const JumpFlow = () => {
 
   const mainLoop = async () => {
     const video: any = videoRef.current;
-    const canvas: any = canvasRef.current;
-    const ctx = canvas.getContext("2d");
+    // const canvas: any = canvasRef.current;
+    // const ctx = canvas.getContext("2d");
 
     if (detectorRef.current && video.readyState === 4) {
-      drawVideoFrame2(ctx, video, canvas);
+      // drawVideoFrame2(ctx, video, canvas);
       const poses = await detectorRef.current.estimatePoses(video);
       setMoveVector(poses[0]?.keypoints, setMoveVectorY);
       const hipsVisible = detectHips(poses);
@@ -228,13 +238,13 @@ const JumpFlow = () => {
     animationFrameId = requestAnimationFrame(animate);
 
     // Set canvas dimensions
-    const canvas = canvasRef.current;
-    if (canvas) {
-      // @ts-ignore
-      canvas.width = window.innerWidth;
-      // @ts-ignore
-      canvas.height = window.innerHeight;
-    }
+    // const canvas = canvasRef.current;
+    // if (canvas) {
+    //   // @ts-ignore
+    //   canvas.width = window.innerWidth;
+    //   // @ts-ignore
+    //   canvas.height = window.innerHeight;
+    // }
 
     // Cleanup function
     return () => {
@@ -257,6 +267,7 @@ const JumpFlow = () => {
   }, []);
 
   useEffect(() => {
+    console.log(cameraReady, detectorRef.current);
     // @ts-ignore
     if (videoRef.current.srcObject && detectorRef.current) {
       setFlowStatus("searchHips");
@@ -418,19 +429,27 @@ const JumpFlow = () => {
       )}
     >
       <CoinsFirework ref={coinsFireworkRef} />
-      {flowStatus !== "end" && flowStatus !== "jump" && (
-        <Link href="/" className="block">
-          <button className="relative z-50 rotate-90 rounded-full p-[20px] text-white transition active:bg-slate-900">
-            <Image src={arrow as any} alt="arrow-down" width={24} height={24} />
-          </button>
-        </Link>
-      )}
-      <button
-        onClick={() => setIsMuted(!isMuted)}
-        className="fixed right-[20px] top-[20px] z-50 rounded-full bg-background px-[16px] py-[8px] text-white transition hover:bg-background-light active:bg-slate-900"
-      >
-        {isMuted ? "🔇" : "🔊"}
-      </button>
+      <div className="flex w-full">
+        {flowStatus !== "end" && flowStatus !== "jump" && (
+          <Link href="/" className="block">
+            <button className="relative z-50 rotate-90 rounded-full p-[20px] text-white transition active:bg-slate-900">
+              <Image
+                src={arrow as any}
+                alt="arrow-down"
+                width={24}
+                height={24}
+              />
+            </button>
+          </Link>
+        )}
+        <button
+          onClick={() => setIsMuted(!isMuted)}
+          className="ml-auto h-[64px] rounded-full bg-background px-[16px] py-[16px] text-white transition hover:bg-background-light active:bg-slate-900"
+        >
+          {isMuted ? "🔇" : "🔊"}
+        </button>
+      </div>
+
       {flowStatus === "jump" && (
         <Button
           className="fixed bottom-[32px] left-1/2 z-10 w-[200px] -translate-x-1/2"
@@ -447,14 +466,14 @@ const JumpFlow = () => {
         {isRunning && seconds > 0 && <Title>Старт через {seconds}</Title>}
       </div>
       {flowStatus === "jump" && (
-        <div className="absolute left-1/2 top-[72px] z-50 w-full -translate-x-1/2">
+        <div className="absolute left-1/2 top-[120px] z-50 w-full -translate-x-1/2">
           {/* <h1 className="flex items-center justify-center text-[54px] font-bold text-white">
             {secondsToMinutesString(currentSeconds)}
           </h1> */}
-          <div className="-ml-[32px] mb-[80px] flex items-center justify-center text-[32px] font-bold text-primary">
+          {/* <div className="-ml-[32px] mb-[80px] flex items-center justify-center text-[32px] font-bold text-primary">
             <Image height={32} src={energy as any} alt="energy" />
             {availableEnergy}/{currentRankData.energyCapacity}
-          </div>
+          </div> */}
           <h1 className="flex items-center justify-center text-[140px] leading-[120px] text-white">
             {jumpsCounter}
           </h1>
@@ -465,10 +484,10 @@ const JumpFlow = () => {
       )}
       {/*{<Reward jumps={jumpsCounter} time={currentSeconds} />}*/}
       <video ref={videoRef} className="w-full" autoPlay playsInline></video>
-      <canvas
+      {/* <canvas
         ref={canvasRef}
-        className="absolute left-1/2 top-0 hidden h-[100vh] w-full -translate-x-1/2 -scale-x-100 opacity-50"
-      ></canvas>
+        className="absolute left-1/2 top-0 h-[100vh] w-full -translate-x-1/2 -scale-x-100 opacity-50"
+      ></canvas> */}
     </div>
   );
 };

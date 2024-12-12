@@ -151,43 +151,43 @@ export const drawVideoFrame2 = (
   if (!shouldDrawFrame) return;
   lastDrawTime = currentTime;
 
-  // const videoWidth = videoElement.videoWidth;
-  // const videoHeight = videoElement.videoHeight;
+  const videoWidth = videoElement.videoWidth;
+  const videoHeight = videoElement.videoHeight;
   const canvasWidth = canvasElement.width;
   const canvasHeight = canvasElement.height;
 
-  // const videoAspectRatio = videoWidth / videoHeight;
+  const videoAspectRatio = videoWidth / videoHeight;
   const canvasAspectRatio = canvasWidth / canvasHeight;
 
   let sx, sy, sWidth, sHeight;
 
-  // if (videoAspectRatio > canvasAspectRatio) {
-  //   // Video is wider than canvas; crop the sides
-  //   sHeight = videoHeight;
-  //   sWidth = sHeight * canvasAspectRatio;
-  //   sx = (videoWidth - sWidth) / 2;
-  //   sy = 0;
-  // } else {
-  //   // Video is taller than canvas; crop the top and bottom
-  //   sWidth = videoWidth;
-  //   sHeight = sWidth / canvasAspectRatio;
-  //   sx = 0;
-  //   sy = (videoHeight - sHeight) / 2;
-  // }
+  if (videoAspectRatio > canvasAspectRatio) {
+    // Video is wider than canvas; crop the sides
+    sHeight = videoHeight;
+    sWidth = sHeight * canvasAspectRatio;
+    sx = (videoWidth - sWidth) / 2;
+    sy = 0;
+  } else {
+    // Video is taller than canvas; crop the top and bottom
+    sWidth = videoWidth;
+    sHeight = sWidth / canvasAspectRatio;
+    sx = 0;
+    sy = (videoHeight - sHeight) / 2;
+  }
 
   // Clear canvas and draw the video frame
   context.clearRect(0, 0, canvasWidth, canvasHeight);
-  // context.drawImage(
-  //   videoElement,
-  //   sx,
-  //   sy,
-  //   sWidth,
-  //   sHeight,
-  //   0,
-  //   0,
-  //   canvasWidth,
-  //   canvasHeight,
-  // );
+  context.drawImage(
+    videoElement,
+    sx,
+    sy,
+    sWidth,
+    sHeight,
+    0,
+    0,
+    canvasWidth,
+    canvasHeight,
+  );
 
   // Optionally, return values if needed for further processing
   return { sx, sy, sWidth, sHeight, scale: canvasWidth / sWidth };
