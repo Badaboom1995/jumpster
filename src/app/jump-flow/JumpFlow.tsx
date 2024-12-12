@@ -74,9 +74,65 @@ const JumpFlow = () => {
     x: 0,
     y: 0,
   });
-  const audioRef = useRef<HTMLAudioElement | null>(null);
   const [isMuted, setIsMuted] = useState(false);
-  const finishAudioRef = useRef<HTMLAudioElement | null>(null);
+
+  // 1. Lazy initialize the audio pools only when needed
+  const [coinAudioPool, setCoinAudioPool] = useState<HTMLAudioElement[]>([]);
+  const [finishAudioPool, setFinishAudioPool] = useState<HTMLAudioElement[]>(
+    [],
+  );
+
+  // Initialize pools only when the game starts
+  useEffect(() => {
+    if (flowStatus === "jump") {
+      // Initialize only if not already done
+      if (coinAudioPool.length === 0) {
+        setCoinAudioPool(
+          Array(3)
+            .fill(null)
+            .map(() => {
+              const audio = new Audio(coinBag);
+              audio.volume = 0.2;
+              return audio;
+            }),
+        );
+      }
+
+      if (finishAudioPool.length === 0) {
+        setFinishAudioPool(
+          Array(2)
+            .fill(null)
+            .map(() => {
+              const audio = new Audio(finishSound);
+              audio.volume = 0.2;
+              return audio;
+            }),
+        );
+      }
+    }
+  }, [flowStatus]);
+
+  // 2. Clean up audio pools when game ends
+  useEffect(() => {
+    if (flowStatus === "end") {
+      // Clean up audio instances
+      coinAudioPool.forEach((audio) => {
+        audio.src = "";
+        audio.load();
+      });
+      finishAudioPool.forEach((audio) => {
+        audio.src = "";
+        audio.load();
+      });
+
+      setCoinAudioPool([]);
+      setFinishAudioPool([]);
+    }
+  }, [flowStatus]);
+
+  // Add index trackers for the pools
+  const [currentCoinAudioIndex, setCurrentCoinAudioIndex] = useState(0);
+  const [currentFinishAudioIndex, setCurrentFinishAudioIndex] = useState(0);
 
   useEffect(() => {
     if (isUserLoading) return;
@@ -117,26 +173,34 @@ const JumpFlow = () => {
     if (vector > 10 && jumpState === "down") {
       if (availableEnergy < energyPerJump) {
         setFlowStatus("endCountdown");
-        // stopTimer();
         startRewardCountdown();
-        // Play finish sound when energy runs out
-        if (finishAudioRef.current) {
-          finishAudioRef.current.currentTime = 0;
-          finishAudioRef.current.play().catch((error) => {
-            console.warn("Audio playback failed:", error);
-          });
+
+        // Play finish sound using pool
+        const audio = finishAudioPool[currentFinishAudioIndex];
+        if (audio && !audio.playing) {
+          audio.currentTime = 0;
+          audio
+            .play()
+            .catch((error) => console.warn("Audio playback failed:", error));
+          setCurrentFinishAudioIndex(
+            (prev) => (prev + 1) % finishAudioPool.length,
+          );
         }
         return;
       }
+
       setJumpState("up");
       setJumpsCounter((prev) => prev + 1);
       setAvailableEnergy((prev) => prev - energyPerJump);
 
-      if (audioRef.current) {
-        audioRef.current.currentTime = 0;
-        audioRef.current.play().catch((error) => {
-          console.warn("Audio playback failed:", error);
-        });
+      // Play coin sound using pool
+      const audio = coinAudioPool[currentCoinAudioIndex];
+      if (audio && !audio.playing) {
+        audio.currentTime = 0;
+        audio
+          .play()
+          .catch((error) => console.warn("Audio playback failed:", error));
+        setCurrentCoinAudioIndex((prev) => (prev + 1) % coinAudioPool.length);
       }
     }
     if (vector < 0 && jumpState === "up") {
@@ -183,9 +247,8 @@ const JumpFlow = () => {
       audio: false,
     };
     const stream = await navigator?.mediaDevices.getUserMedia(constraints);
-    console.log("finish");
-    video.srcObject = stream;
     setCameraReady(true);
+    video.srcObject = stream;
     return new Promise((resolve) => {
       video.onloadedmetadata = () => {
         resolve(video);
@@ -384,28 +447,14 @@ const JumpFlow = () => {
   //   }
   // };
 
+  // Update the mute effect
   useEffect(() => {
-    audioRef.current = new Audio(coinBag);
-    // Set volume to 20%
-    if (audioRef.current) {
-      audioRef.current.volume = 0.2;
-    }
-  }, []);
-
-  useEffect(() => {
-    finishAudioRef.current = new Audio(finishSound);
-    if (finishAudioRef.current) {
-      finishAudioRef.current.volume = 0.2;
-    }
-  }, []);
-
-  useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.muted = isMuted;
-    }
-    if (finishAudioRef.current) {
-      finishAudioRef.current.muted = isMuted;
-    }
+    coinAudioPool.forEach((audio) => {
+      if (audio) audio.muted = isMuted;
+    });
+    finishAudioPool.forEach((audio) => {
+      if (audio) audio.muted = isMuted;
+    });
   }, [isMuted]);
 
   const handleJumpingFinished = () => {
@@ -413,11 +462,15 @@ const JumpFlow = () => {
     // stopTimer();
     startRewardCountdown();
     // Play finish sound
-    if (finishAudioRef.current) {
-      finishAudioRef.current.currentTime = 0;
-      finishAudioRef.current.play().catch((error) => {
-        console.warn("Audio playback failed:", error);
-      });
+    if (
+      finishAudioPool[currentFinishAudioIndex] &&
+      !finishAudioPool[currentFinishAudioIndex].paused
+    ) {
+      finishAudioPool[currentFinishAudioIndex].currentTime = 0;
+      finishAudioPool[currentFinishAudioIndex]
+        .play()
+        .catch((error) => console.warn("Audio playback failed:", error));
+      setCurrentFinishAudioIndex((prev) => (prev + 1) % finishAudioPool.length);
     }
   };
 

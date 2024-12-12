@@ -254,7 +254,7 @@ export const getStatusText = (status: string) => {
     case "loadingModel":
       return "Настраиваем нейросети";
     case "loadingCamera":
-      return "Настраиваем камеру";
+      return "Загрузка...";
     case "searchHips":
       return "Встаньте в кадр";
     case "stayStill":
