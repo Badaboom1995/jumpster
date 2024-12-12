@@ -25,21 +25,12 @@ import { Title } from "@/components/Title";
 import { getRankData } from "@/utils";
 import Button from "@/components/Button";
 import { useRewards } from "@/hooks/api/useRewards";
-import { supabase } from "@/lib/supabase";
-import toast from "react-hot-toast";
 import { useQueryClient } from "react-query";
-import { Database } from "@/types/database.types";
-import { User } from "@supabase/supabase-js";
 import CoinsFirework from "@/components/CoinsFirework/CoinsFirework";
 import coinBag from "@/app/_assets/audio/coin.mp3";
 import finishSound from "@/app/_assets/audio/done.wav";
-
-const constraints = {
-  video: true,
-  width: { ideal: 360 }, // Set ideal width (e.g., 640px)
-  height: { ideal: 640 },
-};
-
+import Lottie from "lottie-react";
+import loader from "@/app/_assets/loader.json";
 const energyPerJump = 100;
 
 const FPS = 24;
@@ -61,6 +52,7 @@ const JumpFlow = () => {
   const [appReady, setAppReady] = useState(false); // set to false to disable camera and model
   const [jumpState, setJumpState] = useState("down");
   const [jumpsCounter, setJumpsCounter] = useState(0);
+  const [starJumpingTime, setStarJumpingTime] = useState<any>(null);
   const [availableEnergy, setAvailableEnergy] = useState<number>(0);
   const statusText = getStatusText(flowStatus);
   // @ts-ignore
@@ -275,8 +267,8 @@ const JumpFlow = () => {
 
   const mainLoop = async () => {
     const video: any = videoRef.current;
-    // const canvas: any = canvasRef.current;
-    // const ctx = canvas.getContext("2d");
+    const canvas: any = canvasRef.current;
+    const ctx = canvas.getContext("2d");
 
     if (detectorRef.current && video.readyState === 4) {
       // drawVideoFrame2(ctx, video, canvas);
@@ -303,13 +295,13 @@ const JumpFlow = () => {
     animationFrameId = requestAnimationFrame(animate);
 
     // Set canvas dimensions
-    // const canvas = canvasRef.current;
-    // if (canvas) {
-    //   // @ts-ignore
-    //   canvas.width = window.innerWidth;
-    //   // @ts-ignore
-    //   canvas.height = window.innerHeight;
-    // }
+    const canvas = canvasRef.current;
+    if (canvas) {
+      // @ts-ignore
+      canvas.width = window.innerWidth;
+      // @ts-ignore
+      canvas.height = window.innerHeight;
+    }
 
     // Cleanup function
     return () => {
@@ -349,13 +341,6 @@ const JumpFlow = () => {
       stopCountDown();
       return;
     }
-    //  && !moveVectorY.standStill
-    // if (hipsVisible) {
-    //   setFlowStatus("stayStill");
-    //   stopCountDown();
-    //   return;
-    // }
-    // && moveVectorY.standStill
     if (hipsVisible && !isRunning) {
       setFlowStatus("countDown");
       startCountDown();
@@ -364,7 +349,7 @@ const JumpFlow = () => {
     // && moveVectorY.standStill
     if (hipsVisible && seconds === 0) {
       setFlowStatus("jump");
-      // startTimer();
+      setStarJumpingTime(new Date());
       return;
     }
   }, [hipsVisible, moveVectorY.standStill, seconds, isRunning, flowStatus]);
@@ -386,68 +371,6 @@ const JumpFlow = () => {
       setTimeout(stopCamera, 1000);
     }
   }, [flowStatus, secondsUntilReward, isRewardRunning]);
-
-  // Add test function for periodic coin throws
-  // useEffect(() => {
-  //   const throwCoinsTest = () => {
-  //     const position = getRandomTopPosition();
-  //     const coinParams = getRandomCoinParams();
-
-  //     if (coinsFireworkRef.current) {
-  //       coinsFireworkRef.current.triggerAnimation(position.x, position.y, {
-  //         min: 1,
-  //         max: 1,
-  //       });
-  //     }
-  //   };
-
-  //   // Start periodic coin throwing
-  //   const intervalId = setInterval(throwCoinsTest, 300);
-
-  //   // Cleanup interval on component unmount
-  //   return () => clearInterval(intervalId);
-  // }, []); // Empty dependency array means this runs once on mount
-
-  // const handleSessionComplete = async () => {
-  //   if (!user) return;
-
-  //   try {
-  //     const rewards = await calculateRewards.mutateAsync({
-  //       userExperience: user.experience,
-  //       jumpCount: jumpsCounter,
-  //       perfectJumps: 0,
-  //       comboMultiplier: 1,
-  //     });
-
-  //     // Update user parameters
-  //     const { error } = await supabase
-  //       .from("user_parameters")
-  //       .update({
-  //         "coins.value": user.user_parameters.coins.value + rewards.coins,
-  //         "energy.value":
-  //           user.user_parameters.energy.value - rewards.energyCost,
-  //       })
-  //       .eq("user_id", user.id);
-
-  //     if (error) throw error;
-
-  //     // Update user experience separately
-  //     await supabase
-  //       .from("users")
-  //       .update({
-  //         experience: user.experience + rewards.experience,
-  //       })
-  //       .eq("id", user.id);
-
-  //     // Invalidate user query to refresh data
-  //     queryClient.invalidateQueries("user");
-
-  //     toast.success("Нра��ы получены!");
-  //   } catch (error) {
-  //     console.error("Error updating rewards:", error);
-  //     toast.error("Ошибка при получении наград");
-  //   }
-  // };
 
   // Update the mute effect
   useEffect(() => {
@@ -476,10 +399,26 @@ const JumpFlow = () => {
     }
   };
 
+  // Add new state for tracking loading time
+  const [showLoadingNote, setShowLoadingNote] = useState(false);
+
+  // Add useEffect to handle slow loading notification
+  useEffect(() => {
+    if (flowStatus === "loadingCamera") {
+      const timer = setTimeout(() => {
+        setShowLoadingNote(true);
+      }, 5000);
+
+      return () => clearTimeout(timer);
+    } else {
+      setShowLoadingNote(false);
+    }
+  }, [flowStatus]);
+
   return (
     <div
       className={twMerge(
-        "fixed left-0 top-0 h-full w-full bg-background-dark",
+        "fixed left-0 top-0 h-full w-full",
         isRewardRunning && "animate-fade",
       )}
     >
@@ -516,12 +455,33 @@ const JumpFlow = () => {
         </Button>
       )}
       {/* temp */}
-      <div className="absolute left-1/2 top-[240px] z-50 w-full -translate-x-1/2">
-        <Title>{statusText}</Title>
+      <div className="absolute left-1/2 top-[200px] z-50 w-full -translate-x-1/2">
+        <Title>
+          {statusText === "Загрузка..." ? (
+            <div className="flex w-full flex-col items-center justify-center gap-[16px]">
+              <span className="">Загрузка...</span>
+              <Lottie
+                width={100}
+                height={100}
+                animationData={loader}
+                loop={true}
+              />
+              {showLoadingNote && (
+                <span className="mt-2 text-sm text-gray-300">
+                  Первая загрузка может занять некоторое время, пожалуйста, не
+                  прерывайте процесс
+                </span>
+              )}
+            </div>
+          ) : (
+            statusText
+          )}
+        </Title>
+
         {isRunning && seconds > 0 && <Title>Старт через {seconds}</Title>}
       </div>
       {flowStatus === "jump" && (
-        <div className="absolute left-1/2 top-[120px] z-50 w-full -translate-x-1/2">
+        <div className="tr absolute left-1/2 top-1/2 z-50 w-full -translate-x-1/2 -translate-y-1/2">
           {/* <h1 className="flex items-center justify-center text-[54px] font-bold text-white">
             {secondsToMinutesString(currentSeconds)}
           </h1> */}
@@ -535,19 +495,39 @@ const JumpFlow = () => {
         </div>
       )}
       {flowStatus === "end" && (
-        <Reward energyLeft={availableEnergy} jumps={jumpsCounter} time={0} />
+        <Reward
+          energyLeft={availableEnergy}
+          jumps={jumpsCounter}
+          time={(new Date().getTime() - starJumpingTime.getTime()) / 1000}
+        />
       )}
-      {/*{<Reward jumps={jumpsCounter} time={currentSeconds} />}*/}
       <video
         ref={videoRef}
-        className="fixed left-1/2 top-0 -z-10 h-[100vh] -translate-x-1/2"
+        className={twMerge(
+          "fixed left-1/2 top-0 -z-10 h-[100vh] -translate-x-1/2 opacity-70 transition-opacity duration-300 ease-out",
+          flowStatus === "loadingCamera" && "opacity-0",
+        )}
         autoPlay
         playsInline
       ></video>
-      {/* <canvas
+      <canvas
         ref={canvasRef}
         className="absolute left-1/2 top-0 h-[100vh] w-full -translate-x-1/2 -scale-x-100 opacity-50"
-      ></canvas> */}
+      ></canvas>
+      <div className="fixed bottom-0 left-0 right-0 z-50">
+        {flowStatus === "jump" && (
+          <div className="h-[12px] w-full bg-background-light">
+            <div
+              className="h-full bg-primary transition-all duration-300 ease-out"
+              style={{
+                width: `${(availableEnergy / currentRankData.energyCapacity) * 100}%`,
+                boxShadow:
+                  "0 0 10px rgb(34 197 94), 0 0 20px rgb(34 197 94), inset 0 0 8px rgba(255,255,255,0.4)",
+              }}
+            />
+          </div>
+        )}
+      </div>
     </div>
   );
 };

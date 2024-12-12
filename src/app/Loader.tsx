@@ -1,3 +1,4 @@
+"use client";
 import React from "react";
 import arrow from "@/app/_assets/icons/ArrowDown.svg";
 import Image from "next/image";
@@ -8,7 +9,7 @@ const Loader = () => {
       <Image
         src={arrow}
         alt="loader"
-        className="animate-jumpAndSpin w-[35px] rotate-180"
+        className="w-[35px] rotate-180 animate-jumpAndSpin"
       />
     </div>
   );

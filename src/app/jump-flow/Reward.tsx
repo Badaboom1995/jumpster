@@ -24,6 +24,7 @@ import { useUserBoosters } from "@/hooks/api/useBoosters";
 // import useWindowSize from "react-use/lib/useWindowSize";
 import finishSound from "@/app/_assets/audio/harp_money.wav";
 import coin from "@/app/_assets/images/coin.png";
+import { div } from "@tensorflow/tfjs-core";
 
 const StatCard = ({
   children,
@@ -43,6 +44,12 @@ const StatCard = ({
 
 const coinsPerJump = 1;
 
+const finishAudio = new Audio(finishSound);
+finishAudio.volume = 0.2;
+finishAudio.load();
+
+const AUDIO_START_TIME = 0.3;
+
 const Reward = ({
   jumps,
   time,
@@ -55,7 +62,7 @@ const Reward = ({
   const queryClient = useQueryClient();
   const { user, isUserLoading } = useGetUser();
   const { data: activeBoosters } = useUserBoosters(user?.id || "");
-
+  const [isReady, setIsReady] = useState(false);
   const coinsEarned = jumps * coinsPerJump;
 
   const coinsEarned2 =
@@ -127,27 +134,32 @@ const Reward = ({
 
   useEffect(() => {
     addReward();
+    playSound();
+    setTimeout(() => {
+      setIsReady(true);
+    }, 300);
   }, []);
 
-  const finishAudioRef = useRef<HTMLAudioElement | null>(null);
+  const playSound = () => {
+    finishAudio.currentTime = AUDIO_START_TIME;
+    finishAudio.play().catch((error) => {
+      console.warn("Audio playback failed:", error);
+    });
+  };
 
-  // Initialize audio
-  useEffect(() => {
-    finishAudioRef.current = new Audio(finishSound);
-    if (finishAudioRef.current) {
-      finishAudioRef.current.volume = 0.2;
-    }
-    if (finishAudioRef.current) {
-      finishAudioRef.current.currentTime = 0;
-      finishAudioRef.current.play().catch((error) => {
-        console.warn("Audio playback failed:", error);
-      });
-    }
-  }, []);
-
+  if (!isReady)
+    return (
+      <div className="fixed left-0 top-0 h-[100vh] w-full bg-background-dark"></div>
+    );
   return (
     <div className="fixed top-0 z-[50] flex h-[100vh] w-full flex-col items-center overflow-y-scroll bg-background-dark px-[12px] py-[24px] pb-[80px]">
       <Image width={130} src={medal as any} alt="medal" className="mb-[12px]" />
+      {/* <button
+        onClick={playSound}
+        className="mb-4 rounded-full bg-primary px-4 py-2 text-sm text-white"
+      >
+        🔊 Play Sound
+      </button> */}
       <h2 className="flex items-center gap-[4px] text-[64px] font-bold leading-[90px] text-white">
         {coinsEarnedAnimated.toLocaleString()}
       </h2>
