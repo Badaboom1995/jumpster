@@ -441,7 +441,7 @@ const JumpFlow = () => {
           <span>Забрать награду</span>
         </Button>
       )}
-
+      {/* temp */}
       <div className="absolute left-1/2 top-[240px] z-50 w-full -translate-x-1/2">
         <Title>{statusText}</Title>
         {isRunning && seconds > 0 && <Title>Старт через {seconds}</Title>}
