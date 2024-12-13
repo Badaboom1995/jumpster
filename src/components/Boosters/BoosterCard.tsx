@@ -6,6 +6,7 @@ import Curtain from "@/components/Curtain";
 import { BoosterDetails } from "./BoosterDetails";
 import lightning from "@/app/_assets/images/lightning.png";
 import fire from "@/app/_assets/images/fire.png";
+
 interface BoosterCardProps {
   booster: UserBooster;
   userId: string;

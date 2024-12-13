@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import { Title } from "@/components/Title";
 import Link from "next/link";
 import Button from "@/components/Button";
@@ -11,15 +11,35 @@ import energy from "@/app/_assets/icons/Energy.svg";
 import saved from "@/app/_assets/icons/Saved.svg";
 import { useUserBoosters } from "@/hooks/api/useBoosters";
 import coin from "@/app/_assets/images/coin.png";
+import Slider from "@/components/SliderSimple";
+import SlideTemplate from "@/components/SlideTemplate";
+import pose from "@/app/_assets/images/pose_onboarding.png";
+import light from "@/app/_assets/images/light_onboarding.png";
+import many from "@/app/_assets/images/many_onboarding.png";
+import buttons from "@/app/_assets/images/interface_onboarding.png";
+
 const PreJumpView = () => {
+  const [showOnboarding, setShowOnboarding] = useState(true);
   const { user } = useGetUser();
   const { data: activeBoosters } = useUserBoosters(user?.id || "");
+
+  const toggleOnboarding = async () => {
+    await fetch("/api/user/jump_onboarding", {
+      method: "PATCH",
+      body: JSON.stringify({ user_id: user?.id }),
+    });
+  };
 
   if (!user) return null;
   // @ts-ignore
   const currentEnergy = user.user_parameters.energy.value;
   // @ts-ignore
   const rank = getRankData(user.experience);
+
+  const handleFinishOnboarding = () => {
+    toggleOnboarding();
+    setShowOnboarding(false);
+  };
 
   const getBoosterEffectText = (booster: any) => {
     console.log(booster);
@@ -38,6 +58,41 @@ const PreJumpView = () => {
         return "";
     }
   };
+  // @ts-ignore
+  if (showOnboarding && !user.jump_onboarding_done) {
+    return (
+      <div className="fixed left-0 top-0 z-50 h-[100vh] w-full overflow-scroll bg-background-dark">
+        <Slider onFinish={handleFinishOnboarding}>
+          <SlideTemplate
+            icon={pose}
+            title="Встань в кадр"
+            description="Убедитесь, что в кадре видно таз и по крайней мере половину тела. Так мы сможем точнее считать прыжки"
+            onSkip={handleFinishOnboarding}
+            first
+          />
+          <SlideTemplate
+            icon={light}
+            title="Включи свет"
+            description="Можете прыгать на улице или в помещении, главное чтобы место было хорошо освещено и вас было отчетливо видно"
+            onSkip={handleFinishOnboarding}
+          />
+          <SlideTemplate
+            icon={many}
+            title="Один в кадре"
+            description="В кадре должен быть только один человек, иначе камера может запутаться и посчитать прыжки неправильно"
+            nextText="Далее"
+          />
+          <SlideTemplate
+            icon={buttons}
+            title="Уровень энергии"
+            description="Как только уровень энергии опустится до нуля игра закончится и ты получишь награду. Если хочешь завершить игру раньше нажми на кнопку внизу экрана"
+            onNext={handleFinishOnboarding}
+            nextText="Понятно"
+          />
+        </Slider>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed left-0 top-0 z-50 flex h-[100vh] w-full animate-fadeReverse flex-col items-center bg-background-dark pt-[32px]">

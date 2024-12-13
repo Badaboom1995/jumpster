@@ -108,29 +108,29 @@ const Main = () => {
 
   const handleClaimCoins = async (event: React.MouseEvent) => {
     try {
-      let particleCount = { min: 10, max: 20 };
-      if (currentCoinsReward > 1000 && currentCoinsReward < 5000) {
-        particleCount = { min: 3, max: 5 };
-      }
-      if (currentCoinsReward > 5000 && currentCoinsReward < 10000) {
-        particleCount = { min: 5, max: 8 };
-      }
-      if (currentCoinsReward > 10000 && currentCoinsReward < 20000) {
-        particleCount = { min: 8, max: 12 };
-      }
-      if (currentCoinsReward > 20000 && currentCoinsReward < 50000) {
-        particleCount = { min: 12, max: 15 };
-      }
-      if (currentCoinsReward > 50000) {
-        particleCount = { min: 15, max: 20 };
-      }
+      // let particleCount = { min: 10, max: 20 };
+      // if (currentCoinsReward > 1000 && currentCoinsReward < 5000) {
+      //   particleCount = { min: 3, max: 5 };
+      // }
+      // if (currentCoinsReward > 5000 && currentCoinsReward < 10000) {
+      //   particleCount = { min: 5, max: 8 };
+      // }
+      // if (currentCoinsReward > 10000 && currentCoinsReward < 20000) {
+      //   particleCount = { min: 8, max: 12 };
+      // }
+      // if (currentCoinsReward > 20000 && currentCoinsReward < 50000) {
+      //   particleCount = { min: 12, max: 15 };
+      // }
+      // if (currentCoinsReward > 50000) {
+      //   particleCount = { min: 15, max: 20 };
+      // }
 
       // Start both sound and animation simultaneously
       const playPromise = audioRef.current?.play();
       coinsFireworkRef.current?.triggerAnimation(
         event.clientX,
         event.clientY,
-        particleCount,
+        { min: 3, max: 5 },
         {
           min: 1,
           max: 1,

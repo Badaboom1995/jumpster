@@ -299,9 +299,15 @@ interface RewardParams {
 
 export const calculateReward = ({
   jumps,
-  experience,
-  boostersImpact,
-}: RewardParams): number => {
+  experience = 0,
+  boostersImpact = 0,
+}: {
+  jumps: number;
+  experience?: number;
+  boostersImpact?: number;
+}) => {
+  if (jumps === 0) return 0;
+
   const coinsPerJump =
     ranks[getRankData(experience)?.id - 1].coins_per_jump + boostersImpact;
   return jumps * coinsPerJump;

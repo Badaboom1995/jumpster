@@ -55,20 +55,11 @@ export const secondsToMinutesString = (seconds: number) => {
   return `${minutes.toString().padStart(2, "0")}:${remainingSeconds.toString().padStart(2, "0")}`;
 };
 
-export function calculateCaloriesBurned(
-  jumps: number,
-  timeInSeconds: number,
-): number {
-  const MET = 11.8; // MET for moderate skipping rope pace
-  const timeInMinutes = timeInSeconds / 60;
-  const averageJumpsPerMinute = jumps / timeInMinutes;
-
-  // Using the standard calorie burning formula
-  const caloriesPerMinute = (MET * 3.5 * 68) / 200; // Assuming 68kg as a baseline weight
-  const totalCaloriesBurned = caloriesPerMinute * timeInMinutes;
-
-  return totalCaloriesBurned;
-}
+export const calculateCaloriesBurned = (jumps: number, time: number) => {
+  if (jumps === 0) return 0;
+  // ... rest of the calculation
+  return Math.floor(jumps * 0.2);
+};
 
 // Start the camera stream
 // export const startCamera = async (video: any) => {

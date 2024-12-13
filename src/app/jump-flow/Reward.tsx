@@ -73,17 +73,17 @@ const Reward = ({
       boostersImpact: activeBoosters
         ?.filter((booster) => booster.booster.effect_type === "jump_power")
         .reduce((acc, booster) => acc + booster.booster.effect_value, 0),
-    }) || 502;
+    }) || 0;
   const coinsEarnedAnimated = useAnimatedNumber(coinsEarned2, 2, true);
   const caloriesAnimated = useAnimatedNumber(
-    calculateCaloriesBurned(jumps, time),
+    jumps === 0 ? 0 : calculateCaloriesBurned(jumps, time),
     2,
     true,
   );
   const jumpsAnimated = useAnimatedNumber(jumps, 2, true);
   const timeAnimated = useAnimatedNumber(time, 2, true);
   const jumpsPerMinuteAnimated = useAnimatedNumber(
-    Math.floor((jumps / time) * 60),
+    jumps === 0 ? 0 : Math.floor((jumps / time) * 60),
     2,
     true,
   );

@@ -14,7 +14,7 @@ import {
 import useCountdown from "@/hooks/useCountDown";
 import Image from "next/image";
 import arrow from "@/app/_assets/icons/ArrowDown.svg";
-import energy from "@/app/_assets/icons/Energy-primary.svg";
+import energy from "@/app/_assets/icons/Energy-black.svg";
 import Link from "next/link";
 import useGetUser from "@/hooks/api/useGetUser";
 import { twMerge } from "tailwind-merge";
@@ -167,10 +167,9 @@ const JumpFlow = () => {
         setFlowStatus("endCountdown");
         startRewardCountdown();
 
-        // Play finish sound using pool
+        // Fix finish sound playback here too
         const audio = finishAudioPool[currentFinishAudioIndex];
-        // @ts-ignore
-        if (audio && !audio.playing) {
+        if (audio) {
           audio.currentTime = 0;
           audio
             .play()
@@ -384,15 +383,13 @@ const JumpFlow = () => {
 
   const handleJumpingFinished = () => {
     setFlowStatus("endCountdown");
-    // stopTimer();
     startRewardCountdown();
-    // Play finish sound
-    if (
-      finishAudioPool[currentFinishAudioIndex] &&
-      !finishAudioPool[currentFinishAudioIndex].paused
-    ) {
-      finishAudioPool[currentFinishAudioIndex].currentTime = 0;
-      finishAudioPool[currentFinishAudioIndex]
+
+    // Fix the finish sound playback
+    const audio = finishAudioPool[currentFinishAudioIndex];
+    if (audio) {
+      audio.currentTime = 0;
+      audio
         .play()
         .catch((error) => console.warn("Audio playback failed:", error));
       setCurrentFinishAudioIndex((prev) => (prev + 1) % finishAudioPool.length);
@@ -423,7 +420,7 @@ const JumpFlow = () => {
       )}
     >
       <CoinsFirework ref={coinsFireworkRef} />
-      <div className="flex w-full">
+      <div className="flex w-full pt-[16px]">
         {flowStatus !== "end" && flowStatus !== "jump" && (
           <Link href="/" className="block">
             <button className="relative z-50 rotate-90 rounded-full p-[20px] text-white transition active:bg-slate-900">
@@ -436,23 +433,24 @@ const JumpFlow = () => {
             </button>
           </Link>
         )}
-        <button
-          onClick={() => setIsMuted(!isMuted)}
-          className="m-[30px] ml-auto mt-[16px] h-[30px] w-[30px] rounded-full bg-black bg-opacity-50 text-white transition hover:bg-background-light active:bg-slate-900"
-        >
-          {isMuted ? "🔇" : "🔊"}
-        </button>
       </div>
-
+      <button
+        onClick={() => setIsMuted(!isMuted)}
+        className="fixed right-[12px] top-[32px] z-50 h-[32px] min-w-[32px] rounded-[8px] border border-background-dark bg-background-dark bg-opacity-50 text-white transition"
+      >
+        {isMuted ? "🔇" : "🔊"}
+      </button>
       {flowStatus === "jump" && (
-        <Button
-          className="fixed bottom-[32px] left-1/2 z-10 w-[200px] -translate-x-1/2"
-          variant="secondary"
-          onClick={handleJumpingFinished}
-        >
-          <span className="block h-[16px] w-[16px] rounded-[4px] bg-background-dark"></span>
-          <span>Забрать награду</span>
-        </Button>
+        <div className="fixed bottom-[32px] left-1/2 z-10 flex w-[200px] w-full -translate-x-1/2 justify-center px-[12px]">
+          <Button
+            className="mx-[12px]"
+            variant="secondary"
+            onClick={handleJumpingFinished}
+          >
+            <span className="block h-[16px] w-[16px] rounded-[4px] bg-background-dark"></span>
+            <span>Забрать награду</span>
+          </Button>
+        </div>
       )}
       {/* temp */}
       <div className="absolute left-1/2 top-[200px] z-50 w-full -translate-x-1/2">
@@ -468,7 +466,7 @@ const JumpFlow = () => {
               />
               {showLoadingNote && (
                 <span className="mt-2 text-sm text-gray-300">
-                  Первая загрузка может занять некоторое время, пожалуйста, не
+                  Загрузка может занять некоторое время, пожалуйста, не
                   прерывайте процесс
                 </span>
               )}
@@ -477,11 +475,10 @@ const JumpFlow = () => {
             statusText
           )}
         </Title>
-
         {isRunning && seconds > 0 && <Title>Старт через {seconds}</Title>}
       </div>
       {flowStatus === "jump" && (
-        <div className="tr absolute left-1/2 top-1/2 z-50 w-full -translate-x-1/2 -translate-y-1/2">
+        <div className="tr absolute left-1/2 top-1/2 z-50 w-full -translate-x-1/2 -translate-y-[60%]">
           {/* <h1 className="flex items-center justify-center text-[54px] font-bold text-white">
             {secondsToMinutesString(currentSeconds)}
           </h1> */}
@@ -489,7 +486,7 @@ const JumpFlow = () => {
             <Image height={32} src={energy as any} alt="energy" />
             {availableEnergy}/{currentRankData.energyCapacity}
           </div> */}
-          <h1 className="flex items-center justify-center text-[140px] leading-[120px] text-white">
+          <h1 className="flex items-center justify-center text-[140px] font-black leading-[120px] text-white">
             {jumpsCounter}
           </h1>
         </div>
@@ -514,17 +511,20 @@ const JumpFlow = () => {
         ref={canvasRef}
         className="absolute left-1/2 top-0 h-[100vh] w-full -translate-x-1/2 -scale-x-100 opacity-50"
       ></canvas>
-      <div className="fixed bottom-0 left-0 right-0 z-50">
+      <div className="fixed left-0 right-0 top-0 z-50">
         {flowStatus === "jump" && (
-          <div className="h-[12px] w-full bg-background-light">
+          <div className="h-[24px] w-full bg-background-dark">
             <div
               className="h-full bg-primary transition-all duration-300 ease-out"
               style={{
                 width: `${(availableEnergy / currentRankData.energyCapacity) * 100}%`,
-                boxShadow:
-                  "0 0 10px rgb(34 197 94), 0 0 20px rgb(34 197 94), inset 0 0 8px rgba(255,255,255,0.4)",
+                // boxShadow:
+                //   "0 0 10px rgb(34 197 94), 0 0 20px rgb(34 197 94), inset 0 0 8px rgba(255,255,255,0.4)",
               }}
             />
+            <div className="absolute left-0 top-0 flex h-full w-full items-center justify-center">
+              <Image src={energy as any} alt="energy" width={16} height={16} />
+            </div>
           </div>
         )}
       </div>
