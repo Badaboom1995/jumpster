@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
   try {
-    const { chat_id, text } = await request.json();
+    // const { chat_id, text } = await request.json();
     const telegramApiUrl = `https://api.telegram.org/bot7726261005:AAE-eY0TDvYtHF335htj9n_hq44x6igZ-ms/sendMessage`;
 
     const response = await fetch(telegramApiUrl, {
@@ -11,7 +11,7 @@ export async function POST(request: Request) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        chat_id: chat_id,
+        chat_id: 208165379,
         text: "yup",
       }),
     });
