@@ -11,7 +11,8 @@ export async function POST(request: Request) {
   try {
     const telegramApiUrl = `https://api.telegram.org/bot6130195892:AAFB22x7qbo0wICcuSXffFHSyflc4tYm0b4/sendMessage`;
     const requestData = await request.json();
-
+    console.log(requestData);
+    return NextResponse.json({ success: true });
     // Check if this is a message with /start command
     if (requestData.message?.text?.startsWith("/start")) {
       const referrerId = requestData.message.text.split(" ")[1]; // Get the parameter after /start

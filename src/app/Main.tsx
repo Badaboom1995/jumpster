@@ -51,7 +51,6 @@ import CoinsFirework, {
   CoinsFireworkRef,
 } from "@/components/CoinsFirework/CoinsFirework";
 import coinSound from "@/app/_assets/audio/collect.mp3";
-import VideoMirror from "@/components/VideoMirror";
 
 type StatsProps = {
   coins: number;
@@ -99,13 +98,13 @@ const Main = () => {
   const coinsFireworkRef = useRef<CoinsFireworkRef>(null);
 
   useEffect(() => {
-    const { totalCoins, totalPassiveCoins, totalExperience, sessions } =
-      simulateTotalIncome(180, 3);
-    console.log(
-      totalCoins.toLocaleString(),
-      totalPassiveCoins.toLocaleString(),
-      sessions,
-    );
+    // const { totalCoins, totalPassiveCoins, totalExperience, sessions } =
+    //   simulateTotalIncome(180, 3);
+    // console.log(
+    //   totalCoins.toLocaleString(),
+    //   totalPassiveCoins.toLocaleString(),
+    //   sessions,
+    // );
     audioRef.current = new Audio(coinSound);
     if (audioRef.current) {
       audioRef.current.volume = 0.2;
