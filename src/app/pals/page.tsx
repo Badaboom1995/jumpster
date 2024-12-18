@@ -1,11 +1,14 @@
 import React from "react";
+import ReferralSystem from "./ReferralSystem";
 
 const Page = () => {
   return (
-    <div>
-      <h1 className="fixed left-1/2 top-1/2 w-full -translate-x-1/2 -translate-y-1/2 text-center text-[32px] font-bold text-background-light">
-        Coming soon
-      </h1>
+    <div className="p-4">
+      <h1 className="mb-2 text-[32px] font-bold text-white">Друзья</h1>
+      <p className="mb-[24px] text-gray-400">
+        Приглашай друзей и зарабатывайте больше вместе
+      </p>
+      <ReferralSystem />
     </div>
   );
 };

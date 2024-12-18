@@ -36,7 +36,7 @@ export const ranks = [
   {
     id: 3,
     name: "Любитель",
-    coins_per_jump: 20,
+    coins_per_jump: 15,
     passive_coins: 100,
     experience: 90,
     energyCapacity: 4500,
@@ -47,7 +47,7 @@ export const ranks = [
   {
     id: 4,
     name: "Устремленный",
-    coins_per_jump: 35,
+    coins_per_jump: 20,
     passive_coins: 500,
     experience: 225,
     energyCapacity: 8000,
@@ -58,7 +58,7 @@ export const ranks = [
   {
     id: 5,
     name: "Продвинутый",
-    coins_per_jump: 60,
+    coins_per_jump: 30,
     passive_coins: 2000,
     experience: 800,
     energyCapacity: 10000,
@@ -69,7 +69,7 @@ export const ranks = [
   {
     id: 6,
     name: "Атлет",
-    coins_per_jump: 100,
+    coins_per_jump: 50,
     passive_coins: 5000,
     experience: 2000,
     energyCapacity: 12000,
@@ -79,9 +79,9 @@ export const ranks = [
   {
     id: 7,
     name: "Профессионал",
-    coins_per_jump: 150,
+    coins_per_jump: 75,
     passive_coins: 10000,
-    experience: 3000,
+    experience: 4000,
     energyCapacity: 15000,
     recoveryRate: 8.333,
     url: roo6 as any,
@@ -89,9 +89,9 @@ export const ranks = [
   {
     id: 8,
     name: "Мастер",
-    coins_per_jump: 225,
+    coins_per_jump: 100,
     passive_coins: 20000,
-    experience: 6000,
+    experience: 8000,
     energyCapacity: 20000,
     recoveryRate: 11.111,
     url: roo7 as any,
@@ -99,9 +99,9 @@ export const ranks = [
   {
     id: 9,
     name: "Чемпион",
-    coins_per_jump: 400,
+    coins_per_jump: 150,
     passive_coins: 50000,
-    experience: 10000,
+    experience: 15000,
     energyCapacity: 30000,
     recoveryRate: 16.667,
     url: roo8 as any,
@@ -109,9 +109,9 @@ export const ranks = [
   {
     id: 10,
     name: "Легенда",
-    coins_per_jump: 600,
+    coins_per_jump: 200,
     passive_coins: 100000,
-    experience: 15000,
+    experience: 20000,
     energyCapacity: 50000,
     recoveryRate: 25,
     url: roo9 as any,
@@ -119,14 +119,39 @@ export const ranks = [
   {
     id: 11,
     name: "Супергерой",
-    coins_per_jump: 1000,
+    coins_per_jump: 300,
     passive_coins: 200000,
-    experience: 20000,
+    experience: 30000,
     energyCapacity: 100000,
     recoveryRate: 41.667,
     url: roo10 as any,
   },
 ];
+
+export const simulateTotalIncome = (
+  number_of_days: number,
+  daily_sessions: number,
+) => {
+  const numberOfSessions = number_of_days * daily_sessions;
+  let totalCoins = 0;
+  let totalPassiveCoins = 0;
+  let totalExperience = 0;
+  const sessions = [];
+  for (let i = 0; i < numberOfSessions; i++) {
+    const currentRank = getRankData(totalExperience);
+    const coinsPerJump = currentRank?.coins_per_jump;
+    const jumpsNumber = currentRank?.energyCapacity / 100;
+    const coinsEarned = jumpsNumber * coinsPerJump + currentRank?.passive_coins;
+    totalCoins += coinsEarned;
+    totalPassiveCoins += currentRank?.passive_coins + 940;
+    totalExperience += jumpsNumber;
+    sessions.push({
+      coins: coinsEarned,
+      experience: jumpsNumber,
+    });
+  }
+  return { totalCoins, totalPassiveCoins, totalExperience, sessions };
+};
 
 export const getDifferenceInSeconds = (
   timestamp1: string,

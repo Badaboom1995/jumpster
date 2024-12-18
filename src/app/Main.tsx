@@ -13,6 +13,7 @@ import {
   getObjectSearchParams,
   getRankData,
   ranks,
+  simulateTotalIncome,
   updateStreak,
 } from "@/utils";
 
@@ -98,6 +99,13 @@ const Main = () => {
   const coinsFireworkRef = useRef<CoinsFireworkRef>(null);
 
   useEffect(() => {
+    const { totalCoins, totalPassiveCoins, totalExperience, sessions } =
+      simulateTotalIncome(180, 3);
+    console.log(
+      totalCoins.toLocaleString(),
+      totalPassiveCoins.toLocaleString(),
+      sessions,
+    );
     audioRef.current = new Audio(coinSound);
     if (audioRef.current) {
       audioRef.current.volume = 0.2;

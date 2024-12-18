@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "react-query";
 import { supabase } from "@/components/Root/Root";
 import useGetUser from "@/hooks/api/useGetUser";
 import { QuestCard, type Quest } from "./components/QuestCard";
+
 import CoinsFirework, {
   CoinsFireworkRef,
 } from "@/components/CoinsFirework/CoinsFirework";
@@ -108,10 +109,10 @@ const QuestsView: React.FC = () => {
   // if (!quests) return null;
 
   return (
-    <div className="relative px-[16px] py-[24px]">
+    <div className="relative px-[16px] py-4">
       <CoinsFirework ref={coinsFireworkRef} />
 
-      <h1 className="mb-2 text-[24px] font-bold text-white">Задания</h1>
+      <h1 className="text-[32px] font-bold text-white">Задания</h1>
 
       <p className="mb-[24px] text-gray-400">
         Выполняй задания и получай опыт для своего персонажа
