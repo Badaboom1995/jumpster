@@ -16,11 +16,12 @@ export async function POST(request: Request) {
     if (requestData.message?.text?.startsWith("/start")) {
       const referrerId = requestData.message.text.split(" ")[1]; // Get the parameter after /start
       const userTelegramId = requestData.message.from.id;
+
       // check if user exists
       const { data: user, error: userError } = await supabase
         .from("users")
         .select("*")
-        .eq("telegram_id", userTelegramId.toString())
+        .eq("telegram_id", userTelegramId)
         .single();
 
       if (userError) {
@@ -50,6 +51,7 @@ export async function POST(request: Request) {
             text: "Аккаунт уже зарегистрирован. Вы не можете быть приглашены другим пользователем.",
           }),
         });
+        console.log("user already exists");
         return NextResponse.json(
           { error: "Аккаунт уже зарегистрирован" },
           { status: 400 },
@@ -62,13 +64,15 @@ export async function POST(request: Request) {
         });
         const newUser: any = data;
         const newUserId = newUser.id;
-        // create referral
-        const { data: referral, error: referralError } = await supabase
-          .from("referrals")
-          .insert({
-            referrer_id: referrerId,
-            referred_user_id: newUserId,
-          });
+        if (referrerId) {
+          // create referral
+          const { data: referral, error: referralError } = await supabase
+            .from("referrals")
+            .insert({
+              referrer_id: referrerId,
+              referred_user_id: newUserId,
+            });
+        }
       }
 
       // Send welcome message
