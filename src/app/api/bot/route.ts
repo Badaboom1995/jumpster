@@ -1,14 +1,8 @@
 import { NextResponse } from "next/server";
 
-const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
-const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
-
 export async function POST(request: Request) {
   try {
-    if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) {
-      throw new Error("Telegram configuration is missing");
-    }
-
+    const { chat_id, text } = await request.json();
     const telegramApiUrl = `https://api.telegram.org/bot7726261005:AAE-eY0TDvYtHF335htj9n_hq44x6igZ-ms/sendMessage`;
 
     const response = await fetch(telegramApiUrl, {
@@ -17,7 +11,7 @@ export async function POST(request: Request) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        chat_id: TELEGRAM_CHAT_ID,
+        chat_id: chat_id,
         text: "yup",
       }),
     });
