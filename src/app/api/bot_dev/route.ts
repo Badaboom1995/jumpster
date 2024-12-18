@@ -10,35 +10,65 @@ const supabase = createClient(
 export async function POST(request: Request) {
   try {
     const telegramApiUrl = `https://api.telegram.org/bot6130195892:AAFB22x7qbo0wICcuSXffFHSyflc4tYm0b4/sendMessage`;
-    const data = await request.json();
+    const requestData = await request.json();
 
     // Check if this is a message with /start command
-    if (data.message?.text?.startsWith("/start")) {
-      const referrerId = data.message.text.split(" ")[1]; // Get the parameter after /start
-      const userId = data.message.from.id;
+    if (requestData.message?.text?.startsWith("/start")) {
+      const referrerId = requestData.message.text.split(" ")[1]; // Get the parameter after /start
+      const userTelegramId = requestData.message.from.id;
+      // check if user exists
+      const { data: user, error: userError } = await supabase
+        .from("users")
+        .select("*")
+        .eq("telegram_id", userTelegramId.toString())
+        .single();
 
-      if (referrerId) {
-        // First, create or update the user
-        const { error: userError } = await supabase.from("users").upsert({
-          id: userId,
-          telegram_id: userId.toString(),
-          // Add other user fields as needed
+      if (userError) {
+        // send error message
+        await fetch(telegramApiUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            chat_id: userTelegramId,
+            text: "Ошибка при проверке аккаунта. Попробуйте позже.",
+          }),
         });
+        return NextResponse.json({ error: userError.message }, { status: 400 });
+      }
 
-        if (userError) throw userError;
-
-        // Then create the referral record if referrer exists
-        if (referrerId !== userId.toString()) {
-          // Prevent self-referrals
-          const { error: referralError } = await supabase
-            .from("referrals")
-            .insert({
-              referrer_id: referrerId,
-              referred_user_id: userId,
-              created_at: new Date().toISOString(),
-            });
-          if (referralError) throw referralError;
-        }
+      if (user) {
+        // user can be referred, send error message
+        await fetch(telegramApiUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            chat_id: userTelegramId,
+            text: "Аккаунт уже зарегистрирован. Вы не можете быть приглашены другим пользователем.",
+          }),
+        });
+        return NextResponse.json(
+          { error: "Аккаунт уже зарегистрирован" },
+          { status: 400 },
+        );
+      } else {
+        // create user
+        const { data, error: userError } = await supabase.from("users").insert({
+          telegram_id: userTelegramId.toString(),
+          username: requestData.message.from.username,
+        });
+        const newUser: any = data;
+        const newUserId = newUser.id;
+        // create referral
+        const { data: referral, error: referralError } = await supabase
+          .from("referrals")
+          .insert({
+            referrer_id: referrerId,
+            referred_user_id: newUserId,
+          });
       }
 
       // Send welcome message
@@ -52,7 +82,7 @@ export async function POST(request: Request) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          chat_id: userId,
+          chat_id: userTelegramId,
           text: welcomeMessage,
         }),
       });
