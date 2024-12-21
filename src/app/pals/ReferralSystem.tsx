@@ -10,6 +10,7 @@ import { getRankData } from "@/utils";
 import Image from "next/image";
 import coin from "@/app/_assets/images/coin.png";
 import { PostgrestResponse } from "@supabase/supabase-js";
+import { div } from "@tensorflow/tfjs-core";
 
 interface Referral {
   id: string;
@@ -79,7 +80,9 @@ const ReferralSystem = () => {
 
   const referralLink = `https://t.me/Jumpster_bot?start=${user?.id}`;
   // get referrals with reffered user field
-  const { data: referrals } = useQuery<PostgrestResponse<any>>({
+  const { data: referrals, isLoading: referralsLoading } = useQuery<
+    PostgrestResponse<any>
+  >({
     queryKey: ["referrals", user?.id],
     queryFn: async () => {
       return supabase
@@ -108,7 +111,7 @@ const ReferralSystem = () => {
   );
 
   const calculateBonusIncome = (hourlyIncome: number) => {
-    return Math.round(hourlyIncome * 0.2) + 1;
+    return Math.ceil(hourlyIncome * 0.2);
   };
 
   const copyToClipboard = () => {
@@ -141,8 +144,14 @@ const ReferralSystem = () => {
 
         {/* Scrollable Content */}
         <div className="h-full overflow-y-auto pt-[4px]">
+          {referralsLoading && (
+            <div className="flex h-full items-center justify-center">
+              <div className="h-[30px] w-[30px] animate-bounce rounded-full bg-white" />
+            </div>
+          )}
           <div className="space-y-4">
-            {(!referrals?.data || referrals.data.length === 0) && (
+            {(!referrals?.data ||
+              (referrals.data.length === 0 && !referralsLoading)) && (
               <ReferralGuide />
             )}
             {referrals?.data?.map((referral, index) => (
@@ -153,31 +162,33 @@ const ReferralSystem = () => {
                 <div className="flex w-full items-center gap-4">
                   {getAvatarByExp(referral.users.experience)}
                   <div className="grow">
-                    <h3 className="text-[16px] font-semibold text-white">
+                    <h3 className="mb-[8px] text-[16px] font-semibold text-white">
                       {referral.users.username}
                     </h3>
 
-                    <p className="text-[12px] text-sm text-white">
+                    <p className="flex items-center gap-1 text-[12px] text-sm text-white">
                       <span>
-                        {getRankData(referral.users.experience).name} |{" "}
+                        {getRankData(referral.users.experience).name}&nbsp;
                       </span>
-                      {referral.users.user_parameters
-                        .find((item) => item.name === "coins")
-                        ?.value.toLocaleString()}
+                      <span className="inline-block h-[4px] w-[4px] rounded-full bg-white" />
+                      <div className="flex items-center gap-1">
+                        <Image src={coin} alt="coin" width={20} height={20} />
+                        {referral.users.user_parameters
+                          .find((item) => item.name === "coins")
+                          ?.value.toLocaleString()}
+                      </div>
                     </p>
                   </div>
-                  <p className="flex items-center text-[20px] font-bold text-white">
-                    <Image src={coin} alt="coin" width={30} height={30} />
-                    {passiveIncomeQueries[index]?.data
-                      ? `+${calculateBonusIncome(
-                          passiveIncomeQueries[index].data,
-                        )}`
-                      : "Loading..."}
-                    {/* {calculateBonusIncome(
-                      referral.users.user_parameters.find(
-                        (item) => item.name === "coins",
-                      )?.recovery_rate,
-                    )} */}
+                  <p className="flex items-center gap-1 text-[20px] font-bold text-white">
+                    {passiveIncomeQueries[index]?.data ? (
+                      <div className="flex items-center gap-1">
+                        +
+                        {calculateBonusIncome(passiveIncomeQueries[index].data)}
+                        <Image src={coin} alt="coin" width={30} height={30} />
+                      </div>
+                    ) : (
+                      <div className="h-[30px] w-[60px] animate-pulse rounded-[12px] bg-background-light" />
+                    )}
                   </p>
                 </div>
               </div>
