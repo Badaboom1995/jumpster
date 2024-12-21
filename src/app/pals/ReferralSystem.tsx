@@ -79,7 +79,7 @@ const ReferralSystem = () => {
   const [showCurtain, setShowCurtain] = useState(false);
 
   const referralLink = `https://t.me/Jumpster_bot?start=${user?.id}`;
-  // get referrals with reffered user field
+  // get referrals and referrer with reffered user field
   const { data: referrals, isLoading: referralsLoading } = useQuery<
     PostgrestResponse<any>
   >({
@@ -95,9 +95,26 @@ const ReferralSystem = () => {
     enabled: !!user?.id,
   });
 
+  const { data: referrer, isLoading: isReferrerLoading } = useQuery<
+    PostgrestResponse<any>
+  >({
+    queryKey: ["referrer", user?.id],
+    queryFn: async () => {
+      return supabase
+        .from("referrals")
+        .select(
+          "users!referrals_referrer_id_fkey(id, username, experience, user_parameters(*))",
+        )
+        .eq("referred_user_id", user?.id);
+    },
+    enabled: !!user?.id,
+  });
+
+  const linkedUsers = [...(referrals?.data ?? []), ...(referrer?.data ?? [])];
+
   // Fetch passive income for each referral
   const passiveIncomeQueries = useQueries(
-    referrals?.data?.map((referral) => ({
+    linkedUsers?.map((referral) => ({
       queryKey: ["passiveIncome", referral.users.id],
       queryFn: async () => {
         const response = await fetch(
@@ -106,7 +123,7 @@ const ReferralSystem = () => {
         const data: PassiveIncomeResponse = await response.json();
         return data.totalPassiveIncome;
       },
-      enabled: !!referrals?.data,
+      enabled: !!referrals?.data && !!referrer?.data,
     })) ?? [],
   );
 
@@ -150,11 +167,11 @@ const ReferralSystem = () => {
             </div>
           )}
           <div className="space-y-4">
-            {(!referrals?.data ||
-              (referrals.data.length === 0 && !referralsLoading)) && (
+            {(!linkedUsers ||
+              (linkedUsers.length === 0 && !referralsLoading)) && (
               <ReferralGuide />
             )}
-            {referrals?.data?.map((referral, index) => (
+            {linkedUsers?.map((referral, index) => (
               <div
                 key={referral.id}
                 className="mb-[12px] flex items-center justify-between rounded-lg bg-background-dark"
@@ -162,7 +179,7 @@ const ReferralSystem = () => {
                 <div className="flex w-full items-center gap-4">
                   {getAvatarByExp(referral.users.experience)}
                   <div className="grow">
-                    <h3 className="mb-[8px] text-[16px] font-semibold text-white">
+                    <h3 className="mb-[4px] text-[16px] font-semibold text-white">
                       {referral.users.username}
                     </h3>
 
