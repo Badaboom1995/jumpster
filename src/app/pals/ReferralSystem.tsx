@@ -136,7 +136,7 @@ const ReferralSystem = () => {
   };
 
   return (
-    <div className="flex h-[calc(100vh-200px)] flex-col">
+    <div className="flex h-[calc(100vh-230px)] flex-col">
       {/* Scrollable Container with Shadows */}
       <div className="relative h-0 grow">
         {/* Top Shadow */}
