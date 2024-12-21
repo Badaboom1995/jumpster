@@ -39,7 +39,7 @@ const ReferralGuide = () => {
           <div className="relative z-10 ml-[8px] mt-[4px] h-4 w-4 rounded-full border-2 border-background-dark bg-white" />
           <div>
             <p className="text-[16px] font-medium text-white">
-              Поделись приглашением
+              Поделись ссылкой
             </p>
             <p className="text-[13px] text-gray-400">
               Получи дополнительный бустер
@@ -78,7 +78,7 @@ const ReferralSystem = () => {
   const [copied, setCopied] = useState(false);
   const [showCurtain, setShowCurtain] = useState(false);
 
-  const referralLink = `https://t.me/Jumpster_bot?start=${user?.id}`;
+  const referralLink = `https://t.me/badavoo_bot?start=${user?.id}`;
   // get referrals and referrer with reffered user field
   const { data: referrals, isLoading: referralsLoading } = useQuery<
     PostgrestResponse<any>

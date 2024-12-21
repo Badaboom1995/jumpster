@@ -8,13 +8,12 @@ import earnIcon from "@/app/_assets/icons/DollarCoin.svg";
 import earnOutlineIcon from "@/app/_assets/icons/DollarCoinOutlined.svg";
 import friendsIcon from "@/app/_assets/icons/People.svg";
 import friendsOutlineIcon from "@/app/_assets/icons/PeopleOutlined.svg";
-import walletIcon from "@/app/_assets/icons/Wallet.svg";
-import walletOutlineIcon from "@/app/_assets/icons/WalletOutlined.svg";
 import barbel from "@/app/_assets/icons/Barbell-1.svg";
 import barbelOutline from "@/app/_assets/icons/Barbell.svg";
+import crownIcon from "@/app/_assets/icons/crown.svg";
+import crownOutlineIcon from "@/app/_assets/icons/crown-1.svg";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import saved from "@/app/_assets/icons/Saved.svg";
 
 const Navitem = ({
   children,
@@ -66,6 +65,16 @@ const Footer = () => {
           }
         >
           Доход
+        </Navitem>
+        <Navitem
+          href="/leaderboard"
+          src={
+            !checkIfActive("/leaderboard")
+              ? (crownOutlineIcon as any)
+              : (crownIcon as any)
+          }
+        >
+          Ранг
         </Navitem>
         <Navitem
           href="/earn"
