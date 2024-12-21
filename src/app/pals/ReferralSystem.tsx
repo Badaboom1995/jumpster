@@ -1,10 +1,15 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Button from "@/components/Button";
 import Curtain from "@/components/Curtain";
 import useGetUser from "@/hooks/api/useGetUser";
-import { useQuery } from "react-query";
+import { useQuery, useQueries } from "react-query";
+import { supabase } from "@/components/Root/Root";
+import { getRankData } from "@/utils";
+import Image from "next/image";
+import coin from "@/app/_assets/images/coin.png";
+import { PostgrestResponse } from "@supabase/supabase-js";
 
 interface Referral {
   id: string;
@@ -13,13 +18,98 @@ interface Referral {
   balance: number;
 }
 
+interface ReferralData {
+  data?: any[];
+  error?: any;
+}
+
+interface PassiveIncomeResponse {
+  totalPassiveIncome: number;
+}
+
+const ReferralGuide = () => {
+  return (
+    <div className="rounded-lg bg-background-dark pt-[24px]">
+      <div className="relative flex flex-col gap-y-6">
+        {/* Vertical line */}
+        <div className="absolute left-[15px] top-[16px] h-[calc(100%-56px)] w-[2px] bg-white" />
+
+        <div className="flex items-start gap-4">
+          <div className="relative z-10 ml-[8px] mt-[4px] h-4 w-4 rounded-full border-2 border-background-dark bg-white" />
+          <div>
+            <p className="text-[16px] font-medium text-white">
+              Поделись приглашением
+            </p>
+            <p className="text-[13px] text-gray-400">
+              Получи дополнительный бустер
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-start gap-4">
+          <div className="relative z-10 ml-[8px] mt-[4px] h-4 w-4 rounded-full border-2 border-background-dark bg-white" />
+          <div>
+            <p className="text-[16px] font-medium text-white">
+              Друзья присоединяются к Jumpster
+            </p>
+            <p className="text-[13px] text-gray-400">
+              И начинают зарабатывать очки
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-start gap-4">
+          <div className="relative z-10 ml-[8px] mt-[4px] h-4 w-4 rounded-full border-2 border-background-dark bg-white" />
+          <div>
+            <p className="text-[16px] font-medium text-white">
+              Зарабатывай 10% от друзей
+            </p>
+            <p className="text-[13px] text-gray-400">Плюс 2.5% от их друзей</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const ReferralSystem = () => {
   const { user } = useGetUser();
   const [copied, setCopied] = useState(false);
   const [showCurtain, setShowCurtain] = useState(false);
 
   const referralLink = `https://t.me/Jumpster_bot?start=${user?.id}`;
-  const referrals = [];
+  // get referrals with reffered user field
+  const { data: referrals } = useQuery<PostgrestResponse<any>>({
+    queryKey: ["referrals", user?.id],
+    queryFn: async () => {
+      return supabase
+        .from("referrals")
+        .select(
+          "*, users!referrals_referred_user_id_fkey(id, username, experience, user_parameters(*))",
+        )
+        .eq("referrer_id", user?.id);
+    },
+    enabled: !!user?.id,
+  });
+
+  // Fetch passive income for each referral
+  const passiveIncomeQueries = useQueries(
+    referrals?.data?.map((referral) => ({
+      queryKey: ["passiveIncome", referral.users.id],
+      queryFn: async () => {
+        const response = await fetch(
+          `/api/getPassiveCoins?user_id=${referral.users.id}`,
+        );
+        const data: PassiveIncomeResponse = await response.json();
+        return data.totalPassiveIncome;
+      },
+      enabled: !!referrals?.data,
+    })) ?? [],
+  );
+
+  const calculateBonusIncome = (hourlyIncome: number) => {
+    return Math.round(hourlyIncome * 0.2) + 1;
+  };
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(referralLink);
@@ -27,48 +117,86 @@ const ReferralSystem = () => {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const calculateBonusIncome = (hourlyIncome: number) => {
-    return (hourlyIncome * 0.2).toFixed(2);
+  const getAvatarByExp = (exp: number) => {
+    const rankData = getRankData(exp);
+    return (
+      <div className="h-[50px] w-[50px] overflow-hidden rounded-full border-2 border-background">
+        <Image
+          className="translate-x-[-37px] translate-y-[-5px]"
+          src={rankData.url}
+          alt={rankData.name}
+          width={120}
+          height={120}
+        />
+      </div>
+    );
   };
 
   return (
-    <div className="flex min-h-[calc(100vh-200px)] flex-col justify-between">
-      <div className="space-y-6">
-        {/* Referrals List */}
-        <div className="space-y-4">
-          {referrals?.length === 0 && (
-            <p className="text-gray-400">У вас пока нет приглашенных друзей</p>
-          )}
-          {referrals?.map((referral) => (
-            <div
-              key={referral.id}
-              className="flex items-center justify-between rounded-lg bg-background-dark p-4"
-            >
-              <div>
-                <h3 className="font-semibold">{referral.username}</h3>
-                <p className="text-sm text-gray-400">
-                  Balance: ${referral.balance.toFixed(2)}
-                </p>
-                <p className="text-sm text-gray-400">
-                  Hourly Income: ${referral.hourlyIncome.toFixed(2)}
-                </p>
+    <div className="flex h-[calc(100vh-200px)] flex-col">
+      {/* Scrollable Container with Shadows */}
+      <div className="relative h-0 grow">
+        {/* Top Shadow */}
+        <div className="pointer-events-none absolute top-0 z-10 h-4 w-full bg-gradient-to-b from-background-dark to-transparent" />
+
+        {/* Scrollable Content */}
+        <div className="h-full overflow-y-auto pt-[4px]">
+          <div className="space-y-4">
+            {(!referrals?.data || referrals.data.length === 0) && (
+              <ReferralGuide />
+            )}
+            {referrals?.data?.map((referral, index) => (
+              <div
+                key={referral.id}
+                className="mb-[12px] flex items-center justify-between rounded-lg bg-background-dark"
+              >
+                <div className="flex w-full items-center gap-4">
+                  {getAvatarByExp(referral.users.experience)}
+                  <div className="grow">
+                    <h3 className="text-[16px] font-semibold text-white">
+                      {referral.users.username}
+                    </h3>
+
+                    <p className="text-[12px] text-sm text-white">
+                      <span>
+                        {getRankData(referral.users.experience).name} |{" "}
+                      </span>
+                      {referral.users.user_parameters
+                        .find((item) => item.name === "coins")
+                        ?.value.toLocaleString()}
+                    </p>
+                  </div>
+                  <p className="flex items-center text-[20px] font-bold text-white">
+                    <Image src={coin} alt="coin" width={30} height={30} />
+                    {passiveIncomeQueries[index]?.data
+                      ? `+${calculateBonusIncome(
+                          passiveIncomeQueries[index].data,
+                        )}`
+                      : "Loading..."}
+                    {/* {calculateBonusIncome(
+                      referral.users.user_parameters.find(
+                        (item) => item.name === "coins",
+                      )?.recovery_rate,
+                    )} */}
+                  </p>
+                </div>
               </div>
-              <div className="text-right">
-                <p className="text-sm font-semibold text-green-400">
-                  Your Bonus: ${calculateBonusIncome(referral.hourlyIncome)}/hr
-                </p>
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
+
+        {/* Bottom Shadow */}
+        <div className="pointer-events-none absolute bottom-0 z-10 h-4 w-full bg-gradient-to-t from-background-dark to-transparent" />
       </div>
 
       {/* Button at Bottom */}
-      <div className="mt-auto pb-[40px] pt-4">
-        <Button onClick={() => setShowCurtain(true)}>Пригласить друга</Button>
+      <div className="mt-2 px-[4px]">
+        <Button onClick={() => setShowCurtain(true)} className="w-full">
+          Пригласить друга
+        </Button>
       </div>
 
-      {/* Curtain with Referral Link */}
+      {/* Curtain component remains unchanged */}
       <Curtain isOpen={showCurtain} onClose={() => setShowCurtain(false)}>
         <div className="p-4">
           <h2 className="mb-4 text-xl font-semibold text-white">
@@ -86,7 +214,7 @@ const ReferralSystem = () => {
             {copied ? "Скопировано!" : "Копировать ссылку"}
           </Button>
           <p className="mt-4 text-center text-sm text-gray-400">
-            Отправь эту ссылку друзьям и зарабатывай 20% от их дохода!
+            Отправь эту ссылку друзьям и зарабатывай 10% от их дохода!
           </p>
         </div>
       </Curtain>

@@ -1,5 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { NextRequest } from "next/server";
+import { getRankData } from "@/utils";
 
 const supabase = createClient(
   "https://adrdxahjylqbmxomhrmi.supabase.co",
@@ -9,9 +10,38 @@ const supabase = createClient(
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const userId = searchParams.get("user_id");
-  const coinsParam = await supabase
-    .from("users_parameters")
-    .select("*")
+
+  // fetch user
+  const { data, error } = await supabase
+    .from("users")
+    .select("experience, user_cards(earn_cards(*))")
     .eq("id", userId);
-  // return Response.json(res.data);
+
+  if (error) {
+    return Response.json({ error: error.message }, { status: 500 });
+  }
+
+  if (!data || data.length === 0) {
+    return Response.json({ error: "User not found" }, { status: 404 });
+  }
+
+  const user = data[0];
+  const rankData = getRankData(user.experience);
+
+  // Calculate total passive income from earn cards
+  const cardsPassiveIncome = user.user_cards.reduce((total, userCard) => {
+    // @ts-ignore
+    return total + (userCard.earn_cards?.passive_income || 0);
+  }, 0);
+
+  // Add rank passive income to cards passive income
+  const totalPassiveIncome =
+    // @ts-ignore
+    cardsPassiveIncome + (rankData.passive_coins || 0);
+
+  return Response.json({
+    data: data,
+    rankData: rankData,
+    totalPassiveIncome: totalPassiveIncome,
+  });
 }

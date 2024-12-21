@@ -11,34 +11,26 @@ export async function POST(request: Request) {
   try {
     const telegramApiUrl = `https://api.telegram.org/bot6130195892:AAFB22x7qbo0wICcuSXffFHSyflc4tYm0b4/sendMessage`;
     const requestData = await request.json();
-    console.log(requestData);
-    return NextResponse.json({ success: true });
+
     // Check if this is a message with /start command
     if (requestData.message?.text?.startsWith("/start")) {
       const referrerId = requestData.message.text.split(" ")[1]; // Get the parameter after /start
+      const refferrerNumberId = referrerId ? parseInt(referrerId) : null;
       const userTelegramId = requestData.message.from.id;
 
       // check if user exists
-      const { data: user, error: userError } = await supabase
+      const { data: user } = await supabase
         .from("users")
         .select("*")
         .eq("telegram_id", userTelegramId)
         .single();
+      // get referrer
 
-      if (userError) {
-        // send error message
-        await fetch(telegramApiUrl, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            chat_id: userTelegramId,
-            text: "Ошибка при проверке аккаунта. Попробуйте позже.",
-          }),
-        });
-        return NextResponse.json({ error: userError.message }, { status: 400 });
-      }
+      const { data: referrer } = await supabase
+        .from("users")
+        .select("*")
+        .eq("id", refferrerNumberId)
+        .single();
 
       if (user) {
         // user can be referred, send error message
@@ -59,41 +51,44 @@ export async function POST(request: Request) {
         );
       } else {
         // create user
-        const { data, error: userError } = await supabase.from("users").insert({
-          telegram_id: userTelegramId.toString(),
-          username: requestData.message.from.username,
-        });
-        const newUser: any = data;
-        const newUserId = newUser.id;
+        const { data: newUser, error: userError } = await supabase
+          .from("users")
+          .insert({
+            telegram_id: userTelegramId,
+            username: requestData.message.from.username,
+          })
+          .select()
+          .single();
+
         if (referrerId) {
           // create referral
-          const { data: referral, error: referralError } = await supabase
-            .from("referrals")
-            .insert({
-              referrer_id: referrerId,
-              referred_user_id: newUserId,
-            });
+          await supabase.from("referrals").insert({
+            referrer_id: refferrerNumberId,
+            referred_user_id: newUser.id,
+          });
+          // send message to referrer
+          await fetch(telegramApiUrl, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              chat_id: referrer.telegram_id,
+              text: `⭐️ Пользователь ${newUser.username} присоединился к Jumpster по вашей реферальной ссылке`,
+            }),
+          });
+          // send message to referred user
+          await fetch(telegramApiUrl, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              chat_id: userTelegramId,
+              text: "Реферальный код успешно применен",
+            }),
+          });
         }
-      }
-
-      // Send welcome message
-      const welcomeMessage = referrerId
-        ? "Welcome! You've been referred by another user."
-        : "Welcome to the bot!";
-
-      const response = await fetch(telegramApiUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          chat_id: userTelegramId,
-          text: welcomeMessage,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to send message to Telegram");
       }
     }
 
