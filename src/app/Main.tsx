@@ -18,6 +18,7 @@ import {
 } from "@/utils";
 
 import coin from "@/app/_assets/images/coin.png";
+import clickSound from "@/app/_assets/audio/click.wav";
 
 import "@tensorflow/tfjs-backend-webgl";
 import * as tf from "@tensorflow/tfjs-core";
@@ -38,15 +39,7 @@ import Character from "@/components/Character";
 import Header from "@/components/Header";
 import usePassiveIncome from "@/hooks/usePassiveIncome";
 import useCurrentCoinsReward from "@/hooks/useCurrentCoinsReward";
-// import Curtain from "@/components/Curtain";
-// import CoinsReward from "@/components/CoinsReward";
 import { useQueryClient } from "react-query";
-// import { twMerge } from "tailwind-merge";
-// import fire from "@/app/_assets/icons/Fire.svg";
-// import Card from "@/components/Card";
-// import JumpingCoinLoader from "@/app/Loader";
-// import Loader from "@/app/Loader";
-import { BoostersList } from "@/components/Boosters/BoostersList";
 import CoinsFirework, {
   CoinsFireworkRef,
 } from "@/components/CoinsFirework/CoinsFirework";
@@ -76,6 +69,7 @@ const Main = () => {
   const queryClient = useQueryClient();
   const searchParams = useSearchParams();
   const objectSearchParams = getObjectSearchParams(searchParams);
+
   const { user, isUserLoading } = useGetUser(false);
   // @ts-ignore
   const userParams = user?.user_parameters;
@@ -97,6 +91,8 @@ const Main = () => {
 
   const coinsFireworkRef = useRef<CoinsFireworkRef>(null);
 
+  const [isClaimingCoins, setIsClaimingCoins] = useState(false);
+
   useEffect(() => {
     // const { totalCoins, totalPassiveCoins, totalExperience, sessions } =
     //   simulateTotalIncome(180, 3);
@@ -114,23 +110,10 @@ const Main = () => {
   }, []);
 
   const handleClaimCoins = async (event: React.MouseEvent) => {
+    if (isClaimingCoins) return; // Prevent multiple clicks
+
     try {
-      // let particleCount = { min: 10, max: 20 };
-      // if (currentCoinsReward > 1000 && currentCoinsReward < 5000) {
-      //   particleCount = { min: 3, max: 5 };
-      // }
-      // if (currentCoinsReward > 5000 && currentCoinsReward < 10000) {
-      //   particleCount = { min: 5, max: 8 };
-      // }
-      // if (currentCoinsReward > 10000 && currentCoinsReward < 20000) {
-      //   particleCount = { min: 8, max: 12 };
-      // }
-      // if (currentCoinsReward > 20000 && currentCoinsReward < 50000) {
-      //   particleCount = { min: 12, max: 15 };
-      // }
-      // if (currentCoinsReward > 50000) {
-      //   particleCount = { min: 15, max: 20 };
-      // }
+      setIsClaimingCoins(true);
 
       // Start both sound and animation simultaneously
       const playPromise = audioRef.current?.play();
@@ -160,6 +143,8 @@ const Main = () => {
       await queryClient.invalidateQueries("user");
     } catch (e) {
       console.log(e);
+    } finally {
+      setIsClaimingCoins(false);
     }
   };
 
@@ -280,8 +265,16 @@ const Main = () => {
       queryClient.invalidateQueries("user");
     });
   }, [user]);
-
-  if (!user || isUserLoading || !userParams || !userStats) return null;
+  // @ts-ignore
+  if (
+    !user ||
+    isUserLoading ||
+    !userParams ||
+    !userStats ||
+    // @ts-ignore
+    !user?.onboarding_done
+  )
+    return null;
 
   return (
     <div className="flex h-full w-full flex-col overflow-hidden">
@@ -351,7 +344,14 @@ const Main = () => {
               {Math.ceil(currentEnergy) || 0}/{currentRankData?.energyCapacity}
             </span>
           </div>
-          <Link href="/boosters" className="flex items-center gap-[4px]">
+          <Link
+            href="/boosters"
+            className="flex items-center gap-[4px]"
+            onClick={() => {
+              const audio = new Audio(clickSound);
+              audio.play();
+            }}
+          >
             <Image src={saved as any} alt="boost" />
             <span>Буст</span>
           </Link>
@@ -359,18 +359,21 @@ const Main = () => {
       </div>
       <div className="mb-[12px] px-[16px]">
         {currentCoinsReward ? (
-          <Button onClick={handleClaimCoins} variant="secondary">
-            <div className="flex gap-[2px]">
-              <span className="mr-[4px]">Забрать</span>
-              <Image
-                src={coin as any}
-                width={28}
-                height={28}
-                // className="ml-[4px]"
-                alt="coin"
-              />{" "}
-              {currentCoinsReward}
-            </div>
+          <Button
+            onClick={handleClaimCoins}
+            variant="secondary"
+            disabled={isClaimingCoins}
+            className={isClaimingCoins ? "animate-pulse" : ""}
+          >
+            {isClaimingCoins ? (
+              "Загрузка..."
+            ) : (
+              <div className="flex gap-[2px]">
+                <span className="mr-[4px]">Забрать</span>
+                <Image src={coin as any} width={28} height={28} alt="coin" />
+                {currentCoinsReward}
+              </div>
+            )}
           </Button>
         ) : (
           <Link href="/pre-jump">

@@ -14,6 +14,7 @@ import crownIcon from "@/app/_assets/icons/crown.svg";
 import crownOutlineIcon from "@/app/_assets/icons/crown-1.svg";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import clickSound from "@/app/_assets/audio/click.wav";
 
 const Navitem = ({
   children,
@@ -24,10 +25,21 @@ const Navitem = ({
   src: string;
   href: string;
 }) => {
+  const handleClick = () => {
+    const audio = new Audio(clickSound);
+    audio.play();
+  };
+
   return (
-    <Link href={href}>
-      <li className="flex h-[50px] flex-col items-center gap-[4px] rounded-[12px] px-[8px] py-[4px] transition active:bg-background">
-        <Image src={src} width={24} height={24} alt="menu item" />
+    <Link href={href} onClick={handleClick}>
+      <li className="flex h-[50px] flex-col items-center justify-between gap-[4px] rounded-[12px] px-[8px] py-[4px] transition active:bg-background">
+        <Image
+          src={src}
+          width={24}
+          height={24}
+          alt="menu item"
+          className="max-h-[24px] min-h-[24px]"
+        />
         <p className="text-[12px] text-white">{children}</p>
       </li>
     </Link>

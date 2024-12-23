@@ -17,7 +17,8 @@ import pose from "@/app/_assets/images/pose_onboarding.png";
 import light from "@/app/_assets/images/light_onboarding.png";
 import many from "@/app/_assets/images/many_onboarding.png";
 import buttons from "@/app/_assets/images/interface_onboarding.png";
-
+import privacy from "@/app/_assets/images/privacy.png";
+import clickSound from "@/app/_assets/audio/click.wav";
 const PreJumpView = () => {
   const [showOnboarding, setShowOnboarding] = useState(true);
   const { user } = useGetUser();
@@ -64,27 +65,38 @@ const PreJumpView = () => {
       <div className="fixed left-0 top-0 z-50 h-[100vh] w-full overflow-scroll bg-background-dark">
         <Slider onFinish={handleFinishOnboarding}>
           <SlideTemplate
-            icon={pose}
-            title="Встань в кадр"
-            description="Убедитесь, что в кадре видно таз и по крайней мере половину тела. Так мы сможем точнее считать прыжки"
+            icon={privacy}
+            title="Приватность"
+            iconSlides={true}
+            description="Мы не записываем видео, не храним и не делимся вашими данными. Подсчет прыжков происходит прямо на вашем устройстве."
             onSkip={handleFinishOnboarding}
             first
           />
           <SlideTemplate
+            icon={pose}
+            title="Встань в кадр"
+            iconSlides={true}
+            description="Убедитесь, что в кадре видно таз и по крайней мере половину тела. Так мы сможем точнее считать прыжки."
+            onSkip={handleFinishOnboarding}
+          />
+          <SlideTemplate
             icon={light}
             title="Включи свет"
+            iconSlides={true}
             description="Можете прыгать на улице или в помещении, главное чтобы место было хорошо освещено и вас было отчетливо видно"
             onSkip={handleFinishOnboarding}
           />
           <SlideTemplate
             icon={many}
             title="Один в кадре"
+            iconSlides={true}
             description="В кадре должен быть только один человек, иначе камера может запутаться и посчитать прыжки неправильно"
             nextText="Далее"
           />
           <SlideTemplate
             icon={buttons}
             title="Уровень энергии"
+            iconSlides={true}
             description="Как только уровень энергии опустится до нуля игра закончится и ты получишь награду. Если хочешь завершить игру раньше нажми на кнопку внизу экрана"
             onNext={handleFinishOnboarding}
             nextText="Понятно"
@@ -97,7 +109,14 @@ const PreJumpView = () => {
   return (
     <div className="fixed left-0 top-0 z-50 flex h-[100vh] w-full animate-fadeReverse flex-col items-center bg-background-dark pt-[32px]">
       <Link href="/" className="fixed right-[8px] top-[8px] block">
-        <button className="right-[12px] top-[12px] z-50 rotate-90 rounded-full text-[24px] text-white transition active:bg-slate-900">
+        <button
+          onClick={() => {
+            // audio
+            const audio = new Audio(clickSound);
+            audio.play();
+          }}
+          className="right-[12px] top-[12px] z-50 rotate-90 rounded-full text-[24px] text-white transition active:bg-slate-900"
+        >
           &times;
         </button>
       </Link>
@@ -166,7 +185,14 @@ const PreJumpView = () => {
             </span>
             {/*<span>150,000/150,000</span>*/}
           </div>
-          <Link href="/boosters" className="flex gap-[4px]">
+          <Link
+            href="/boosters"
+            className="flex gap-[4px]"
+            onClick={() => {
+              const audio = new Audio(clickSound);
+              audio.play();
+            }}
+          >
             <Image src={saved as any} alt="boost" />
             <span>Буст</span>
           </Link>

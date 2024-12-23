@@ -34,16 +34,16 @@ export async function POST(request: Request) {
 
       if (user) {
         // user can be referred, send error message
-        await fetch(telegramApiUrl, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            chat_id: userTelegramId,
-            text: "Аккаунт уже зарегистрирован. Вы не можете быть приглашены другим пользователем.",
-          }),
-        });
+        // await fetch(telegramApiUrl, {
+        //   method: "POST",
+        //   headers: {
+        //     "Content-Type": "application/json",
+        //   },
+        //   body: JSON.stringify({
+        //     chat_id: userTelegramId,
+        //     text: "Аккаунт уже зарегистрирован. Вы не можете быть приглашены другим пользователем.",
+        //   }),
+        // });
         console.log("user already exists");
         return NextResponse.json(
           { error: "Аккаунт уже зарегистрирован" },

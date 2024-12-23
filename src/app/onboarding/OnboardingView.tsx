@@ -9,6 +9,8 @@ import star from "@/app/_assets/images/star.png";
 import tasks from "@/app/_assets/images/tasks.png";
 import time from "@/app/_assets/images/time.png";
 import prize from "@/app/_assets/images/prize.png";
+import privacy from "@/app/_assets/images/privacy.png";
+import play_lottie from "@/app/_assets/play_lottie.json";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import useGetUser from "@/hooks/api/useGetUser";
@@ -23,21 +25,12 @@ const OnboardingView = () => {
 
   const setOnboardingDone = async (user: User) => {
     try {
-      const { error } = await supabase
+      await supabase
         .from("users")
         .update({ onboarding_done: true })
         .eq("id", user?.id);
-
-      if (error) throw error;
-
-      // queryClient.setQueryData(["user"], (oldUser: any) => {
-      //   if (!oldUser) return oldUser;
-      //   return {
-      //     ...oldUser,
-      //     onboarding_done: true,
-      //   };
-      // });
-
+      // invalidate query
+      queryClient.invalidateQueries(["user"]);
       router.push("/");
     } catch (error) {
       console.error("Failed to update onboarding status:", error);
@@ -60,6 +53,8 @@ const OnboardingView = () => {
         <SlideTemplate
           icon={coin}
           title="Получай долю"
+          animate={true}
+          // @ts-ignore
           description={
             <p>
               <b>До 70% дохода</b> от рекламы отправляется в общий пул, который
@@ -71,45 +66,42 @@ const OnboardingView = () => {
         <SlideTemplate
           icon={prize}
           title="Прокачай атлета"
+          animate={true}
           description="Каждый прыжок – это опыт для твоего героя. Повышай уровень, чтобы получать ещё больше монет и доступ к новым привилегиям. Стартуй как новичок, стань легендой!"
-          // @ts-ignore
-          onSkip={() => user && setOnboardingDone(user)}
         />
         <SlideTemplate
           icon={star}
           title="Увеличивай доход"
+          animate={true}
           description="Заключай контракты со спонсорами, прокачивай социальные сети и покупай снаряжение. Чем сильнее и известнее твой герой, тем больше пассивного дохода он приносит!"
-          // @ts-ignore
-          onSkip={() => user && setOnboardingDone(user)}
         />
         <SlideTemplate
           icon={time}
           title="Поймай темп"
+          animate={true}
           description="Заходи чаще и получай больше наград.Прыгай каждый час, собирай монеты каждые 3 часа и не забудь про ежедневные награды!"
-          // @ts-ignore
-          onSkip={() => user && setOnboardingDone(user)}
         />
         <SlideTemplate
           icon={celeb}
           title="Собери команду"
-          description="За каждого приглашенного друга ты получаешь 25% от всех его доходов, а так же 10% от доходов его друзей. Вместе вы добъетесь большего!"
-          // @ts-ignore
-          onSkip={() => user && setOnboardingDone(user)}
+          animate={true}
+          description="За каждого приглашенного друга ты получаешь 10% от всех его доходов, а так же 2.5% от доходов его друзей. Вместе вы добъетесь большего!"
         />
         <SlideTemplate
           icon={tasks}
           title="Делай задания"
+          animate={true}
           description="Чтобы заработать еще больше монет - выполняй специальные задания. Задания обновляются ежедневно, не упусти свою возможность!"
-          // @ts-ignore
-          onSkip={() => user && setOnboardingDone(user)}
         />
         <SlideTemplate
-          title="Готово!"
-          icon={tasks}
-          description="Теперь ты можешь начать зарабатывать и получать награды!"
+          title="Начнем игру"
+          iconLottie={play_lottie}
+          last
+          // desription long
+          description="Играй честно, соревнуйся с друзьями и стань топовым атлетом в мире Jumpster. Веселой игры и больших призов!"
           // @ts-ignore
           onNext={() => user && setOnboardingDone(user)}
-          nextText="Начать"
+          nextText="Понятно, погнали!"
         />
       </Slider>
     </div>

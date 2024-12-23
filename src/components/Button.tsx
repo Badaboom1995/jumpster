@@ -2,6 +2,7 @@ import React from "react";
 import classNames from "classnames";
 import { twMerge } from "tailwind-merge";
 import Image from "next/image";
+import clickSound from "@/app/_assets/audio/click.wav";
 
 interface ButtonProps {
   children: React.ReactNode;
@@ -15,6 +16,8 @@ interface ButtonProps {
   loaderIcon?: React.ReactNode;
   disabled?: boolean;
   onClick?: (e: React.MouseEvent) => void;
+  muteSound?: boolean;
+  sound?: string;
 }
 
 const Button: React.FC<ButtonProps> = ({
@@ -26,7 +29,24 @@ const Button: React.FC<ButtonProps> = ({
   isLoading = false,
   disabled = false,
   onClick,
+  muteSound = false,
+  sound = clickSound,
 }) => {
+  const playClickSound = () => {
+    if (!muteSound) {
+      const audio = new Audio(sound);
+      audio.volume = 0.5;
+      audio.play().catch((error) => {
+        console.debug("Button sound playback failed:", error);
+      });
+    }
+  };
+
+  const handleClick = (e: React.MouseEvent) => {
+    playClickSound();
+    onClick?.(e);
+  };
+
   const specificClass = (variant: string) =>
     classNames({
       "bg-primary active:bg-primary-dark transition":
@@ -44,7 +64,7 @@ const Button: React.FC<ButtonProps> = ({
         className,
       )}
       disabled={disabled || isLoading}
-      onClick={onClick}
+      onClick={handleClick}
     >
       <span className="flex items-center gap-[8px] font-[600]">
         {iconLeft && <Image src={iconLeft as any} alt="icon" />}

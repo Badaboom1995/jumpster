@@ -63,7 +63,6 @@ const Reward = ({
   const { user, isUserLoading } = useGetUser();
   const { data: activeBoosters } = useUserBoosters(user?.id || "");
   const [isReady, setIsReady] = useState(false);
-  const coinsEarned = jumps * coinsPerJump;
 
   const coinsEarned2 =
     calculateReward({

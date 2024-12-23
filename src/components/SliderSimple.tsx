@@ -21,7 +21,7 @@ const Slider = ({ children, onFinish }: SliderProps) => {
     );
   const prev = () => setCurrentSlide((prev) => (prev - 1 > 0 ? prev - 1 : 0));
   const toSlide = (index) => setCurrentSlide(index);
-  const toLastSlide = () => setCurrentSlide(2);
+  const toLastSlide = () => setCurrentSlide(totalSlides - 1);
   const finish = () => setIsMounted(false);
 
   const sliderFunctions = {
@@ -43,17 +43,21 @@ const Slider = ({ children, onFinish }: SliderProps) => {
     <SliderContext.Provider value={sliderFunctions}>
       <div className="relative w-full overflow-hidden">
         <div className="flex transition-transform">
-          {React.Children.map(children, (child, index) => (
-            <div
-              key={index}
-              className={twMerge(
-                "hidden w-full flex-shrink-0",
-                currentSlide === index && "block",
-              )}
-            >
-              {child}
-            </div>
-          ))}
+          {React.Children.map(
+            children,
+            (child, index) =>
+              currentSlide === index && (
+                <div
+                  key={index}
+                  className={twMerge(
+                    "hidden w-full flex-shrink-0",
+                    currentSlide === index && "block",
+                  )}
+                >
+                  {child}
+                </div>
+              ),
+          )}
         </div>
       </div>
     </SliderContext.Provider>

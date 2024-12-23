@@ -7,6 +7,8 @@ import toast from "react-hot-toast";
 import Image from "next/image";
 import lightning from "@/app/_assets/images/lightning.png";
 import fire from "@/app/_assets/images/fire.png";
+import clickSound from "@/app/_assets/audio/click.wav";
+import successSound from "@/app/_assets/audio/special-click.wav";
 
 interface BoosterDetailsProps {
   booster: Booster;
@@ -47,12 +49,16 @@ export const BoosterDetails: React.FC<BoosterDetailsProps> = ({
   const purchaseBooster = usePurchaseBooster();
 
   const handlePurchase = async () => {
+    const audio = new Audio(clickSound);
+    audio.play();
     try {
       await purchaseBooster.mutateAsync({
         boosterId: booster.id,
         userId,
       });
       toast.success("Бустер успешно приобретен!");
+      const successAudio = new Audio(successSound);
+      successAudio.play();
       onClose();
     } catch (error) {
       console.error("Failed to purchase booster:", error);

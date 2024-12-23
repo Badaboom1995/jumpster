@@ -18,7 +18,6 @@ import energy from "@/app/_assets/icons/Energy-black.svg";
 import Link from "next/link";
 import useGetUser from "@/hooks/api/useGetUser";
 import { twMerge } from "tailwind-merge";
-import useTimer from "@/hooks/api/useTimer";
 import Reward from "@/app/jump-flow/Reward";
 import { StoreContext } from "@/components/Root/Root";
 import { Title } from "@/components/Title";
@@ -166,7 +165,6 @@ const JumpFlow = () => {
       if (availableEnergy < energyPerJump) {
         setFlowStatus("endCountdown");
         startRewardCountdown();
-
         // Fix finish sound playback here too
         const audio = finishAudioPool[currentFinishAudioIndex];
         if (audio) {
@@ -186,6 +184,8 @@ const JumpFlow = () => {
       setAvailableEnergy((prev) => prev - energyPerJump);
 
       // Play coin sound using pool
+      const audio2 = new Audio(coinBag);
+      audio2.play();
       const audio = coinAudioPool[currentCoinAudioIndex];
       // @ts-ignore
       if (audio && !audio.playing) {

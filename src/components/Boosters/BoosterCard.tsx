@@ -6,7 +6,7 @@ import Curtain from "@/components/Curtain";
 import { BoosterDetails } from "./BoosterDetails";
 import lightning from "@/app/_assets/images/lightning.png";
 import fire from "@/app/_assets/images/fire.png";
-
+import clickSound from "@/app/_assets/audio/click.wav";
 interface BoosterCardProps {
   booster: UserBooster;
   userId: string;
@@ -98,7 +98,11 @@ export const BoosterCard: React.FC<BoosterCardProps> = ({
   return (
     <div className="relative rounded-lg bg-gray-800 p-4">
       <button
-        onClick={() => setIsDetailsOpen(true)}
+        onClick={() => {
+          setIsDetailsOpen(true);
+          const audio = new Audio(clickSound);
+          audio.play();
+        }}
         className="flex w-full items-center justify-between rounded-lg py-[4px]"
       >
         <div className="flex items-start gap-3">

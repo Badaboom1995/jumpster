@@ -14,15 +14,8 @@ import check from "@/app/_assets/icons/check.svg";
 import Modal from "@/components/Modal";
 import Tabs from "@/components/Tabs";
 import coin from "@/app/_assets/images/coin.png";
-
-const thumbnailsMap = {
-  medal,
-  muscle,
-  dumbbel,
-  pill,
-  youtube,
-};
-
+import clickSound from "@/app/_assets/audio/click.wav";
+import successSound from "@/app/_assets/audio/special-click.wav";
 const Card = ({
   id,
   title,
@@ -62,7 +55,11 @@ const Card = ({
           </p>
         </div>
         <button
-          onClick={() => !isBought && setIsOpen(id)}
+          onClick={() => {
+            !isBought && setIsOpen(id);
+            const audio = new Audio(clickSound);
+            audio.play();
+          }}
           disabled={insufficientCoins || isBought}
           className={twMerge(
             "background-light flex flex-nowrap rounded-[8px] border px-3 py-2 transition",
@@ -95,7 +92,8 @@ const EarnView = () => {
   const buy = async (cardId: number, userId: number, cost: number) => {
     try {
       setIsLoading(true);
-
+      const audio = new Audio(clickSound);
+      audio.play();
       // Check if card is already bought
       const { data: existingCard } = await supabase
         .from("user_cards")
@@ -145,7 +143,8 @@ const EarnView = () => {
           },
         };
       });
-
+      const successAudio = new Audio(successSound);
+      successAudio.play();
       setIsOpen(null);
     } catch (error) {
       console.error("Error buying card:", error);

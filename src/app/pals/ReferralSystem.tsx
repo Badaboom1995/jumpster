@@ -11,7 +11,7 @@ import Image from "next/image";
 import coin from "@/app/_assets/images/coin.png";
 import { PostgrestResponse } from "@supabase/supabase-js";
 import { div } from "@tensorflow/tfjs-core";
-
+import successSound from "@/app/_assets/audio/special-click.wav";
 interface Referral {
   id: string;
   username: string;
@@ -135,6 +135,8 @@ const ReferralSystem = () => {
     navigator.clipboard.writeText(referralLink);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+    const audio = new Audio(successSound);
+    audio.play();
   };
 
   const getAvatarByExp = (exp: number) => {

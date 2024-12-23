@@ -1,6 +1,6 @@
 import React from "react";
 import { twMerge } from "tailwind-merge";
-
+import clickSound from "@/app/_assets/audio/click.wav";
 const Tabs = ({
   tabs,
   children,
@@ -20,7 +20,11 @@ const Tabs = ({
               "text-caption",
               index === activeTab ? "text-white" : "",
             )}
-            onClick={() => setActiveTab(index)}
+            onClick={() => {
+              setActiveTab(index);
+              const audio = new Audio(clickSound);
+              audio.play();
+            }}
           >
             {tab}
           </button>

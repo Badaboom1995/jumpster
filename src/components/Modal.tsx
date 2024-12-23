@@ -1,5 +1,5 @@
 import React from "react";
-
+import clickSound from "@/app/_assets/audio/click.wav";
 interface ModalProps {
   isOpen: null | number;
   setOpen: (id: number) => void;
@@ -9,7 +9,11 @@ interface ModalProps {
 const Modal: React.FC<ModalProps> = ({ isOpen, setOpen, children }) => {
   if (!isOpen) return null;
 
-  const handleClose = () => setOpen(null);
+  const handleClose = () => {
+    const audio = new Audio(clickSound);
+    audio.play();
+    setOpen(null);
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center p-[24px] pt-[200px]">

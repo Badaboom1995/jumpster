@@ -182,6 +182,10 @@ const config: Config | any = {
             transform: "translateY(0) rotate(180deg)",
           },
         },
+        slideDown: {
+          "0%": { transform: "translateY(-50px)", opacity: "0" },
+          "100%": { transform: "translateY(0)", opacity: "1" },
+        },
       },
       animation: {
         slideIn: "slideIn 0.5s ease-in-out forwards",
@@ -197,6 +201,7 @@ const config: Config | any = {
         tremblingSoft: "tremblingSoft 1.2s ease-in-out 0.25s 1",
         trembling: "trembling 2.7s ease-in-out 0.25s 1",
         scale: "scale 1.2s ease-in-out 0.25s 1",
+        "slide-down": "slideDown 0.5s ease-out forwards",
       },
       backgroundImage: {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",

@@ -7,7 +7,7 @@ import {
 import { BoosterCard } from "./BoosterCard";
 import { Booster } from "@/types/boosters";
 import { useRouter } from "next/navigation";
-
+import negativeClickSound from "@/app/_assets/audio/click.wav";
 interface BoostersListProps {
   userId: string;
 }
@@ -56,7 +56,11 @@ export const BoostersList: React.FC<BoostersListProps> = ({ userId }) => {
     <div className="space-y-6">
       <div className="border-b border-background-light p-4">
         <button
-          onClick={() => router.back()}
+          onClick={() => {
+            const audio = new Audio(negativeClickSound);
+            audio.play();
+            router.back();
+          }}
           className="flex items-center text-gray-400 transition-colors hover:text-white"
         >
           <svg

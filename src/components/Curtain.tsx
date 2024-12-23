@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { twMerge } from "tailwind-merge";
-
+import clickSound from "@/app/_assets/audio/click.wav";
 const Curtain = ({
   children,
   onClose,
@@ -57,6 +57,8 @@ const Curtain = ({
         <button
           className="absolute right-3 top-3 h-[25px] w-[25px] rounded-full bg-background-light bg-opacity-30 text-white"
           onClick={() => {
+            const audio = new Audio(clickSound);
+            audio.play();
             onClose();
             closeCurtain();
           }}
