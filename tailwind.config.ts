@@ -186,6 +186,14 @@ const config: Config | any = {
           "0%": { transform: "translateY(-50px)", opacity: "0" },
           "100%": { transform: "translateY(0)", opacity: "1" },
         },
+        pulseLight: {
+          "0%, 100%": { boxShadow: "0 0 8px 2px rgba(150, 255, 150, 0)" },
+          "50%": { boxShadow: "0 0 8px 2px rgba(150, 255, 150, 0.4)" },
+        },
+        pulse: {
+          "0%, 100%": { opacity: "0.3" },
+          "50%": { opacity: "0.6" },
+        },
       },
       animation: {
         slideIn: "slideIn 0.5s ease-in-out forwards",
@@ -202,6 +210,8 @@ const config: Config | any = {
         trembling: "trembling 2.7s ease-in-out 0.25s 1",
         scale: "scale 1.2s ease-in-out 0.25s 1",
         "slide-down": "slideDown 0.5s ease-out forwards",
+        pulseLight: "pulseLight 1s ease-in-out infinite",
+        pulse: "pulse 2s ease-in-out infinite",
       },
       backgroundImage: {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",

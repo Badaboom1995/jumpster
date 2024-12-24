@@ -27,10 +27,7 @@ import { requestWithRetry } from "@/app/jump-flow/utils";
 import { StoreContext } from "@/components/Root/Root";
 import { useRouter, useSearchParams } from "next/navigation";
 
-import Slider from "react-slick";
 import "./main.css";
-import "slick-carousel/slick/slick.css";
-import "slick-carousel/slick/slick-theme.css";
 
 import useWindowSize from "react-use/lib/useWindowSize";
 import Confetti from "react-confetti";
@@ -45,23 +42,12 @@ import CoinsFirework, {
 } from "@/components/CoinsFirework/CoinsFirework";
 import coinSound from "@/app/_assets/audio/collect.mp3";
 
+import arrow from "@/app/_assets/icons/arrowRight.svg";
+
 type StatsProps = {
   coins: number;
   energy: number;
   experience: number;
-};
-
-const settings = {
-  dots: false,
-  arrows: false,
-  centerPadding: "20px",
-  centerMode: true,
-  className: "center",
-  infinite: true,
-  speed: 500,
-  slidesToShow: 1,
-  slidesToScroll: 1,
-  controls: false,
 };
 
 const Main = () => {
@@ -78,7 +64,7 @@ const Main = () => {
   const [numberOfPieces, setNumberOfPieces] = useState(0);
   const [runAnimation, setRunAnimation] = useState(false);
   const [userStats, setUserStats] = useState<StatsProps | null>(null);
-  const [initialSlide, setInitialSlide] = useState(null);
+  const [currentSlide, setCurrentSlide] = useState(0);
   const router = useRouter();
   const currentCoinsReward = useCurrentCoinsReward(user);
   const passive_income = usePassiveIncome();
@@ -251,7 +237,8 @@ const Main = () => {
     loadModel();
     if (!user) return;
     // @ts-ignore
-    setInitialSlide(getRankData(user?.experience)?.id - 1);
+    const currentRankId = getRankData(user?.experience)?.id - 1;
+    setCurrentSlide(currentRankId);
     chooseBehaviour();
   }, [isUserLoading, user]);
 
@@ -276,6 +263,14 @@ const Main = () => {
   )
     return null;
 
+  const handlePrevSlide = () => {
+    setCurrentSlide((prev) => (prev > 0 ? prev - 1 : ranks.length - 1));
+  };
+
+  const handleNextSlide = () => {
+    setCurrentSlide((prev) => (prev < ranks.length - 1 ? prev + 1 : 0));
+  };
+
   return (
     <div className="flex h-full w-full flex-col overflow-hidden">
       <Confetti
@@ -286,60 +281,87 @@ const Main = () => {
       />
       <CoinsFirework ref={coinsFireworkRef} />
       <Header />
-      <div className="flex grow flex-col justify-center">
-        <div className="flex grow flex-col justify-center">
-          <div className="mb-[16px] mt-[12px] flex flex-col items-center p-[8px]">
-            <p className="mb-[8px] flex w-full items-center justify-center gap-[8px] text-center text-[42px] font-bold leading-[52px] text-white">
-              {/*TODO: use image instead*/}
-              <Image src={coin as any} width={48} height={48} alt="coin" />
-              <span>{userParams.coins.value.toLocaleString()}</span>
-            </p>
-            {passive_income ? (
-              <p className="flex w-full items-center justify-center gap-[8px] text-center text-[20px] text-slate-400">
-                +{passive_income} монет в час
-              </p>
-            ) : (
-              <div className="h-[30px] w-[150px] animate-pulse rounded bg-background"></div>
-            )}
-          </div>
-          {initialSlide !== null && (
-            <Slider {...settings} initialSlide={initialSlide}>
-              {ranks.map((rank, index) => {
-                // @ts-ignore
-                const rankId = getRankData(user?.experience)?.id;
-                // @ts-ignore
-                if (rankId !== rank.id) {
-                  return (
-                    <Character
-                      current={false}
-                      key={rank.id}
-                      progressLevel={0}
-                      runAnimation={false}
-                      rankImage={rank.url}
-                      rankName={rank.name}
-                      passive_income={rank.passive_coins}
-                    />
-                  );
-                }
-                return (
-                  <Character
-                    current={true}
-                    key={rank.id}
-                    progressLevel={currentLevelProgress}
-                    runAnimation={runAnimation}
-                    rankImage={currentCharacterImage}
-                    // @ts-ignore
-                    rankName={getRankData(user?.experience)?.name}
-                    passive_income={rank.passive_coins}
-                  />
-                );
-              })}
-            </Slider>
-          )}
+      <div className="flex grow flex-col">
+        <div className="mb-[12px] flex w-full items-start justify-between p-[12px]">
+          {/* username */}
+          <span className="rounded-[12px] bg-background px-2 py-1 text-[14px] font-semibold text-white">
+            {/* @ts-ignore */}
+            {/* @ts-ignore */}@{user?.username}
+          </span>
+          {/* монеты */}
+          <span className="flex flex-col items-end text-[24px] font-semibold text-white">
+            <div className="flex items-center gap-1">
+              <Image
+                src={coin as any}
+                alt="coin"
+                width={30}
+                height={30}
+                className="h-[30px] w-[30px]"
+              />
+              {userStats.coins.toLocaleString()}
+            </div>
+            <span className="text-[14px] text-[#8D9398]">
+              + {passive_income} в час
+            </span>
+          </span>
         </div>
-        <div className="mb-[12px] flex justify-between px-[16px] font-bold text-white">
-          <div className="flex gap-[4px]">
-            <Image src={energy as any} alt="energy" />
+        <div className="relative flex grow flex-col items-center justify-center">
+          <button
+            onClick={handlePrevSlide}
+            className="absolute left-0 z-10 rotate-180 p-2 opacity-30"
+          >
+            <Image src={arrow} alt="Previous" width={24} height={24} />
+          </button>
+          {ranks.map((rank, index) => {
+            if (index !== currentSlide) return null;
+            // @ts-ignore
+            const rankId = getRankData(user?.experience)?.id;
+            const isCurrent = rankId === rank.id;
+
+            return (
+              <Character
+                key={rank.id}
+                current={isCurrent}
+                progressLevel={isCurrent ? currentLevelProgress : 0}
+                runAnimation={runAnimation}
+                rankImage={isCurrent ? currentCharacterImage : rank.url}
+                rankName={
+                  // @ts-ignore
+                  isCurrent ? getRankData(user?.experience)?.name : rank.name
+                }
+                passive_income={rank.passive_coins}
+              />
+            );
+          })}
+          <button
+            onClick={handleNextSlide}
+            className="absolute right-0 z-10 p-2 opacity-30"
+          >
+            <Image src={arrow} alt="Next" width={24} height={24} />
+          </button>
+        </div>
+        <div className="mb-[8px] flex justify-between px-[16px] font-semibold text-white">
+          <div className="flex items-center gap-[4px]">
+            <div className="relative ml-[-6px]">
+              {currentEnergy < currentRankData?.energyCapacity && (
+                <div
+                  className="animate-pulseLight absolute inset-0 left-[7px] top-[4px] z-0 h-[10px] w-[2px] rounded-full opacity-90"
+                  style={{
+                    // background:
+                    //   "radial-gradient(circle, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 70%)",
+                    // animation: "pulse 2s ease-in-out infinite",
+                    transform: "scale(1.5)",
+                  }}
+                />
+              )}
+              <Image
+                width={16}
+                height={16}
+                src={energy as any}
+                alt="energy"
+                className="relative z-10 h-[16px] w-[16px]"
+              />
+            </div>
             <span>
               {Math.ceil(currentEnergy) || 0}/{currentRankData?.energyCapacity}
             </span>

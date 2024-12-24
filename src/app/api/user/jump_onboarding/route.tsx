@@ -1,5 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 const supabase = createClient(
   "https://adrdxahjylqbmxomhrmi.supabase.co",
@@ -12,4 +12,5 @@ export async function PATCH(request: NextRequest) {
     .from("users")
     .update({ jump_onboarding_done: true })
     .eq("id", user_id);
+  return NextResponse.json({ status: "success" });
 }
