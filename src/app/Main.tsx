@@ -231,7 +231,7 @@ const Main = () => {
     ) {
       router.push("/onboarding");
     }
-    // loadModel();
+    loadModel();
     if (!user) return;
     // @ts-ignore
     const currentRankId = getRankData(user?.experience)?.id - 1;

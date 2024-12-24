@@ -10,8 +10,8 @@ import { getRankData } from "@/utils";
 import Image from "next/image";
 import coin from "@/app/_assets/images/coin.png";
 import { PostgrestResponse } from "@supabase/supabase-js";
-import { div } from "@tensorflow/tfjs-core";
 import successSound from "@/app/_assets/audio/special-click.wav";
+
 interface Referral {
   id: string;
   username: string;
@@ -63,9 +63,11 @@ const ReferralGuide = () => {
           <div className="relative z-10 ml-[8px] mt-[4px] h-4 w-4 rounded-full border-2 border-background-dark bg-white" />
           <div>
             <p className="text-[16px] font-medium text-white">
-              Зарабатывай 10% от друзей
+              Зарабатывай 10% от рефералов
             </p>
-            <p className="text-[13px] text-gray-400">Плюс 2.5% от их друзей</p>
+            <p className="text-[13px] text-gray-400">
+              Плюс 2.5% от их рефералов
+            </p>
           </div>
         </div>
       </div>
