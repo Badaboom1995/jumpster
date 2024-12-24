@@ -13,6 +13,7 @@ import {
   getObjectSearchParams,
   getRankData,
   ranks,
+  setOnboardingDone,
   simulateTotalIncome,
   updateStreak,
 } from "@/utils";
@@ -24,7 +25,7 @@ import "@tensorflow/tfjs-backend-webgl";
 import * as tf from "@tensorflow/tfjs-core";
 import * as poseDetection from "@tensorflow-models/pose-detection";
 import { requestWithRetry } from "@/app/jump-flow/utils";
-import { StoreContext } from "@/components/Root/Root";
+import { StoreContext, supabase } from "@/components/Root/Root";
 import { useRouter, useSearchParams } from "next/navigation";
 
 import "./main.css";
@@ -80,13 +81,6 @@ const Main = () => {
   const [isClaimingCoins, setIsClaimingCoins] = useState(false);
 
   useEffect(() => {
-    // const { totalCoins, totalPassiveCoins, totalExperience, sessions } =
-    //   simulateTotalIncome(180, 3);
-    // console.log(
-    //   totalCoins.toLocaleString(),
-    //   totalPassiveCoins.toLocaleString(),
-    //   sessions,
-    // );
     audioRef.current = new Audio(coinSound);
     if (audioRef.current) {
       audioRef.current.volume = 0.2;
@@ -100,7 +94,6 @@ const Main = () => {
 
     try {
       setIsClaimingCoins(true);
-
       // Start both sound and animation simultaneously
       const playPromise = audioRef.current?.play();
       coinsFireworkRef.current?.triggerAnimation(
@@ -176,7 +169,7 @@ const Main = () => {
 
   const chooseBehaviour = () => {
     // if no search searchParams, then no animation
-    if (!objectSearchParams) {
+    if (!objectSearchParams || objectSearchParams.onboarding_done) {
       setUserStats({
         coins: userParams?.coins.value,
         energy: userParams?.energy.value,
@@ -230,11 +223,15 @@ const Main = () => {
   }, [currentRankData]);
 
   useEffect(() => {
-    // @ts-ignore
-    if (user && !user?.onboarding_done) {
+    if (
+      user &&
+      // @ts-ignore
+      !user?.onboarding_done &&
+      !objectSearchParams?.onboarding_done
+    ) {
       router.push("/onboarding");
     }
-    loadModel();
+    // loadModel();
     if (!user) return;
     // @ts-ignore
     const currentRankId = getRankData(user?.experience)?.id - 1;
@@ -245,6 +242,9 @@ const Main = () => {
   useEffect(() => {
     if (!user) return;
     // TODO: move to backend
+    if (objectSearchParams?.onboarding_done) {
+      setOnboardingDone(user);
+    }
     addEnergy(user).then((energy) => {
       setUserStats((prev) => ({ ...prev, energy }));
     });
@@ -252,6 +252,7 @@ const Main = () => {
       queryClient.invalidateQueries("user");
     });
   }, [user]);
+
   // @ts-ignore
   if (
     !user ||
@@ -259,7 +260,7 @@ const Main = () => {
     !userParams ||
     !userStats ||
     // @ts-ignore
-    !user?.onboarding_done
+    (!user?.onboarding_done && !objectSearchParams?.onboarding_done)
   )
     return null;
 
@@ -284,11 +285,22 @@ const Main = () => {
       <div className="flex grow flex-col">
         <div className="mb-[12px] flex w-full items-start justify-between p-[12px]">
           {/* username */}
-          <span className="rounded-[12px] bg-background px-2 py-1 text-[14px] font-semibold text-white">
+          <button
+            className="rounded-[12px] bg-background px-2 py-1 text-[14px] font-semibold text-white"
+            onClick={async () => {
+              // set onboarding done to false
+              await supabase
+                .from("users")
+                .update({
+                  onboarding_done: false,
+                  jump_onboarding_done: false,
+                })
+                .eq("id", user?.id);
+            }}
+          >
             {/* @ts-ignore */}
             {/* @ts-ignore */}@{user?.username}
-          </span>
-          {/* монеты */}
+          </button>
           <span className="flex flex-col items-end text-[24px] font-semibold text-white">
             <div className="flex items-center gap-1">
               <Image
@@ -298,7 +310,7 @@ const Main = () => {
                 height={30}
                 className="h-[30px] w-[30px]"
               />
-              {userStats.coins.toLocaleString()}
+              {userStats.coins?.toLocaleString()}
             </div>
             <span className="text-[14px] text-[#8D9398]">
               + {passive_income} в час
@@ -345,13 +357,8 @@ const Main = () => {
             <div className="relative ml-[-6px]">
               {currentEnergy < currentRankData?.energyCapacity && (
                 <div
-                  className="animate-pulseLight absolute inset-0 left-[7px] top-[4px] z-0 h-[10px] w-[2px] rounded-full opacity-90"
-                  style={{
-                    // background:
-                    //   "radial-gradient(circle, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 70%)",
-                    // animation: "pulse 2s ease-in-out infinite",
-                    transform: "scale(1.5)",
-                  }}
+                  className="absolute inset-0 left-[7px] top-[4px] z-0 h-[10px] w-[2px] animate-pulseLight rounded-full opacity-90"
+                  style={{ transform: "scale(1.5)" }}
                 />
               )}
               <Image

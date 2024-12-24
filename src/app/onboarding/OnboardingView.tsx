@@ -9,7 +9,6 @@ import star from "@/app/_assets/images/star.png";
 import tasks from "@/app/_assets/images/tasks.png";
 import time from "@/app/_assets/images/time.png";
 import prize from "@/app/_assets/images/prize.png";
-import privacy from "@/app/_assets/images/privacy.png";
 import play_lottie from "@/app/_assets/play_lottie.json";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
@@ -25,13 +24,7 @@ const OnboardingView = () => {
 
   const setOnboardingDone = async (user: User) => {
     try {
-      await supabase
-        .from("users")
-        .update({ onboarding_done: true })
-        .eq("id", user?.id);
-      // invalidate query
-      queryClient.invalidateQueries(["user"]);
-      router.push("/");
+      router.push("/?onboarding_done=true");
     } catch (error) {
       console.error("Failed to update onboarding status:", error);
     }
@@ -58,8 +51,8 @@ const OnboardingView = () => {
           description={
             <p>
               <b>До 70% дохода</b> от рекламы отправляется в общий пул, который
-              распределяется среди игроков. Чем больше у тебя монет, тем больше
-              ты получишь долю от пула.
+              распределяется среди игроков. Чем больше у тебя монет, тем большую
+              долю от пула ты получишь.
             </p>
           }
         />
@@ -94,7 +87,7 @@ const OnboardingView = () => {
           description="Чтобы заработать еще больше монет - выполняй специальные задания. Задания обновляются ежедневно, не упусти свою возможность!"
         />
         <SlideTemplate
-          title="Начнем игру"
+          title="Начнем игру!"
           iconLottie={play_lottie}
           last
           // desription long

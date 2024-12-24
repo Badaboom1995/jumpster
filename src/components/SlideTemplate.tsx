@@ -81,7 +81,7 @@ const SlideTemplate = (props: SlideProps) => {
       fallingIconsRef.current = Array.from({ length: 10 }, () => ({
         x: Math.random() * canvas.width,
         y: Math.random() * canvas.height - canvas.height,
-        speed: 0.5 + Math.random() * 0.5,
+        speed: 1 + Math.random() * 0.5,
         rotation: Math.random() * Math.PI * 2,
         rotationSpeed: (Math.random() - 0.5) * 0.02,
         size: 100 + Math.random() * 30,
@@ -92,7 +92,6 @@ const SlideTemplate = (props: SlideProps) => {
         if (!canvas || !ctx) return;
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.filter = "blur(2px) brightness(0.5)";
 
         fallingIconsRef.current.forEach((fallingIcon) => {
           ctx.save();
@@ -161,7 +160,7 @@ const SlideTemplate = (props: SlideProps) => {
       {icon && !iconLottie && animate && (
         <canvas
           ref={canvasRef}
-          className="pointer-events-none fixed inset-0"
+          className="pointer-events-none fixed inset-0 blur-[2px] brightness-[0.5]"
           style={{ zIndex: 0 }}
         />
       )}
@@ -173,7 +172,7 @@ const SlideTemplate = (props: SlideProps) => {
           </button>
           {!last && (
             <button
-              className="text-[14px] underline active:bg-caption"
+              className="text-[14px] active:bg-caption"
               onClick={onSkip || toLastSlide}
             >
               Пропустить
@@ -203,7 +202,7 @@ const SlideTemplate = (props: SlideProps) => {
           )}
         </div>
 
-        <h2 className="mb-[32px] text-[32px] font-black">{title}</h2>
+        <h2 className="mb-[16px] text-[32px] font-black">{title}</h2>
         <p className="mb-[40px] grow text-[16px]">{description}</p>
         <Button onClick={onNext || next}>{nextText || "Дальше"}</Button>
       </div>

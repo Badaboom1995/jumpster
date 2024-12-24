@@ -165,7 +165,14 @@ export const getDifferenceInSeconds = (
   // Convert milliseconds to seconds
   return Math.floor(diffInMilliseconds / 1000);
 };
-
+export const setOnboardingDone = async (user: any) => {
+  await supabase
+    .from("users")
+    .update({
+      onboarding_done: true,
+    })
+    .eq("id", user?.id);
+};
 // TODO: move to backend
 export const addEnergy = async (user: any) => {
   const currentRank = getRankData(user?.experience);

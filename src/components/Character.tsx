@@ -29,7 +29,7 @@ const Character = (character: CharacterProps) => {
       {/* {current && <p className="-mb-[8px] text-[14px]">badavoo</p>} */}
       <div className="w-full grow">
         <Image
-          className={`${!current && "opacity-50 brightness-0"} top-62px absolute left-1/2 h-[calc(100vh-350px)] w-auto -translate-x-1/2`}
+          className={`${!current && "opacity-50 brightness-0"} top-62px absolute left-1/2 h-[calc(100vh-340px)] w-auto -translate-x-1/2`}
           src={rankImage}
           alt="roo"
         />
