@@ -1,4 +1,4 @@
-import React, { PropsWithChildren, useEffect, useState, useRef } from "react";
+import React, { PropsWithChildren, useEffect, useState } from "react";
 import Image from "next/image";
 import medal from "@/app/_assets/images/medal.png";
 import fire from "@/app/_assets/icons/Fire.svg";
@@ -16,15 +16,10 @@ import {
 } from "@/app/jump-flow/utils";
 import { supabase } from "@/components/Root/Root";
 import useGetUser from "@/hooks/api/useGetUser";
-// import { useRouter } from "next/navigation";
 import { useQueryClient } from "react-query";
 import { calculateReward } from "@/utils";
 import { useUserBoosters } from "@/hooks/api/useBoosters";
-// import Confetti from "react-confetti";
-// import useWindowSize from "react-use/lib/useWindowSize";
 import finishSound from "@/app/_assets/audio/harp_money.wav";
-import coin from "@/app/_assets/images/coin.png";
-import { div } from "@tensorflow/tfjs-core";
 
 const StatCard = ({
   children,
@@ -60,7 +55,7 @@ const Reward = ({
   energyLeft: number;
 }) => {
   const queryClient = useQueryClient();
-  const { user, isUserLoading } = useGetUser();
+  const { user } = useGetUser();
   const { data: activeBoosters } = useUserBoosters(user?.id || "");
   const [isReady, setIsReady] = useState(false);
 
@@ -69,9 +64,10 @@ const Reward = ({
       jumps,
       // @ts-ignore
       experience: user?.experience,
-      boostersImpact: activeBoosters
-        ?.filter((booster) => booster.booster.effect_type === "jump_power")
-        .reduce((acc, booster) => acc + booster.booster.effect_value, 0),
+      boostersImpact:
+        activeBoosters?.find(
+          (booster) => booster.booster.effect_type === "jump_power",
+        )?.booster.effect_value || 1,
     }) || 0;
   const coinsEarnedAnimated = useAnimatedNumber(coinsEarned2, 2, true);
   const caloriesAnimated = useAnimatedNumber(

@@ -52,7 +52,7 @@ const PreJumpView = () => {
       case "experience_multiplier":
         return `${booster.booster.effect_value}x опыта`;
       case "jump_power":
-        return `+${booster.booster.effect_value} монет/прыжок`;
+        return `x${booster.booster.effect_value} монет за прыжок`;
       case "energy_cost_reduction":
         return `-${booster.booster.effect_value * 100}% энергии`;
       default:
@@ -148,7 +148,7 @@ const PreJumpView = () => {
                 {/* {getBoosterEffectText(booster)} */}
                 {booster.booster.effect_type === "jump_power" ? (
                   <div className="flex items-center gap-[2px]">
-                    + <span>{booster.booster.effect_value}</span>
+                    x<span>{booster.booster.effect_value}</span>
                     <Image
                       className="w-[20px]"
                       src={coin as any}

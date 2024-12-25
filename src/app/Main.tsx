@@ -1,5 +1,11 @@
 "use client";
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, {
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+  useCallback,
+} from "react";
 import Button from "@/components/Button";
 import Link from "next/link";
 import play from "@/app/_assets/icons/Play.svg";
@@ -51,6 +57,8 @@ type StatsProps = {
   experience: number;
 };
 
+const SWIPE_THRESHOLD = 50; // Minimum swipe distance to trigger a slide change
+
 const Main = () => {
   const { store, setStore } = useContext(StoreContext);
   const queryClient = useQueryClient();
@@ -79,6 +87,49 @@ const Main = () => {
   const coinsFireworkRef = useRef<CoinsFireworkRef>(null);
 
   const [isClaimingCoins, setIsClaimingCoins] = useState(false);
+
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+
+  const [tiltAngle, setTiltAngle] = useState(0);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStart(e.touches[0].clientX);
+    setTouchEnd(null); // Reset touchEnd
+  };
+
+  const handleTouchMove = useCallback(
+    (e: React.TouchEvent) => {
+      setTouchEnd(e.touches[0].clientX);
+
+      if (touchStart) {
+        const diff = touchStart - e.touches[0].clientX;
+        // Convert swipe distance to a tilt angle, max ±15 degrees
+        const newTiltAngle = Math.max(Math.min(diff / 10, 15), -15);
+        setTiltAngle(newTiltAngle);
+      }
+    },
+    [touchStart],
+  );
+
+  const handleTouchEnd = useCallback(() => {
+    if (!touchStart || !touchEnd) return;
+
+    const diff = touchStart - touchEnd;
+
+    if (Math.abs(diff) > SWIPE_THRESHOLD) {
+      if (diff > 0) {
+        handleNextSlide();
+      } else {
+        handlePrevSlide();
+      }
+    }
+
+    // Reset values
+    setTouchStart(null);
+    setTouchEnd(null);
+    setTiltAngle(0); // Reset tilt angle
+  }, [touchStart, touchEnd]);
 
   useEffect(() => {
     audioRef.current = new Audio(coinSound);
@@ -317,10 +368,16 @@ const Main = () => {
             </span>
           </span>
         </div>
-        <div className="relative flex grow flex-col items-center justify-center">
+        {/*  */}
+        <div
+          className="relative flex grow flex-col items-center justify-center"
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+        >
           <button
             onClick={handlePrevSlide}
-            className="absolute left-0 z-10 rotate-180 p-2 opacity-30"
+            className="absolute left-0 z-10 h-[40vh] rotate-180 rounded-full p-2 opacity-30 transition-all duration-100 active:bg-background"
           >
             <Image src={arrow} alt="Previous" width={24} height={24} />
           </button>
@@ -329,11 +386,12 @@ const Main = () => {
             // @ts-ignore
             const rankId = getRankData(user?.experience)?.id;
             const isCurrent = rankId === rank.id;
-
             return (
               <Character
                 key={rank.id}
+                tiltAngle={tiltAngle}
                 current={isCurrent}
+                locked={rank.id > rankId}
                 progressLevel={isCurrent ? currentLevelProgress : 0}
                 runAnimation={runAnimation}
                 rankImage={isCurrent ? currentCharacterImage : rank.url}
@@ -347,7 +405,7 @@ const Main = () => {
           })}
           <button
             onClick={handleNextSlide}
-            className="absolute right-0 z-10 p-2 opacity-30"
+            className="absolute right-0 z-10 h-[40vh] rounded-full p-2 opacity-30 transition-all duration-100 active:bg-background"
           >
             <Image src={arrow} alt="Next" width={24} height={24} />
           </button>

@@ -35,12 +35,12 @@ export const detectHips = (poses: any) => {
     );
 
     // Check if hips are detected and draw markers
-    if (leftHip && leftHip.score > 0.3) {
+    if (leftHip && leftHip.score > 0.5) {
       leftHipDetected = true;
       // drawMarker(context, leftHip, offsetX, offsetY, scale);
     }
 
-    if (rightHip && rightHip.score > 0.3) {
+    if (rightHip && rightHip.score > 0.5) {
       rightHipDetected = true;
       // drawMarker(context, rightHip, offsetX, offsetY, scale);
     }

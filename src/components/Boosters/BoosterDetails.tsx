@@ -86,7 +86,7 @@ export const BoosterDetails: React.FC<BoosterDetailsProps> = ({
       case "experience_multiplier":
         return `Множитель опыта ${booster.effect_value}x`;
       case "jump_power":
-        return `Дополнительно ${booster.effect_value} монет за каждый прыжок`;
+        return `x${booster.effect_value} монет за прыжок`;
       case "energy_cost_reduction":
         return `Снижение затрат энергии на ${booster.effect_value * 100}%`;
       default:

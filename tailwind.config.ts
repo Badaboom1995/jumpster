@@ -97,7 +97,7 @@ const config: Config | any = {
         },
         trembling: {
           "0%, 100%": {
-            boxShadow: "0 0 5px 2px rgba(60, 60, 60, 0.5)",
+            // boxShadow: "0 0 5px 2px rgba(60, 60, 60, 0.5)",
             transform: "scale(1) translate(0, 0) rotate(0deg)",
           }, // Rest state
           "5%": { transform: "translate(-0.5px, 0.5px) rotate(-0.5deg)" },
@@ -111,12 +111,12 @@ const config: Config | any = {
           "45%": { transform: "translate(-3px, 3px) rotate(-3deg)" },
           "50%": { transform: "translate(3px, -3px) rotate(3deg)" },
           "55%": {
-            boxShadow: "0 0 6px 2px rgba(60, 60, 60, 0.8)",
+            // boxShadow: "0 0 6px 2px rgba(60, 60, 60, 0.8)",
             transform: "translate(-3px, 3px) rotate(-3deg)",
           },
           "65%": { transform: "translate(-3px, 3px) rotate(-3deg)" },
           "70%": {
-            boxShadow: "0 0 18px 0px rgba(130, 150, 80, 1)",
+            // boxShadow: "0 0 18px 0px rgba(130, 150, 80, 1)",
             transform: "scale(1.1) translate(3px, -3px) rotate(3deg)",
           }, // Peak intensity
           "80%": { transform: "translate(-2px, 2px) rotate(-2deg)" },

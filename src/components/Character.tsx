@@ -10,6 +10,8 @@ type CharacterProps = {
   rankImage: string;
   progressLevel: number;
   passive_income: number;
+  locked?: boolean;
+  tiltAngle: number;
 };
 
 const Character = (character: CharacterProps) => {
@@ -20,16 +22,21 @@ const Character = (character: CharacterProps) => {
     runAnimation,
     current,
     passive_income,
+    locked,
+    tiltAngle,
   } = character;
 
   return (
     <div
       className={`${!current && "opacity-40"} mx-[4px] ${runAnimation && "animate-trembling"} mb-[8px] flex w-full grow flex-col items-center justify-center rounded-[24px] px-[12px] text-white`}
     >
-      {/* {current && <p className="-mb-[8px] text-[14px]">badavoo</p>} */}
       <div className="w-full grow">
         <Image
-          className={`${!current && "opacity-50 brightness-0"} top-62px absolute left-1/2 h-[calc(100vh-340px)] w-auto -translate-x-1/2`}
+          style={{
+            transform: `translateX(-50%) rotate(${tiltAngle / 2}deg)`,
+            transition: tiltAngle === 0 ? "transform 0.3s ease-out" : "none",
+          }}
+          className={`${locked && "opacity-80 brightness-0"} top-62px absolute left-1/2 h-[calc(100vh-340px)] w-auto`}
           src={rankImage}
           alt="roo"
         />

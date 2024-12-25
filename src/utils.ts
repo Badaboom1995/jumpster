@@ -15,7 +15,7 @@ export const ranks = [
   {
     id: 1,
     name: "Новичок",
-    coins_per_jump: 5,
+    coins_per_jump: 1,
     passive_coins: 5,
     experience: 0,
     energyCapacity: 1000,
@@ -25,7 +25,7 @@ export const ranks = [
   {
     id: 2,
     name: "Ученик",
-    coins_per_jump: 10,
+    coins_per_jump: 2,
     passive_coins: 10,
     experience: 10,
     energyCapacity: 3000,
@@ -36,8 +36,8 @@ export const ranks = [
   {
     id: 3,
     name: "Любитель",
-    coins_per_jump: 15,
-    passive_coins: 100,
+    coins_per_jump: 3,
+    passive_coins: 20,
     experience: 90,
     energyCapacity: 4500,
     recoveryRate: 1.667,
@@ -47,8 +47,8 @@ export const ranks = [
   {
     id: 4,
     name: "Устремленный",
-    coins_per_jump: 20,
-    passive_coins: 500,
+    coins_per_jump: 4,
+    passive_coins: 40,
     experience: 225,
     energyCapacity: 8000,
     recoveryRate: 2.778,
@@ -58,8 +58,8 @@ export const ranks = [
   {
     id: 5,
     name: "Продвинутый",
-    coins_per_jump: 30,
-    passive_coins: 2000,
+    coins_per_jump: 5,
+    passive_coins: 80,
     experience: 800,
     energyCapacity: 10000,
     recoveryRate: 4.167,
@@ -69,8 +69,8 @@ export const ranks = [
   {
     id: 6,
     name: "Атлет",
-    coins_per_jump: 50,
-    passive_coins: 5000,
+    coins_per_jump: 6,
+    passive_coins: 150,
     experience: 2000,
     energyCapacity: 12000,
     recoveryRate: 6.25,
@@ -79,8 +79,8 @@ export const ranks = [
   {
     id: 7,
     name: "Профессионал",
-    coins_per_jump: 75,
-    passive_coins: 10000,
+    coins_per_jump: 7,
+    passive_coins: 300,
     experience: 4000,
     energyCapacity: 15000,
     recoveryRate: 8.333,
@@ -89,8 +89,8 @@ export const ranks = [
   {
     id: 8,
     name: "Мастер",
-    coins_per_jump: 100,
-    passive_coins: 20000,
+    coins_per_jump: 8,
+    passive_coins: 500,
     experience: 8000,
     energyCapacity: 20000,
     recoveryRate: 11.111,
@@ -99,8 +99,8 @@ export const ranks = [
   {
     id: 9,
     name: "Чемпион",
-    coins_per_jump: 150,
-    passive_coins: 50000,
+    coins_per_jump: 9,
+    passive_coins: 750,
     experience: 15000,
     energyCapacity: 30000,
     recoveryRate: 16.667,
@@ -109,8 +109,8 @@ export const ranks = [
   {
     id: 10,
     name: "Легенда",
-    coins_per_jump: 200,
-    passive_coins: 100000,
+    coins_per_jump: 10,
+    passive_coins: 1000,
     experience: 20000,
     energyCapacity: 50000,
     recoveryRate: 25,
@@ -119,8 +119,8 @@ export const ranks = [
   {
     id: 11,
     name: "Супергерой",
-    coins_per_jump: 300,
-    passive_coins: 200000,
+    coins_per_jump: 20,
+    passive_coins: 2000,
     experience: 30000,
     energyCapacity: 100000,
     recoveryRate: 41.667,
@@ -341,6 +341,6 @@ export const calculateReward = ({
   if (jumps === 0) return 0;
 
   const coinsPerJump =
-    ranks[getRankData(experience)?.id - 1].coins_per_jump + boostersImpact;
+    ranks[getRankData(experience)?.id - 1].coins_per_jump * boostersImpact;
   return jumps * coinsPerJump;
 };

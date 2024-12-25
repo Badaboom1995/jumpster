@@ -86,12 +86,7 @@ export default function LeaderboardClient() {
               >
                 #{entry.rank}
               </span>
-              <span className="text-white">
-                {entry.username}{" "}
-                <span className="text-gray-400">
-                  {index === 3 && "(Это вы)"}
-                </span>
-              </span>
+              <span className="text-white">{entry.username} </span>
             </div>
             <div className="text-right">
               <span className="text-gray-300">

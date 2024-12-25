@@ -30,6 +30,8 @@ import coinBag from "@/app/_assets/audio/coin.mp3";
 import finishSound from "@/app/_assets/audio/done.wav";
 import Lottie from "lottie-react";
 import loader from "@/app/_assets/loader.json";
+import { DotLottieReact } from "@lottiefiles/dotlottie-react";
+import eye from "@/app/_assets/lottie/eye.json";
 const energyPerJump = 100;
 
 const FPS = 24;
@@ -66,6 +68,7 @@ const JumpFlow = () => {
     y: 0,
   });
   const [isMuted, setIsMuted] = useState(false);
+  const [loadingProgress, setLoadingProgress] = useState(0);
 
   // 1. Lazy initialize the audio pools only when needed
   const [coinAudioPool, setCoinAudioPool] = useState<HTMLAudioElement[]>([]);
@@ -412,6 +415,29 @@ const JumpFlow = () => {
     }
   }, [flowStatus]);
 
+  // Add this useEffect to simulate loading progress
+  useEffect(() => {
+    if (flowStatus === "loadingCamera") {
+      // Start at 0
+      setLoadingProgress(0);
+      // Simulate progress until camera is ready
+      const interval = setInterval(() => {
+        setLoadingProgress((prev) => {
+          // Slow down progress as it gets higher
+          const increment = Math.max(0.5, (100 - prev) / 10);
+          const newProgress = Math.min(95, prev + increment);
+
+          return newProgress;
+        });
+      }, 100);
+
+      return () => clearInterval(interval);
+    } else if (cameraReady && detectorRef.current) {
+      // When everything is loaded, set to 100%
+      setLoadingProgress(100);
+    }
+  }, [flowStatus, cameraReady]);
+
   return (
     <div
       className={twMerge(
@@ -440,6 +466,24 @@ const JumpFlow = () => {
       >
         {isMuted ? "🔇" : "🔊"}
       </button>
+      {/* flowStatus === "searchHips" */}
+
+      <div
+        className={twMerge(
+          "fixed left-0 top-0 flex h-[100vh] w-full bg-background-dark bg-opacity-70 transition-opacity duration-1000 ease-out",
+          flowStatus !== "searchHips" && "opacity-0",
+        )}
+      >
+        <div className="absolute left-1/2 top-[300px] z-50 w-full -translate-x-1/2 -translate-y-1/2">
+          <div className="mx-auto w-[200px]">
+            <Lottie width={35} height={35} animationData={eye} loop={true} />
+          </div>
+          <p className="w-full text-center text-[24px] text-white">
+            Встаньте в кадр
+          </p>
+        </div>
+      </div>
+
       {flowStatus === "jump" && (
         <div className="fixed bottom-[32px] left-1/2 z-10 flex w-[200px] w-full -translate-x-1/2 justify-center px-[12px]">
           <Button
@@ -452,31 +496,55 @@ const JumpFlow = () => {
           </Button>
         </div>
       )}
-      {/* temp */}
-      <div className="absolute left-1/2 top-[200px] z-50 w-full -translate-x-1/2">
-        <Title>
-          {statusText === "Загрузка..." ? (
-            <div className="flex w-full flex-col items-center justify-center gap-[16px]">
-              <span className="">Загрузка...</span>
+      <div className="absolute left-1/2 top-[100px] z-50 w-full -translate-x-1/2">
+        <div>
+          {statusText === "Загрузка..." && (
+            <div className="flex w-full flex-col items-center justify-center gap-[0px]">
               <Lottie
-                width={100}
-                height={100}
+                width={50}
+                height={50}
                 animationData={loader}
                 loop={true}
+                className="mb-[24px]"
               />
+              <Title className="mb-[8px] text-center text-[16px]">
+                Загрузка...
+              </Title>
+              <div className="mb-[24px] w-[250px]">
+                <div className="h-2 w-full rounded-full bg-background-dark">
+                  <div
+                    className="h-full rounded-full bg-primary transition-all duration-300"
+                    style={{ width: `${loadingProgress}%` }}
+                  />
+                </div>
+                <div className="mt-2 text-center text-sm text-gray-300">
+                  {Math.round(loadingProgress)}%
+                </div>
+              </div>
               {showLoadingNote && (
-                <span className="mt-2 text-sm text-gray-300">
+                <p className="mt-2 w-full px-[12px] text-center text-sm text-gray-300">
                   Загрузка может занять некоторое время, пожалуйста, не
                   прерывайте процесс
-                </span>
+                </p>
               )}
             </div>
-          ) : (
-            statusText
           )}
-        </Title>
-        {isRunning && seconds > 0 && <Title>Старт через {seconds}</Title>}
+        </div>
       </div>
+      {isRunning && seconds > 0 && (
+        <div className="fixed left-1/2 top-1/2 z-50 w-full -translate-x-1/2 -translate-y-1/2">
+          {/* <h1 className="flex items-center justify-center text-[54px] font-bold text-white">
+            {secondsToMinutesString(currentSeconds)}
+          </h1> */}
+          {/* <div className="-ml-[32px] mb-[80px] flex items-center justify-center text-[32px] font-bold text-primary">
+            <Image height={32} src={energy as any} alt="energy" />
+            {availableEnergy}/{currentRankData.energyCapacity}
+          </div> */}
+          <h1 className="flex items-center justify-center text-[140px] font-black leading-[120px] text-white">
+            {seconds}
+          </h1>
+        </div>
+      )}
       {flowStatus === "jump" && (
         <div className="tr absolute left-1/2 top-1/2 z-50 w-full -translate-x-1/2 -translate-y-[60%]">
           {/* <h1 className="flex items-center justify-center text-[54px] font-bold text-white">
@@ -501,7 +569,7 @@ const JumpFlow = () => {
       <video
         ref={videoRef}
         className={twMerge(
-          "fixed left-1/2 top-0 -z-10 h-[100vh] -translate-x-1/2 opacity-70 transition-opacity duration-300 ease-out",
+          "fixed left-1/2 top-0 -z-10 h-[100vh] -translate-x-1/2 scale-x-[-1] opacity-70 transition-opacity duration-300 ease-out",
           flowStatus === "loadingCamera" && "opacity-0",
         )}
         autoPlay
@@ -518,8 +586,6 @@ const JumpFlow = () => {
               className="h-full bg-primary transition-all duration-300 ease-out"
               style={{
                 width: `${(availableEnergy / currentRankData.energyCapacity) * 100}%`,
-                // boxShadow:
-                //   "0 0 10px rgb(34 197 94), 0 0 20px rgb(34 197 94), inset 0 0 8px rgba(255,255,255,0.4)",
               }}
             />
             <div className="absolute left-0 top-0 flex h-full w-full items-center justify-center">
