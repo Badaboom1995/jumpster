@@ -20,7 +20,6 @@ import { useQueryClient } from "react-query";
 import { calculateReward } from "@/utils";
 import { useUserBoosters } from "@/hooks/api/useBoosters";
 import finishSound from "@/app/_assets/audio/harp_money.wav";
-import CoinsFireworkPixie from "../../components/CoinsFireworkPixie";
 
 const StatCard = ({
   children,
@@ -37,8 +36,6 @@ const StatCard = ({
     </div>
   );
 };
-
-const coinsPerJump = 1;
 
 const finishAudio = new Audio(finishSound);
 finishAudio.volume = 0.2;
@@ -59,7 +56,6 @@ const Reward = ({
   const { user } = useGetUser();
   const { data: activeBoosters } = useUserBoosters(user?.id || "");
   const [isReady, setIsReady] = useState(false);
-  const [showFirework, setShowFirework] = useState(false);
 
   const coinsEarned2 =
     calculateReward({
@@ -208,16 +204,16 @@ const Reward = ({
           Забрать награду
         </Button>
       </Link>
-      {showFirework && (
+      {/* {showFirework && (
         <CoinsFireworkPixie
           x={window.innerWidth / 2}
           y={window.innerHeight / 2}
           coinCount={30}
           onComplete={() => setShowFirework(false)}
         />
-      )}
+      )} */}
 
-      <button onClick={() => setShowFirework(true)}>Show Coin Firework</button>
+      {/* <button onClick={() => setShowFirework(true)}>Show Coin Firework</button> */}
     </div>
   );
 };
