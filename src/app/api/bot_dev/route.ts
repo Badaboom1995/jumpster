@@ -7,13 +7,49 @@ const supabase = createClient(
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFkcmR4YWhqeWxxYm14b21ocm1pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mjc2Njc1NDAsImV4cCI6MjA0MzI0MzU0MH0.pe1KulD4qwauzZxD0PFIV0cfdnuVii12tdgUHsQsRiA",
 );
 
+// with formatting
+const welcomeMessage = `
+<b>Добро пожаловать в Jumpster! 🎉🎉🎉</b>
+
+Jumpster — это не просто приложение, а совершенно новый способ заниматься фитнесом. Мы преобразуем ваши тренировки в увлекательное игровое приключение, используя передовые ИИ технологии, которые в режиме реального времени считают ваши прыжки.
+
+💪 <b>Зарабатывайте монеты Jump:</b> Каждый ваш прыжок приносит монеты, которые можно использовать д��я открытия улучшений, наград и многого другого.
+🔄 <b>Пройдите путь от новичка до чемпиона:</b> Создавайте и улучшайте своего виртуального атлета, подписывайте контракты и прокачивайте медиа. 
+🌎 <b>Общайтесь и соревнуйтесь:</b> Создавайте сеть друзей и участвуйте в совместных челленджах. Делитесь достижениями и поддерживайте друг друга.
+
+С Jumpster фитнес становится чем-то большим. Начните свой путь уже сегодня и узнайте, насколько далеко вы сможете зайти! ⚡
+
+Продолжайте прыгать с Jumpster! 🌟`;
+
 export async function POST(request: Request) {
   try {
     const telegramApiUrl = `https://api.telegram.org/bot6130195892:AAFB22x7qbo0wICcuSXffFHSyflc4tYm0b4/sendMessage`;
     const requestData = await request.json();
 
-    // Check if this is a message with /start command
     if (requestData.message?.text?.startsWith("/start")) {
+      // Send welcome message with inline keyboard
+      await fetch(telegramApiUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          parse_mode: "HTML",
+          chat_id: requestData.message.from.id,
+          text: welcomeMessage,
+          reply_markup: {
+            inline_keyboard: [
+              [
+                {
+                  text: "🎮 Открыть приложение",
+                  web_app: { url: "https://jumpster.vercel.app/" },
+                },
+              ],
+            ],
+          },
+        }),
+      });
+
       const referrerId = requestData.message.text.split(" ")[1]; // Get the parameter after /start
       const refferrerNumberId = referrerId ? parseInt(referrerId) : null;
       const userTelegramId = requestData.message.from.id;
@@ -32,19 +68,7 @@ export async function POST(request: Request) {
         .eq("id", refferrerNumberId)
         .single();
 
-      if (user) {
-        // user can be referred, send error message
-        // await fetch(telegramApiUrl, {
-        //   method: "POST",
-        //   headers: {
-        //     "Content-Type": "application/json",
-        //   },
-        //   body: JSON.stringify({
-        //     chat_id: userTelegramId,
-        //     text: "Аккаунт уже зарегистрирован. Вы не можете быть приглашены другим пользователем.",
-        //   }),
-        // });
-        console.log("user already exists");
+      if (user && referrerId) {
         return NextResponse.json(
           { error: "Аккаунт уже зарегистрирован" },
           { status: 400 },
@@ -91,7 +115,6 @@ export async function POST(request: Request) {
         }
       }
     }
-
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Error processing Telegram webhook:", error);

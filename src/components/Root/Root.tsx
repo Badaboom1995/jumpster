@@ -49,6 +49,7 @@ function App(props: PropsWithChildren) {
   const viewport = useViewport();
 
   useEffect(() => {
+    miniApp.requestFullscreen && miniApp.requestFullscreen();
     return bindMiniAppCSSVars(miniApp, themeParams);
   }, [miniApp, themeParams]);
 
