@@ -219,7 +219,6 @@ const ReferralSystem = () => {
             ))}
           </div>
         </div>
-
         {/* Bottom Shadow */}
         <div className="pointer-events-none absolute bottom-0 z-10 h-4 w-full bg-gradient-to-t from-background-dark to-transparent" />
       </div>

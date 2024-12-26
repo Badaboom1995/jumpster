@@ -20,7 +20,6 @@ import {
   getRankData,
   ranks,
   setOnboardingDone,
-  simulateTotalIncome,
   updateStreak,
 } from "@/utils";
 

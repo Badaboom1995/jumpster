@@ -21,15 +21,5 @@ export default function Home() {
     }
   }, []);
 
-  if (!isAllowed) {
-    return (
-      <div className="flex h-screen items-center justify-center">
-        <p className="px-4 text-center text-lg">
-          This game is only available on mobile devices
-        </p>
-      </div>
-    );
-  }
-
   return <Main />;
 }
