@@ -18,6 +18,8 @@ import React, {
 import {
   SDKProvider,
   useLaunchParams,
+  useClosingBehavior,
+  useSwipeBehavior,
   useMiniApp,
   useThemeParams,
   useViewport,
@@ -46,10 +48,15 @@ function App(props: PropsWithChildren) {
   const lp = useLaunchParams();
   const miniApp = useMiniApp();
   const themeParams = useThemeParams();
+  const closingBehavior = useClosingBehavior();
+  const swipeBehavior = useSwipeBehavior();
   const viewport = useViewport();
 
   useEffect(() => {
     miniApp.requestFullscreen && miniApp.requestFullscreen();
+    viewport && viewport.expand();
+    closingBehavior && closingBehavior.enableConfirmation();
+    swipeBehavior && swipeBehavior.disableVerticalSwipe();
     return bindMiniAppCSSVars(miniApp, themeParams);
   }, [miniApp, themeParams]);
 
