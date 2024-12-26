@@ -56,7 +56,11 @@ function App(props: PropsWithChildren) {
     miniApp.requestFullscreen && miniApp.requestFullscreen();
     viewport && viewport.expand();
     closingBehavior && closingBehavior.enableConfirmation();
-    swipeBehavior && swipeBehavior.disableVerticalSwipe();
+    console.log(lp.startParam);
+    // if test mode, disable vertical swipe
+    // if (lp.startParam !== "test") {
+    //   swipeBehavior && swipeBehavior.disableVerticalSwipe();
+    // }
     return bindMiniAppCSSVars(miniApp, themeParams);
   }, [miniApp, themeParams]);
 

@@ -11,6 +11,7 @@ import Image from "next/image";
 import coin from "@/app/_assets/images/coin.png";
 import { PostgrestResponse } from "@supabase/supabase-js";
 import successSound from "@/app/_assets/audio/special-click.wav";
+import { useUtils } from "@telegram-apps/sdk-react";
 
 interface Referral {
   id: string;
@@ -76,6 +77,7 @@ const ReferralGuide = () => {
 };
 
 const ReferralSystem = () => {
+  const utils = useUtils();
   const { user } = useGetUser();
   const [copied, setCopied] = useState(false);
   const [showCurtain, setShowCurtain] = useState(false);
@@ -135,6 +137,7 @@ const ReferralSystem = () => {
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(referralLink);
+    utils && utils.shareURL(referralLink);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
     const audio = new Audio(successSound);
