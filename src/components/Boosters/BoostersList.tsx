@@ -24,8 +24,7 @@ export const BoostersList: React.FC<BoostersListProps> = ({ userId }) => {
     null,
   );
 
-  if (isLoadingActive || isLoadingAvailable)
-    return <div>Loading boosters...</div>;
+  if (isLoadingActive || isLoadingAvailable) return null;
 
   const getActiveBoosterById = (boosterId: string) => {
     return activeBoosters?.find(
@@ -53,15 +52,15 @@ export const BoostersList: React.FC<BoostersListProps> = ({ userId }) => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="border-b border-background-light p-4">
+    <div className="space-y-4">
+      <div className="border-b border-background py-4">
         <button
           onClick={() => {
             const audio = new Audio(negativeClickSound);
             audio.play();
             router.back();
           }}
-          className="flex items-center text-gray-400 transition-colors hover:text-white"
+          className="flex items-center text-white transition-colors hover:text-white"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"

@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import Slider from "@/components/SliderSimple";
 import SlideOne from "@/app/onboarding/SlideOne";
 import SlideTemplate from "@/components/SlideTemplate";
@@ -13,14 +13,38 @@ import play_lottie from "@/app/_assets/play_lottie.json";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import useGetUser from "@/hooks/api/useGetUser";
-import { supabase } from "@/lib/supabase";
 import { User } from "@/database.types";
-import { useQueryClient } from "react-query";
 
 const OnboardingView = () => {
   const { user } = useGetUser();
   const router = useRouter();
-  const queryClient = useQueryClient();
+  const [imagesLoaded, setImagesLoaded] = useState(false);
+
+  const imageAssets = [coin, celeb, star, tasks, time, prize];
+
+  const preloadImages = async () => {
+    try {
+      await Promise.all(
+        imageAssets.map((src) => {
+          return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.src = src.src;
+            img.onload = resolve;
+            img.onerror = reject;
+          });
+        }),
+      );
+      setImagesLoaded(true);
+    } catch (error) {
+      console.error("Failed to preload images:", error);
+      // Show onboarding anyway if images fail to load
+      setImagesLoaded(true);
+    }
+  };
+
+  useEffect(() => {
+    preloadImages();
+  }, []);
 
   const setOnboardingDone = async (user: User) => {
     try {
@@ -37,6 +61,14 @@ const OnboardingView = () => {
       router.push("/");
     }
   }, [user, router]);
+
+  if (!imagesLoaded) {
+    return (
+      <div className="fixed left-0 top-0 z-50 flex h-[100vh] w-full items-center justify-center overflow-scroll bg-[#1F2126]">
+        <div className="text-xl text-white">Loading...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed left-0 top-0 z-50 h-[100vh] w-full overflow-scroll bg-[#1F2126]">

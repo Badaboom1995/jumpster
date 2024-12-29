@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Title } from "@/components/Title";
 import Link from "next/link";
 import Button from "@/components/Button";
@@ -19,10 +19,34 @@ import many from "@/app/_assets/images/many_onboarding.png";
 import buttons from "@/app/_assets/images/interface_onboarding.png";
 import privacy from "@/app/_assets/images/privacy.png";
 import clickSound from "@/app/_assets/audio/click.wav";
+
 const PreJumpView = () => {
   const [showOnboarding, setShowOnboarding] = useState(true);
   const { user } = useGetUser();
   const { data: activeBoosters } = useUserBoosters(user?.id || "");
+  const [imagesLoaded, setImagesLoaded] = useState(false);
+
+  const imageAssets = [coin, energy, saved, pose, light, many, buttons];
+
+  const preloadImages = async () => {
+    try {
+      await Promise.all(
+        imageAssets.map((src) => {
+          return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.src = src.src;
+            img.onload = resolve;
+            img.onerror = reject;
+          });
+        }),
+      );
+      setImagesLoaded(true);
+    } catch (error) {
+      console.error("Failed to preload images:", error);
+      // Show onboarding anyway if images fail to load
+      setImagesLoaded(true);
+    }
+  };
 
   const toggleOnboarding = async () => {
     await fetch("/api/user/jump_onboarding", {
@@ -30,6 +54,10 @@ const PreJumpView = () => {
       body: JSON.stringify({ user_id: user?.id }),
     });
   };
+
+  useEffect(() => {
+    preloadImages();
+  }, []);
 
   if (!user) return null;
   // @ts-ignore
