@@ -33,6 +33,7 @@ const PreJumpView = () => {
       await Promise.all(
         imageAssets.map((src) => {
           return new Promise((resolve, reject) => {
+            // @ts-ignore
             const img = new Image();
             img.src = src.src;
             img.onload = resolve;
