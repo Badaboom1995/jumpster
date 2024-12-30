@@ -20,6 +20,9 @@ import { useQueryClient } from "react-query";
 import { calculateReward } from "@/utils";
 import { useUserBoosters } from "@/hooks/api/useBoosters";
 import finishSound from "@/app/_assets/audio/harp_money.wav";
+import Lottie from "lottie-react";
+import lightAnimation from "@/app/_assets/lottie/light.json";
+import rewardAnimation from "@/app/_assets/lottie/reward.json";
 
 const StatCard = ({
   children,
@@ -145,8 +148,21 @@ const Reward = ({
       <div className="fixed left-0 top-0 h-[100vh] w-full bg-background-dark"></div>
     );
   return (
-    <div className="fixed top-0 z-[50] flex h-[100vh] w-full flex-col items-center overflow-y-scroll bg-background-dark px-[12px] py-[24px] pb-[80px]">
-      <Image width={130} src={medal as any} alt="medal" className="mb-[12px]" />
+    <div className="fixed top-0 z-[50] flex h-[100vh] w-full flex-col items-center overflow-y-scroll bg-background-dark px-[12px] py-[24px] pb-[80px] pt-[80px]">
+      <div className="relative">
+        <div className="absolute left-1/2 top-1/2 z-[-1] -translate-x-1/2 -translate-y-1/2 opacity-50">
+          <Lottie
+            animationData={lightAnimation}
+            loop={true}
+            style={{ width: 500, height: 500 }}
+          />
+        </div>
+        <Lottie
+          animationData={rewardAnimation}
+          loop={true}
+          style={{ width: 200, height: 200 }}
+        />
+      </div>
       {/* <button
         onClick={playSound}
         className="mb-4 rounded-full bg-primary px-4 py-2 text-sm text-white"
