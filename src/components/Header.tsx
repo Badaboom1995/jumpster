@@ -122,7 +122,7 @@ const Header = () => {
 
           <h2 className="mb-4 w-full text-center text-[24px] font-medium text-white">
             {/* @ts-ignore */}
-            {user?.streak_counter}{" "}
+            {user?.streak_counter} {/* @ts-ignore */}
             {user?.streak_counter && getDayText(user.streak_counter)} подряд!
           </h2>
 
