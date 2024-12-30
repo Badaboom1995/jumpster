@@ -190,6 +190,16 @@ const config: Config | any = {
           "0%, 100%": { boxShadow: "0 0 8px 2px rgba(150, 255, 150, 0)" },
           "50%": { boxShadow: "0 0 8px 2px rgba(150, 255, 150, 0.4)" },
         },
+        rainbowBackAnimation: {
+          "0%, 100%": {
+            background:
+              "linear-gradient(to right, #FF0000, #FF7F00, #FFFF00, #00FF00, #0000FF, #4B0082, #9400D3)",
+          },
+          "50%": {
+            background:
+              "linear-gradient(to right, #9400D3, #4B0082, #0000FF, #00FF00, #FFFF00, #FF7F00, #FF0000)",
+          },
+        },
         pulse: {
           "0%, 100%": { opacity: "0.3" },
           "50%": { opacity: "0.6" },
@@ -212,6 +222,7 @@ const config: Config | any = {
         "slide-down": "slideDown 0.5s ease-out forwards",
         pulseLight: "pulseLight 1s ease-in-out infinite",
         pulse: "pulse 2s ease-in-out infinite",
+        rainbowBackAnimation: "pulseLightSlow 3s ease-in-out infinite",
       },
       backgroundImage: {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
