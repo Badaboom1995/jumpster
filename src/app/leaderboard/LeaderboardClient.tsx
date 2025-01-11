@@ -2,7 +2,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/components/Root/Root";
 import { useLaunchParams } from "@telegram-apps/sdk-react";
-import { useRouter } from "next/navigation";
 
 interface LeaderboardEntry {
   username: string;
@@ -16,7 +15,6 @@ export default function LeaderboardClient() {
   );
   const [loading, setLoading] = useState(false);
   const lp = useLaunchParams();
-  const router = useRouter();
 
   useEffect(() => {
     const fetchLeaderboard = async () => {
@@ -45,12 +43,6 @@ export default function LeaderboardClient() {
 
     fetchLeaderboard();
   }, [supabase]);
-
-  const handleUserClick = (username: string) => {
-    if (username === "rodman") {
-      router.push("/pixi");
-    }
-  };
 
   if (loading) {
     return (
@@ -84,8 +76,7 @@ export default function LeaderboardClient() {
               lp.initData.user.username === entry.username
                 ? "bg-background-light"
                 : "bg-background"
-            } cursor-pointer`}
-            onClick={() => handleUserClick(entry.username)}
+            }`}
           >
             <div className="flex items-center gap-4">
               <span

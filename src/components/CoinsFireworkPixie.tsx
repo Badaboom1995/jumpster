@@ -25,9 +25,9 @@ const App = () => {
   const blurFilter = useMemo(() => new BlurFilter(2), []);
   const STAGE_WIDTH = 500;
   const STAGE_HEIGHT = 900;
-  const COIN_SPEED = 8;
-  const GRAVITY = 0.15;
-  const COINS_PER_THROW = 150;
+  const COIN_SPEED = 20;
+  const GRAVITY = 0.5;
+  const COINS_PER_THROW = 50;
   const MAX_COINS = 1000;
 
   // Create shared texture
