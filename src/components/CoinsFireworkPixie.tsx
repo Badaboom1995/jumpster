@@ -9,6 +9,7 @@ import {
 } from "pixi.js";
 import { Stage, Container, Sprite, Text, ParticleContainer } from "@pixi/react";
 import coin from "@/app/_assets/images/coin.png";
+import Stats from "stats.js";
 
 interface CoinPosition {
   id: number;
@@ -24,9 +25,9 @@ const App = () => {
   const blurFilter = useMemo(() => new BlurFilter(2), []);
   const STAGE_WIDTH = 500;
   const STAGE_HEIGHT = 900;
-  const COIN_SPEED = 20;
-  const GRAVITY = 0.5;
-  const COINS_PER_THROW = 50;
+  const COIN_SPEED = 8;
+  const GRAVITY = 0.15;
+  const COINS_PER_THROW = 150;
   const MAX_COINS = 1000;
 
   // Create shared texture
@@ -85,15 +86,21 @@ const App = () => {
   const createNewCoins = useCallback(() => {
     const newCoins: CoinPosition[] = Array(COINS_PER_THROW)
       .fill(null)
-      .map(() => ({
-        id: nextCoinId + Math.random(),
-        x: STAGE_WIDTH / 2 + (Math.random() - 0.5) * 100,
-        y: STAGE_HEIGHT + 50,
-        speedX: (Math.random() - 0.5) * COIN_SPEED,
-        speedY: -COIN_SPEED - Math.random() * 5,
-        rotation: Math.random() * Math.PI * 2,
-        rotationSpeed: (Math.random() - 0.5) * 0.1,
-      }));
+      .map(() => {
+        const targetY = Math.random() * (STAGE_HEIGHT * 0.8);
+        const distanceToTarget = STAGE_HEIGHT + 50 - targetY;
+        const requiredSpeed = Math.sqrt(2 * GRAVITY * distanceToTarget);
+
+        return {
+          id: nextCoinId + Math.random(),
+          x: STAGE_WIDTH / 2 + (Math.random() - 0.5) * STAGE_WIDTH * 0.8,
+          y: STAGE_HEIGHT + 50,
+          speedX: (Math.random() - 0.5) * COIN_SPEED * 0.3,
+          speedY: -requiredSpeed,
+          rotation: Math.random() * Math.PI * 2,
+          rotationSpeed: (Math.random() - 0.5) * 0.05,
+        };
+      });
 
     setCoinPositions((prev) => {
       const combined = [...prev, ...newCoins];
@@ -107,40 +114,61 @@ const App = () => {
     return () => clearInterval(interval);
   }, [createNewCoins]);
 
-  const updatePositions = useCallback(
-    (deltaTime: number) => {
-      setCoinPositions((prev) =>
-        prev
-          .map((coin) => ({
+  const updatePositions = useCallback(() => {
+    setCoinPositions((prev) =>
+      prev
+        .map((coin) => {
+          let newX = coin.x + coin.speedX;
+          let newSpeedX = coin.speedX;
+
+          // Bounce off left border
+          if (newX < 25) {
+            newX = 25;
+            newSpeedX = Math.abs(coin.speedX) * 0.8; // Reverse direction and lose 20% speed
+          }
+          // Bounce off right border
+          if (newX > STAGE_WIDTH - 25) {
+            newX = STAGE_WIDTH - 25;
+            newSpeedX = -Math.abs(coin.speedX) * 0.8; // Reverse direction and lose 20% speed
+          }
+
+          return {
             ...coin,
-            x: coin.x + coin.speedX * deltaTime * 60,
-            y: coin.y + coin.speedY * deltaTime * 60,
-            speedY: coin.speedY + GRAVITY * deltaTime * 60,
-            rotation: coin.rotation + coin.rotationSpeed * deltaTime * 60,
-          }))
-          .filter((coin) => coin.y < STAGE_HEIGHT + 100),
-      );
-    },
-    [STAGE_HEIGHT, GRAVITY],
-  );
+            x: newX,
+            y: coin.y + coin.speedY,
+            speedX: newSpeedX,
+            speedY: coin.speedY + GRAVITY,
+            rotation: coin.rotation + coin.rotationSpeed,
+          };
+        })
+        .filter((coin) => coin.y < STAGE_HEIGHT + 100),
+    );
+  }, [STAGE_WIDTH, STAGE_HEIGHT]);
 
   useEffect(() => {
+    var stats = new Stats();
+    stats.showPanel(0);
+    document.body.appendChild(stats.dom);
+
+    stats.dom.style.position = "absolute";
+    stats.dom.style.left = "0px";
+    stats.dom.style.top = "0px";
+    stats.dom.style.zIndex = "1000";
+
     let animationFrameId: number;
 
     const animate = (currentTime: number) => {
-      const deltaTime = (currentTime - lastTime.current) / 1000;
-      lastTime.current = currentTime;
-
-      const cappedDelta = Math.min(deltaTime, 1 / 30);
-      updatePositions(cappedDelta);
-
+      stats.begin();
+      updatePositions();
+      stats.end();
       animationFrameId = requestAnimationFrame(animate);
     };
 
     animationFrameId = requestAnimationFrame(animate);
-
     return () => {
       cancelAnimationFrame(animationFrameId);
+      // Clean up stats
+      document.body.removeChild(stats.dom);
     };
   }, [updatePositions]);
 
@@ -161,7 +189,7 @@ const App = () => {
 
       <Container x={100} y={100}>
         <Text
-          text="Hello World"
+          text=""
           anchor={0.5}
           x={50}
           y={150}

@@ -41,6 +41,7 @@
     "react-slick": "^0.30.2",
     "react-use": "^17.5.1",
     "slick-carousel": "^1.8.1",
+    "stats.js": "^0.17.0",
     "tailwind-merge": "^2.5.3"
   },
   "devDependencies": {

@@ -89,6 +89,7 @@ const Reward = ({
     energy: 0,
     experience: 0,
   });
+
   // TODO: move to backend
   const addReward = async () => {
     if (!user) return;
@@ -169,7 +170,7 @@ const Reward = ({
       >
         🔊 Play Sound
       </button> */}
-      <h2 className="flex items-center gap-[4px] text-[64px] font-bold leading-[90px] text-white">
+      <h2 className="mt-[-24px] flex items-center gap-[4px] text-[64px] font-bold leading-[90px] text-white">
         {coinsEarnedAnimated.toLocaleString()}
       </h2>
       <h3 className="mb-[24px] text-[16px] font-[400] text-caption">
