@@ -23,7 +23,7 @@ const SlideOne = () => {
         <Button onClick={next}>Дальше</Button>
       </div>
       <video
-        className="height-[75vh] fixed left-[90px] top-[-50px] opacity-70"
+        className="height-[75vh] fixed left-0 top-[-50px] opacity-70"
         width="auto"
         autoPlay
         loop

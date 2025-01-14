@@ -16,6 +16,7 @@ import Tabs from "@/components/Tabs";
 import coin from "@/app/_assets/images/coin.png";
 import clickSound from "@/app/_assets/audio/click.wav";
 import successSound from "@/app/_assets/audio/special-click.wav";
+
 const Card = ({
   id,
   title,
@@ -31,7 +32,7 @@ const Card = ({
   const insufficientCoins = user?.user_parameters?.coins.value < cost;
 
   return (
-    <div className="flex items-center gap-[12px] rounded-[8px] bg-background px-2 py-2 pr-4">
+    <div className="flex items-center gap-[12px] rounded-[8px] bg-background p-2 pr-4">
       <Image
         className="h-[60px] w-[60px]"
         width={60}
@@ -192,7 +193,7 @@ const EarnView = () => {
   return (
     <div className="max-h-[100vh] overflow-y-scroll px-[16px] pb-[90px] pt-[16px]">
       <div className="mb-[24px]">
-        <h1 className="text-[32px] font-bold text-white">Улучшения</h1>
+        <h1 className="text-[32px] font-bold text-white">Фарминг</h1>
         <p className="mb-[24px] text-gray-300">
           Тренируйся, подписывай рекламные контракты и зарабатывай пассивно
         </p>

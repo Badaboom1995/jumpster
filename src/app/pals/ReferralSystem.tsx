@@ -82,7 +82,7 @@ const ReferralSystem = () => {
   const [copied, setCopied] = useState(false);
   const [showCurtain, setShowCurtain] = useState(false);
 
-  const referralLink = `https://t.me/badavoo_bot?start=${user?.id}`;
+  const referralLink = `https://t.me/Jumpster_bot?start=${user?.id}`;
   // get referrals and referrer with reffered user field
   const { data: referrals, isLoading: referralsLoading } = useQuery<
     PostgrestResponse<any>
@@ -135,9 +135,12 @@ const ReferralSystem = () => {
     return Math.ceil(hourlyIncome * 0.2);
   };
 
+  const shareLink = () => {
+    utils && utils.shareURL(referralLink);
+  };
+
   const copyToClipboard = () => {
     navigator.clipboard.writeText(referralLink);
-    utils && utils.shareURL(referralLink);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
     const audio = new Audio(successSound);
@@ -225,7 +228,7 @@ const ReferralSystem = () => {
 
       {/* Button at Bottom */}
       <div className="mt-2 px-[4px]">
-        <Button onClick={() => setShowCurtain(true)} className="w-full">
+        <Button onClick={shareLink} className="w-full">
           Пригласить друга
         </Button>
       </div>

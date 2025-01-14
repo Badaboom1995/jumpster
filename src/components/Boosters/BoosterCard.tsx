@@ -7,6 +7,7 @@ import { BoosterDetails } from "./BoosterDetails";
 import lightning from "@/app/_assets/images/lightning.png";
 import fire from "@/app/_assets/images/fire.png";
 import clickSound from "@/app/_assets/audio/click.wav";
+
 interface BoosterCardProps {
   booster: UserBooster;
   userId: string;
@@ -96,7 +97,7 @@ export const BoosterCard: React.FC<BoosterCardProps> = ({
   };
 
   return (
-    <div className="relative rounded-lg bg-gray-800 p-4">
+    <div className="relative rounded-lg bg-background p-2 pr-4">
       <button
         onClick={() => {
           setIsDetailsOpen(true);
@@ -113,17 +114,17 @@ export const BoosterCard: React.FC<BoosterCardProps> = ({
             alt="lightning"
             width={100}
             height={100}
-            className="h-[46.5px] w-[46.5px]"
+            className="h-[50px] w-[50px]"
           />
           <div className="flex flex-col">
             <div className="flex items-center gap-2">
-              <h3
+              <h2
                 className={`${
                   RARITY_CLASSES[booster.booster.rarity]
-                } text-[15px] font-medium`}
+                } text-[16px] font-medium`}
               >
                 {booster.booster.name}
-              </h3>
+              </h2>
             </div>
             <div className="mt-1 flex items-center gap-2">
               <span className="text-sm text-gray-500">{getDurationText()}</span>

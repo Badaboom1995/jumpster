@@ -47,7 +47,7 @@ export default function LeaderboardClient() {
   if (loading) {
     return (
       <div className="mx-auto flex h-[calc(100vh-90px)] max-w-lg items-center justify-center p-4">
-        <div className="text-white">Loading...</div>
+        {/* <div className="text-white">Loading...</div> */}
       </div>
     );
   }
