@@ -263,6 +263,7 @@ const EarnView = () => {
                   key={card.id}
                   isBought={user_cards_ids?.includes(card.id)}
                   setIsOpen={setIsOpen}
+                  // @ts-ignore
                   user_id={user?.id}
                   id={card.id}
                   cost={card.buy_price || 0}
@@ -286,6 +287,7 @@ const EarnView = () => {
                 key={card.id}
                 isBought={user_cards_ids?.includes(card.id)}
                 setIsOpen={setIsOpen}
+                // @ts-ignore
                 user_id={user?.id}
                 id={card.id}
                 cost={card.buy_price || 0}
@@ -308,6 +310,7 @@ const EarnView = () => {
                 key={card.id}
                 isBought={user_cards_ids?.includes(card.id)}
                 setIsOpen={setIsOpen}
+                // @ts-ignore
                 user_id={user?.id}
                 id={card.id}
                 cost={card.buy_price || 0}

@@ -381,7 +381,7 @@ const JumpFlow = () => {
     amplitude.track("JumpFlow_Jump_Finished");
     setFlowStatus("endCountdown");
     startRewardCountdown();
-
+    console.log("finish");
     // Fix the finish sound playback
     const audio = finishAudioPool[currentFinishAudioIndex];
     if (audio) {
@@ -479,7 +479,7 @@ const JumpFlow = () => {
       </div>
 
       {flowStatus === "jump" && (
-        <div className="fixed bottom-[32px] left-1/2 z-10 flex w-[200px] w-full -translate-x-1/2 justify-center px-[12px]">
+        <div className="fixed bottom-[32px] left-1/2 z-50 flex w-[200px] w-full -translate-x-1/2 justify-center px-[12px]">
           <Button
             className="mx-[12px]"
             variant="secondary"
@@ -490,9 +490,9 @@ const JumpFlow = () => {
           </Button>
         </div>
       )}
-      <div className="absolute left-1/2 top-[100px] z-50 h-[calc(100vh-100px)] w-full -translate-x-1/2">
-        <div className="h-full">
-          {statusText === "Загрузка..." && (
+      {statusText === "Загрузка..." && (
+        <div className="absolute left-1/2 top-[100px] z-10 z-50 h-[calc(100vh-100px)] w-full -translate-x-1/2">
+          <div className="h-full">
             <div className="flex h-full w-full flex-col items-start justify-center gap-[0px] pb-[24px]">
               <div className="mt-[36px] grow">
                 <Lottie
@@ -524,9 +524,9 @@ const JumpFlow = () => {
                 </p>
               )}
             </div>
-          )}
+          </div>
         </div>
-      </div>
+      )}
       {isRunning && seconds > 0 && (
         <div className="fixed left-1/2 top-1/2 z-50 w-full -translate-x-1/2 -translate-y-1/2">
           <h1 className="flex items-center justify-center text-[140px] font-black leading-[120px] text-white">
