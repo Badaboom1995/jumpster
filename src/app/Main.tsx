@@ -167,8 +167,8 @@ const Main = () => {
     if (store.detector) return;
     await tf.ready();
     const detectorConfig = {
-      modelType: poseDetection.movenet.modelType.SINGLEPOSE_THUNDER,
-      modelUrl: "./movenet/model.json",
+      modelType: poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING,
+      modelUrl: "./movenet_lightning/model.json",
     };
     await requestWithRetry(
       async () =>
