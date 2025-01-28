@@ -381,7 +381,6 @@ const JumpFlow = () => {
     amplitude.track("JumpFlow_Jump_Finished");
     setFlowStatus("endCountdown");
     startRewardCountdown();
-    console.log("finish");
     // Fix the finish sound playback
     const audio = finishAudioPool[currentFinishAudioIndex];
     if (audio) {
@@ -392,7 +391,6 @@ const JumpFlow = () => {
       setCurrentFinishAudioIndex((prev) => (prev + 1) % finishAudioPool.length);
     }
   };
-
   // Add new state for tracking loading time
   const [showLoadingNote, setShowLoadingNote] = useState(false);
 
