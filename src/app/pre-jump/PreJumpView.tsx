@@ -19,13 +19,15 @@ import many from "@/app/_assets/images/many_onboarding.png";
 import buttons from "@/app/_assets/images/interface_onboarding.png";
 import privacy from "@/app/_assets/images/privacy.png";
 import clickSound from "@/app/_assets/audio/click.wav";
+import * as amplitude from "@amplitude/analytics-browser";
+import { useSound } from "@/hooks/useSound";
 
 const PreJumpView = () => {
   const [showOnboarding, setShowOnboarding] = useState(true);
   const { user } = useGetUser();
   const { data: activeBoosters } = useUserBoosters(user?.id || "");
   const [imagesLoaded, setImagesLoaded] = useState(false);
-
+  const { playSound } = useSound(clickSound);
   const imageAssets = [coin, energy, saved, pose, light, many, buttons];
 
   const preloadImages = async () => {
@@ -57,6 +59,7 @@ const PreJumpView = () => {
   };
 
   useEffect(() => {
+    amplitude.track("PreJump_Enter");
     preloadImages();
   }, []);
 
@@ -140,9 +143,7 @@ const PreJumpView = () => {
       <Link href="/" className="fixed right-[8px] top-[8px] block">
         <button
           onClick={() => {
-            // audio
-            const audio = new Audio(clickSound);
-            audio.play();
+            playSound();
           }}
           className="right-[12px] top-[12px] z-50 rotate-90 rounded-full text-[24px] text-white transition active:bg-slate-900"
         >
@@ -218,8 +219,8 @@ const PreJumpView = () => {
             href="/boosters"
             className="flex gap-[4px]"
             onClick={() => {
-              const audio = new Audio(clickSound);
-              audio.play();
+              amplitude.track("PreJump_Boosters_Click");
+              playSound();
             }}
           >
             <Image src={saved as any} alt="boost" />
@@ -227,7 +228,13 @@ const PreJumpView = () => {
           </Link>
         </div>
         <Link href="/jump-flow">
-          <Button className="mb-[8px] px-[12px]" iconLeft={play as any}>
+          <Button
+            className="mb-[8px] px-[12px]"
+            iconLeft={play as any}
+            onClick={() => {
+              amplitude.track("PreJump_Start_Jump");
+            }}
+          >
             Включить камеру
           </Button>
         </Link>

@@ -3,6 +3,7 @@ import classNames from "classnames";
 import { twMerge } from "tailwind-merge";
 import Image from "next/image";
 import clickSound from "@/app/_assets/audio/click.wav";
+import { useSound } from "@/hooks/useSound";
 
 interface ButtonProps {
   children: React.ReactNode;
@@ -29,21 +30,12 @@ const Button: React.FC<ButtonProps> = ({
   isLoading = false,
   disabled = false,
   onClick,
-  muteSound = false,
   sound = clickSound,
 }) => {
-  const playClickSound = () => {
-    if (!muteSound) {
-      const audio = new Audio(sound);
-      audio.volume = 0.5;
-      audio.play().catch((error) => {
-        console.debug("Button sound playback failed:", error);
-      });
-    }
-  };
+  const { playSound } = useSound(sound);
 
   const handleClick = (e: React.MouseEvent) => {
-    playClickSound();
+    playSound();
     onClick?.(e);
   };
 

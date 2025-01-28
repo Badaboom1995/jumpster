@@ -23,6 +23,7 @@ import finishSound from "@/app/_assets/audio/harp_money.wav";
 import Lottie from "lottie-react";
 import lightAnimation from "@/app/_assets/lottie/light.json";
 import rewardAnimation from "@/app/_assets/lottie/reward.json";
+import * as amplitude from "@amplitude/analytics-browser";
 
 const StatCard = ({
   children,
@@ -130,6 +131,7 @@ const Reward = ({
   };
 
   useEffect(() => {
+    amplitude.track("JumpFlow_Reward_Claim");
     addReward();
     playSound();
     setTimeout(() => {
@@ -164,12 +166,6 @@ const Reward = ({
           style={{ width: 200, height: 200 }}
         />
       </div>
-      {/* <button
-        onClick={playSound}
-        className="mb-4 rounded-full bg-primary px-4 py-2 text-sm text-white"
-      >
-        🔊 Play Sound
-      </button> */}
       <h2 className="mt-[-24px] flex items-center gap-[4px] text-[64px] font-bold leading-[90px] text-white">
         {coinsEarnedAnimated.toLocaleString()}
       </h2>
@@ -221,16 +217,6 @@ const Reward = ({
           Забрать награду
         </Button>
       </Link>
-      {/* {showFirework && (
-        <CoinsFireworkPixie
-          x={window.innerWidth / 2}
-          y={window.innerHeight / 2}
-          coinCount={30}
-          onComplete={() => setShowFirework(false)}
-        />
-      )} */}
-
-      {/* <button onClick={() => setShowFirework(true)}>Show Coin Firework</button> */}
     </div>
   );
 };

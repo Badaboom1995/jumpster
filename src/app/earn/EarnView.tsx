@@ -1,11 +1,6 @@
 "use client";
 import React, { useState } from "react";
 import Image from "next/image";
-import medal from "@/app/_assets/images/medal.png";
-import muscle from "@/app/_assets/icons/muscle3D.png";
-import dumbbel from "@/app/_assets/icons/dumbbel3D.png";
-import pill from "@/app/_assets/icons/pill3D.png";
-import youtube from "@/app/_assets/icons/youtube3D.png";
 import { supabase } from "@/components/Root/Root";
 import { useQuery, useQueryClient } from "react-query";
 import { twMerge } from "tailwind-merge";
@@ -16,18 +11,11 @@ import Tabs from "@/components/Tabs";
 import coin from "@/app/_assets/images/coin.png";
 import clickSound from "@/app/_assets/audio/click.wav";
 import successSound from "@/app/_assets/audio/special-click.wav";
+import { useSound } from "@/hooks/useSound";
 
-const Card = ({
-  id,
-  title,
-  icon,
-  income,
-  cost,
-  isBought,
-  user_id,
-  setIsOpen,
-}) => {
+const Card = ({ id, title, icon, income, cost, isBought, setIsOpen }) => {
   const { user } = useGetUser();
+  const { playSound } = useSound(clickSound);
   // @ts-ignore
   const insufficientCoins = user?.user_parameters?.coins.value < cost;
 
@@ -58,8 +46,7 @@ const Card = ({
         <button
           onClick={() => {
             !isBought && setIsOpen(id);
-            const audio = new Audio(clickSound);
-            audio.play();
+            playSound();
           }}
           disabled={insufficientCoins || isBought}
           className={twMerge(
@@ -89,12 +76,12 @@ const EarnView = () => {
   const [isOpen, setIsOpen] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const queryClient = useQueryClient();
+  const { playSound } = useSound(clickSound);
 
   const buy = async (cardId: number, userId: number, cost: number) => {
     try {
       setIsLoading(true);
-      const audio = new Audio(clickSound);
-      audio.play();
+      playSound();
       // Check if card is already bought
       const { data: existingCard } = await supabase
         .from("user_cards")

@@ -15,6 +15,7 @@ import crownOutlineIcon from "@/app/_assets/icons/crown-1.svg";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import clickSound from "@/app/_assets/audio/click.wav";
+import { useSound } from "@/hooks/useSound";
 
 const Navitem = ({
   children,
@@ -25,9 +26,9 @@ const Navitem = ({
   src: string;
   href: string;
 }) => {
+  const { playSound } = useSound(clickSound);
   const handleClick = () => {
-    const audio = new Audio(clickSound);
-    audio.play();
+    playSound();
   };
 
   return (

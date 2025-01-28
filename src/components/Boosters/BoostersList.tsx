@@ -8,11 +8,14 @@ import { BoosterCard } from "./BoosterCard";
 import { Booster } from "@/types/boosters";
 import { useRouter } from "next/navigation";
 import negativeClickSound from "@/app/_assets/audio/click.wav";
+import * as amplitude from "@amplitude/analytics-browser";
+import { useSound } from "@/hooks/useSound";
 interface BoostersListProps {
   userId: string;
 }
 
 export const BoostersList: React.FC<BoostersListProps> = ({ userId }) => {
+  const { playSound } = useSound(negativeClickSound);
   const router = useRouter();
   const { data: activeBoosters, isLoading: isLoadingActive } =
     useUserBoosters(userId);
@@ -56,8 +59,7 @@ export const BoostersList: React.FC<BoostersListProps> = ({ userId }) => {
       <div className="border-b border-background py-4">
         <button
           onClick={() => {
-            const audio = new Audio(negativeClickSound);
-            audio.play();
+            playSound();
             router.back();
           }}
           className="flex items-center text-white transition-colors hover:text-white"

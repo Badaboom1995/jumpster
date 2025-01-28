@@ -8,6 +8,7 @@ export const supabase = createClient(
   "https://adrdxahjylqbmxomhrmi.supabase.co",
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFkcmR4YWhqeWxxYm14b21ocm1pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mjc2Njc1NDAsImV4cCI6MjA0MzI0MzU0MH0.pe1KulD4qwauzZxD0PFIV0cfdnuVii12tdgUHsQsRiA",
 );
+import * as amplitude from "@amplitude/analytics-browser";
 
 import React, {
   type PropsWithChildren,
@@ -53,9 +54,11 @@ function App(props: PropsWithChildren) {
   const viewport = useViewport();
 
   useEffect(() => {
+    amplitude.init("fc185899af59f00b16d189f6bae75ad", { autocapture: true });
     miniApp.requestFullscreen && miniApp.requestFullscreen();
     viewport && viewport.expand();
     closingBehavior && closingBehavior.enableConfirmation();
+    amplitude.track("Enter");
     console.log(lp.startParam);
     // if test mode, disable vertical swipe
     // if (lp.startParam !== "test") {

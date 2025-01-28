@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { twMerge } from "tailwind-merge";
 import clickSound from "@/app/_assets/audio/click.wav";
+import { useSound } from "@/hooks/useSound";
+
 const Curtain = ({
   children,
   onClose,
@@ -12,6 +14,7 @@ const Curtain = ({
 }) => {
   const [isCloseAnimation, setCloseAnimation] = useState(false);
   const [isVisible, setVisible] = useState(null);
+  const { playSound } = useSound(clickSound);
 
   const closeCurtain = () => {
     if (isVisible === null) {
@@ -57,8 +60,7 @@ const Curtain = ({
         <button
           className="absolute right-3 top-3 h-[25px] w-[25px] rounded-full bg-background-light bg-opacity-30 text-white"
           onClick={() => {
-            const audio = new Audio(clickSound);
-            audio.play();
+            playSound();
             onClose();
             closeCurtain();
           }}

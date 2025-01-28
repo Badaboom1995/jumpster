@@ -1,14 +1,13 @@
 import React from "react";
 import { Booster } from "@/types/boosters";
 import Button from "@/components/Button";
-import { twMerge } from "tailwind-merge";
 import { usePurchaseBooster } from "@/hooks/api/useBoosters";
 import toast from "react-hot-toast";
 import Image from "next/image";
 import lightning from "@/app/_assets/images/lightning.png";
 import fire from "@/app/_assets/images/fire.png";
-import clickSound from "@/app/_assets/audio/click.wav";
 import successSound from "@/app/_assets/audio/special-click.wav";
+import * as amplitude from "@amplitude/analytics-browser";
 
 interface BoosterDetailsProps {
   booster: Booster;
@@ -47,10 +46,8 @@ export const BoosterDetails: React.FC<BoosterDetailsProps> = ({
   timeRemaining,
 }) => {
   const purchaseBooster = usePurchaseBooster();
-
   const handlePurchase = async () => {
-    const audio = new Audio(clickSound);
-    audio.play();
+    amplitude.track(`Boosters_Purchase_${booster.name}`);
     try {
       await purchaseBooster.mutateAsync({
         boosterId: booster.id,
@@ -59,10 +56,12 @@ export const BoosterDetails: React.FC<BoosterDetailsProps> = ({
       toast.success("Бустер успешно приобретен!");
       const successAudio = new Audio(successSound);
       successAudio.play();
+      amplitude.track(`Boosters_Purchase_Success_${booster.name}`);
       onClose();
     } catch (error) {
       console.error("Failed to purchase booster:", error);
       toast.error("Не удалось купить бустер");
+      amplitude.track(`Boosters_Purchase_Error_${booster.name}`);
     }
   };
 

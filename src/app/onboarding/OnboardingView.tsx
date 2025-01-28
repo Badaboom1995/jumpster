@@ -14,6 +14,7 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import useGetUser from "@/hooks/api/useGetUser";
 import { User } from "@/database.types";
+import * as amplitude from "@amplitude/analytics-browser";
 
 const OnboardingView = () => {
   const { user } = useGetUser();
@@ -43,11 +44,13 @@ const OnboardingView = () => {
   };
 
   useEffect(() => {
+    amplitude.track("Onboarding_Start");
     preloadImages();
   }, []);
 
   const setOnboardingDone = async (user: User) => {
     try {
+      amplitude.track("Onboarding_Complete");
       router.push("/?onboarding_done=true");
     } catch (error) {
       console.error("Failed to update onboarding status:", error);

@@ -7,6 +7,8 @@ import { BoosterDetails } from "./BoosterDetails";
 import lightning from "@/app/_assets/images/lightning.png";
 import fire from "@/app/_assets/images/fire.png";
 import clickSound from "@/app/_assets/audio/click.wav";
+import * as amplitude from "@amplitude/analytics-browser";
+import { useSound } from "@/hooks/useSound";
 
 interface BoosterCardProps {
   booster: UserBooster;
@@ -43,6 +45,7 @@ export const BoosterCard: React.FC<BoosterCardProps> = ({
   onBuy,
   isLoading,
 }) => {
+  const { playSound } = useSound(clickSound);
   const [isDetailsOpen, setIsDetailsOpen] = React.useState(false);
   const getDurationText = () => {
     if (booster.booster.duration_type === "permanent") return "Постоянный";
@@ -101,8 +104,7 @@ export const BoosterCard: React.FC<BoosterCardProps> = ({
       <button
         onClick={() => {
           setIsDetailsOpen(true);
-          const audio = new Audio(clickSound);
-          audio.play();
+          playSound();
         }}
         className="flex w-full items-center justify-between rounded-lg py-[4px]"
       >
