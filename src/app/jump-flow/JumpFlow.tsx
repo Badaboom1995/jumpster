@@ -5,10 +5,8 @@ import * as tf from "@tensorflow/tfjs-core";
 import "@tensorflow/tfjs-backend-webgl";
 import {
   detectHips,
-  drawVideoFrame2,
   getStatusText,
   requestWithRetry,
-  secondsToMinutesString,
   setMoveVector,
 } from "./utils";
 import useCountdown from "@/hooks/useCountDown";
@@ -23,16 +21,13 @@ import { StoreContext } from "@/components/Root/Root";
 import { Title } from "@/components/Title";
 import { getRankData } from "@/utils";
 import Button from "@/components/Button";
-import { useRewards } from "@/hooks/api/useRewards";
-import { useQueryClient } from "react-query";
-import CoinsFirework from "@/components/CoinsFirework/CoinsFirework";
 import coinBag from "@/app/_assets/audio/coin.mp3";
 import finishSound from "@/app/_assets/audio/done.wav";
 import Lottie from "lottie-react";
 import loader from "@/app/_assets/loader.json";
-import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import eye from "@/app/_assets/lottie/eye.json";
 import * as amplitude from "@amplitude/analytics-browser";
+import { useSound } from "@/hooks/useSound";
 
 const energyPerJump = 100;
 const FPS = 24;
@@ -49,6 +44,9 @@ const JumpFlow = () => {
     currentVector: 0,
     standStill: false,
   }); // vector of movement
+  // finish sound
+  const { playSound: playFinishSound } = useSound(finishSound);
+  const { playSound: playCoinSound } = useSound(coinBag);
   const [hipsVisible, setHipsVisible] = useState(false); // hips are visible
   const [cameraReady, setCameraReady] = useState(false); // set to false to disable camera and model
   const [appReady, setAppReady] = useState(false); // set to false to disable camera and model
@@ -61,70 +59,9 @@ const JumpFlow = () => {
   const { user, isUserLoading } = useGetUser<UserWithParameters>();
   // @ts-ignore
   const currentRankData = getRankData(user?.experience);
-  const coinsFireworkRef = useRef<any>(null);
-  const [lastJumpPosition, setLastJumpPosition] = React.useState({
-    x: 0,
-    y: 0,
-  });
-  const [isMuted, setIsMuted] = useState(false);
+  // const coinsFireworkRef = useRef<any>(null);
+
   const [loadingProgress, setLoadingProgress] = useState(0);
-
-  // 1. Lazy initialize the audio pools only when needed
-  // const [coinAudioPool, setCoinAudioPool] = useState<HTMLAudioElement[]>([]);
-  const [finishAudioPool, setFinishAudioPool] = useState<HTMLAudioElement[]>(
-    [],
-  );
-
-  // Initialize pools only when the game starts
-  // useEffect(() => {
-  //   if (flowStatus === "jump") {
-  //     // Initialize only if not already done
-  //     if (coinAudioPool.length === 0) {
-  //       setCoinAudioPool(
-  //         Array(3)
-  //           .fill(null)
-  //           .map(() => {
-  //             const audio = new Audio(coinBag);
-  //             audio.volume = 0.2;
-  //             return audio;
-  //           }),
-  //       );
-  //     }
-  //     if (finishAudioPool.length === 0) {
-  //       setFinishAudioPool(
-  //         Array(2)
-  //           .fill(null)
-  //           .map(() => {
-  //             const audio = new Audio(finishSound);
-  //             audio.volume = 0.2;
-  //             return audio;
-  //           }),
-  //       );
-  //     }
-  //   }
-  // }, [flowStatus]);
-
-  // 2. Clean up audio pools when game ends
-  useEffect(() => {
-    if (flowStatus === "end") {
-      // Clean up audio instances
-      // coinAudioPool.forEach((audio) => {
-      //   audio.src = "";
-      //   audio.load();
-      // });
-      finishAudioPool.forEach((audio) => {
-        audio.src = "";
-        audio.load();
-      });
-
-      // setCoinAudioPool([]);
-      setFinishAudioPool([]);
-    }
-  }, [flowStatus]);
-
-  // Add index trackers for the pools
-  const [currentCoinAudioIndex, setCurrentCoinAudioIndex] = useState(0);
-  const [currentFinishAudioIndex, setCurrentFinishAudioIndex] = useState(0);
 
   useEffect(() => {
     if (isUserLoading) return;
@@ -141,24 +78,24 @@ const JumpFlow = () => {
     isRunning: isRewardRunning,
   } = useCountdown();
 
-  const getRandomTopPosition = () => {
-    const x = Math.random() * window.innerWidth;
-    const y = 0;
-    return { x, y };
-  };
+  // const getRandomTopPosition = () => {
+  //   const x = Math.random() * window.innerWidth;
+  //   const y = 0;
+  //   return { x, y };
+  // };
 
-  const getRandomCoinParams = () => {
-    return {
-      count: {
-        min: Math.floor(Math.random() * 5) + 8, // Random between 8-12
-        max: Math.floor(Math.random() * 10) + 15, // Random between 15-24
-      },
-      size: {
-        min: Math.floor(Math.random() * 15) + 30, // Random between 30-44px
-        max: Math.floor(Math.random() * 20) + 45, // Random between 45-64px
-      },
-    };
-  };
+  // const getRandomCoinParams = () => {
+  //   return {
+  //     count: {
+  //       min: Math.floor(Math.random() * 5) + 8, // Random between 8-12
+  //       max: Math.floor(Math.random() * 10) + 15, // Random between 15-24
+  //     },
+  //     size: {
+  //       min: Math.floor(Math.random() * 15) + 30, // Random between 30-44px
+  //       max: Math.floor(Math.random() * 20) + 45, // Random between 45-64px
+  //     },
+  //   };
+  // };
 
   const loadModel = async () => {
     if (store.detector) return;
@@ -186,56 +123,33 @@ const JumpFlow = () => {
       if (availableEnergy < energyPerJump) {
         setFlowStatus("endCountdown");
         startRewardCountdown();
-        // Fix finish sound playback here too
-        // const audio = finishAudioPool[currentFinishAudioIndex];
-        // if (audio) {
-        //   audio.currentTime = 0;
-        //   audio
-        //     .play()
-        //     .catch((error) => console.warn("Audio playback failed:", error));
-        //   setCurrentFinishAudioIndex(
-        //     (prev) => (prev + 1) % finishAudioPool.length,
-        //   );
-        // }
+        playFinishSound();
         return;
       }
 
       setJumpState("up");
       setJumpsCounter((prev) => prev + 1);
       setAvailableEnergy((prev) => prev - energyPerJump);
-
-      // Play coin sound using pool
-      const audio2 = new Audio(coinBag);
-      audio2.play();
-      // const audio = coinAudioPool[currentCoinAudioIndex];
-      // @ts-ignore
-      // if (audio && !audio.playing) {
-      //   audio.currentTime = 0;
-      //   audio
-      //     .play()
-      //     .catch((error) => console.warn("Audio playback failed:", error));
-      //   setCurrentCoinAudioIndex((prev) => (prev + 1) % coinAudioPool.length);
-      // }
     }
     if (vector < 0 && jumpState === "up") {
-      // Get random parameters for coins
-      const coinParams = getRandomCoinParams();
-      // Trigger coins animation at random border position
-      const position = getRandomTopPosition();
-      setLastJumpPosition(position);
-
-      if (coinsFireworkRef.current) {
-        coinsFireworkRef.current.triggerAnimation(
-          position.x,
-          position.y,
-          {
-            min: 1,
-            max: 1,
-          },
-          { min: 1, max: 1 },
-        );
-      }
+      playCoinSound();
       setJumpState("down");
+      // Get random parameters for coins
+      // const coinParams = getRandomCoinParams();
+      // Trigger coins animation at random border position
+      // const position = getRandomTopPosition();
+
+      // if (coinsFireworkRef.current) {
+      //   coinsFireworkRef.current.triggerAnimation(
+      //     position.x,
+      //     position.y,
+      //     {
+      //       min: 1,
+      //       max: 1,
+      //     },
+      //     { min: 1, max: 1 },
+      //   );
+      // }
     }
   };
 
@@ -277,10 +191,7 @@ const JumpFlow = () => {
 
   const mainLoop = async () => {
     const video: any = videoRef.current;
-    const canvas: any = canvasRef.current;
-    const ctx = canvas.getContext("2d");
     if (detectorRef.current && video.readyState === 4) {
-      // drawVideoFrame2(ctx, video, canvas);
       const poses = await detectorRef.current.estimatePoses(video);
       setMoveVector(poses[0]?.keypoints, setMoveVectorY);
       const hipsVisible = detectHips(poses);
@@ -388,29 +299,11 @@ const JumpFlow = () => {
     }
   }, [flowStatus, secondsUntilReward, isRewardRunning]);
 
-  // // Update the mute effect
-  // useEffect(() => {
-  //   coinAudioPool.forEach((audio) => {
-  //     if (audio) audio.muted = isMuted;
-  //   });
-  //   finishAudioPool.forEach((audio) => {
-  //     if (audio) audio.muted = isMuted;
-  //   });
-  // }, [isMuted]);
-
   const handleJumpingFinished = () => {
     amplitude.track("JumpFlow_Jump_Finished");
     setFlowStatus("endCountdown");
     startRewardCountdown();
-    // Fix the finish sound playback
-    // const audio = finishAudioPool[currentFinishAudioIndex];
-    // if (audio) {
-    //   audio.currentTime = 0;
-    //   audio
-    //     .play()
-    //     .catch((error) => console.warn("Audio playback failed:", error));
-    //   setCurrentFinishAudioIndex((prev) => (prev + 1) % finishAudioPool.length);
-    // }
+    playFinishSound();
   };
   // Add new state for tracking loading time
   const [showLoadingNote, setShowLoadingNote] = useState(false);
@@ -432,13 +325,8 @@ const JumpFlow = () => {
   // Add this useEffect to simulate loading progress
   useEffect(() => {
     if (flowStatus === "loadingCamera" && loadingProgress === 0) {
-      // Simulate progress until camera is ready
-      // console.log("init loader");
       const interval = setInterval(() => {
         setLoadingProgress((prev) => {
-          // Slow down progress as it gets higher
-          // const increment = Math.max(0.5, (100 - prev) / 10);
-          // const newProgress = Math.min(95, prev + increment);
           const newProgress = prev > 94 ? prev : prev + Math.random() * 5;
           return newProgress;
         });
@@ -446,7 +334,6 @@ const JumpFlow = () => {
 
       return () => clearInterval(interval);
     } else if (cameraReady && detectorRef.current) {
-      // When everything is loaded, set to 100%
       setLoadingProgress(100);
     }
   }, [flowStatus, cameraReady]);
@@ -458,7 +345,6 @@ const JumpFlow = () => {
         isRewardRunning && "animate-fade",
       )}
     >
-      {/* <CoinsFirework ref={coinsFireworkRef} /> */}
       <div className="flex w-full pt-[16px]">
         {flowStatus !== "end" && flowStatus !== "jump" && (
           <Link href="/" className="block">
@@ -473,14 +359,6 @@ const JumpFlow = () => {
           </Link>
         )}
       </div>
-      <button
-        onClick={() => setIsMuted(!isMuted)}
-        className="fixed right-[12px] top-[32px] z-50 h-[32px] min-w-[32px] rounded-[8px] border border-background-dark bg-background-dark bg-opacity-50 text-white transition"
-      >
-        {/* {isMuted ? "🔇" : "🔊"} */}
-      </button>
-      {/* flowStatus === "searchHips" */}
-
       <div
         className={twMerge(
           "fixed left-0 top-0 flex h-[100vh] w-full bg-background-dark bg-opacity-70 transition-opacity duration-1000 ease-out",
