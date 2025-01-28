@@ -25,7 +25,7 @@ import {
 import * as amplitude from "@amplitude/analytics-browser";
 import coin from "@/app/_assets/images/coin.png";
 import clickSound from "@/app/_assets/audio/click.wav";
-
+import Loader from "@/app/Loader";
 import "@tensorflow/tfjs-backend-webgl";
 import * as tf from "@tensorflow/tfjs-core";
 import * as poseDetection from "@tensorflow-models/pose-detection";
@@ -138,8 +138,8 @@ const Main = () => {
 
   const handleClaimCoins = async (event: React.MouseEvent) => {
     amplitude.track("Main_Claim_Coins");
+    playSuccessSound();
     if (isClaimingCoins) return; // Prevent multiple clicks
-
     try {
       setIsClaimingCoins(true);
       coinsFireworkRef.current?.triggerAnimation(
@@ -153,7 +153,6 @@ const Main = () => {
       );
 
       await addCoins(user);
-      playSuccessSound();
       await queryClient.invalidateQueries("user");
       amplitude.track("Main_Claim_Coins_Success");
     } catch (e) {
@@ -168,7 +167,7 @@ const Main = () => {
     if (store.detector) return;
     await tf.ready();
     const detectorConfig = {
-      modelType: poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING,
+      modelType: poseDetection.movenet.modelType.SINGLEPOSE_THUNDER,
       modelUrl: "./movenet/model.json",
     };
     await requestWithRetry(
@@ -299,13 +298,15 @@ const Main = () => {
     // @ts-ignore
     (!user?.onboarding_done && !objectSearchParams?.onboarding_done)
   )
-    return null;
+    return <Loader />;
 
   const handlePrevSlide = () => {
+    playSound();
     setCurrentSlide((prev) => (prev > 0 ? prev - 1 : ranks.length - 1));
   };
 
   const handleNextSlide = () => {
+    playSound();
     setCurrentSlide((prev) => (prev < ranks.length - 1 ? prev + 1 : 0));
   };
 

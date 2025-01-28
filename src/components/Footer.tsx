@@ -27,12 +27,9 @@ const Navitem = ({
   href: string;
 }) => {
   const { playSound } = useSound(clickSound);
-  const handleClick = () => {
-    playSound();
-  };
 
   return (
-    <Link href={href} onClick={handleClick}>
+    <Link href={href} onClick={playSound}>
       <li className="flex h-[50px] flex-col items-center justify-between gap-[4px] rounded-[12px] px-[8px] py-[4px] transition active:bg-background">
         <Image
           src={src}
