@@ -28,7 +28,7 @@ import loader from "@/app/_assets/loader.json";
 import eye from "@/app/_assets/lottie/eye.json";
 import * as amplitude from "@amplitude/analytics-browser";
 import { useSound } from "@/hooks/useSound";
-
+import CoinsFireworkPixie from "@/components/CoinsFireworkPixie";
 const energyPerJump = 100;
 const FPS = 24;
 const FRAME_TIME = 1000 / FPS;
@@ -345,6 +345,7 @@ const JumpFlow = () => {
         isRewardRunning && "animate-fade",
       )}
     >
+      {/* <CoinsFireworkPixie /> */}
       <div className="flex w-full pt-[16px]">
         {flowStatus !== "end" && flowStatus !== "jump" && (
           <Link href="/" className="block">

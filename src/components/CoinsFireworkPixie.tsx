@@ -34,13 +34,13 @@ interface SpecialParticle {
   active: boolean;
 }
 
-const App = () => {
+const CoinsFireworkPixie = () => {
   const blurFilter = useMemo(() => new BlurFilter(2), []);
   const STAGE_WIDTH = 500;
   const STAGE_HEIGHT = 900;
   const COIN_SPEED = 100;
   const GRAVITY = 3;
-  const COINS_PER_THROW = 20;
+  const COINS_PER_THROW = 5;
   const MAX_COINS = 1000;
   const SPECIAL_PARTICLE_CHANCE = 0.5; // 10% chance to appear
   const SPECIAL_PARTICLE_SPEED = 20; // Slower speed
@@ -109,8 +109,8 @@ const App = () => {
     () => ({
       anchor: 0.5,
       scale: 0.5,
-      width: 50,
-      height: 50,
+      width: 35,
+      height: 35,
       blendMode: BLEND_MODES.NORMAL,
     }),
     [],
@@ -119,18 +119,18 @@ const App = () => {
   // Modify createNewCoins to potentially spawn special particle
   const createNewCoins = useCallback(() => {
     // Chance to create special particle
-    if (!specialParticle.active && Math.random() < SPECIAL_PARTICLE_CHANCE) {
-      setSpecialParticle({
-        id: Date.now(),
-        x: STAGE_WIDTH / 2 + (Math.random() - 0.5) * STAGE_WIDTH * 0.8,
-        y: STAGE_HEIGHT + 50,
-        speedX: (Math.random() - 0.5) * SPECIAL_PARTICLE_SPEED * 0.3,
-        speedY: -SPECIAL_PARTICLE_SPEED - Math.random() * 2,
-        rotation: Math.random() * Math.PI * 0.5,
-        rotationSpeed: (Math.random() - 0.5) * 0.02,
-        active: true,
-      });
-    }
+    // if (!specialParticle.active && Math.random() < SPECIAL_PARTICLE_CHANCE) {
+    //   setSpecialParticle({
+    //     id: Date.now(),
+    //     x: STAGE_WIDTH / 2 + (Math.random() - 0.5) * STAGE_WIDTH * 0.8,
+    //     y: STAGE_HEIGHT + 50,
+    //     speedX: (Math.random() - 0.5) * SPECIAL_PARTICLE_SPEED * 0.3,
+    //     speedY: -SPECIAL_PARTICLE_SPEED - Math.random() * 2,
+    //     rotation: Math.random() * Math.PI * 0.5,
+    //     rotationSpeed: (Math.random() - 0.5) * 0.02,
+    //     active: true,
+    //   });
+    // }
 
     const newCoins: CoinPosition[] = Array(COINS_PER_THROW)
       .fill(null)
@@ -143,7 +143,7 @@ const App = () => {
           id: nextCoinId + Math.random(),
           x: STAGE_WIDTH / 2 + (Math.random() - 0.5) * STAGE_WIDTH * 0.8,
           y: STAGE_HEIGHT + 50,
-          speedX: (Math.random() - 0.5) * COIN_SPEED * 0.3,
+          speedX: (Math.random() - 0.5) * COIN_SPEED * 0.1,
           speedY: -requiredSpeed,
           rotation: Math.random() * Math.PI * 2,
           rotationSpeed: (Math.random() - 0.5) * 0.05,
@@ -165,7 +165,7 @@ const App = () => {
   ]);
 
   useEffect(() => {
-    const interval = setInterval(createNewCoins, 1000);
+    const interval = setInterval(createNewCoins, 300);
     return () => clearInterval(interval);
   }, [createNewCoins]);
 
@@ -239,12 +239,12 @@ const App = () => {
   useEffect(() => {
     var stats = new Stats();
     stats.showPanel(0);
-    document.body.appendChild(stats.dom);
+    // document.body.appendChild(stats.dom);
 
-    stats.dom.style.position = "absolute";
-    stats.dom.style.left = "0px";
-    stats.dom.style.top = "0px";
-    stats.dom.style.zIndex = "1000";
+    // stats.dom.style.position = "absolute";
+    // stats.dom.style.left = "0px";
+    // stats.dom.style.top = "0px";
+    // stats.dom.style.zIndex = "1000";
 
     let animationFrameId: number;
     let lastFrameTime = 0;
@@ -268,7 +268,7 @@ const App = () => {
     return () => {
       cancelAnimationFrame(animationFrameId);
       // Clean up stats
-      document.body.removeChild(stats.dom);
+      // document.body.removeChild(stats.dom);
     };
   }, [updatePositions]);
 
@@ -328,4 +328,4 @@ const App = () => {
   );
 };
 
-export default App;
+export default CoinsFireworkPixie;
