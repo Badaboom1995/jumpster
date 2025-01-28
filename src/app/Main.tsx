@@ -22,17 +22,17 @@ import {
   setOnboardingDone,
   updateStreak,
 } from "@/utils";
-
+import * as amplitude from "@amplitude/analytics-browser";
 import coin from "@/app/_assets/images/coin.png";
 import clickSound from "@/app/_assets/audio/click.wav";
-
+import Loader from "@/app/Loader";
 import "@tensorflow/tfjs-backend-webgl";
 import * as tf from "@tensorflow/tfjs-core";
 import * as poseDetection from "@tensorflow-models/pose-detection";
 import { requestWithRetry } from "@/app/jump-flow/utils";
 import { StoreContext, supabase } from "@/components/Root/Root";
 import { useRouter, useSearchParams } from "next/navigation";
-
+import { useSound } from "@/hooks/useSound";
 import "./main.css";
 
 import useWindowSize from "react-use/lib/useWindowSize";
@@ -46,9 +46,10 @@ import { useQueryClient } from "react-query";
 import CoinsFirework, {
   CoinsFireworkRef,
 } from "@/components/CoinsFirework/CoinsFirework";
-import coinSound from "@/app/_assets/audio/collect.mp3";
+import successSound from "@/app/_assets/audio/collect.mp3";
 
 import arrow from "@/app/_assets/icons/arrowRight.svg";
+import ConnectionAlert from "@/components/ConnectionAlert";
 
 type StatsProps = {
   coins: number;
@@ -63,6 +64,8 @@ const Main = () => {
   const queryClient = useQueryClient();
   const searchParams = useSearchParams();
   const objectSearchParams = getObjectSearchParams(searchParams);
+  const { playSound } = useSound(clickSound);
+  const { playSound: playSuccessSound } = useSound(successSound);
 
   const { user, isUserLoading } = useGetUser(false);
   // @ts-ignore
@@ -76,7 +79,6 @@ const Main = () => {
   const router = useRouter();
   const currentCoinsReward = useCurrentCoinsReward(user);
   const passive_income = usePassiveIncome();
-  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const currentRankData = getRankData(userStats?.experience);
   const currentLevelProgress = currentRankData?.percent;
@@ -131,21 +133,15 @@ const Main = () => {
   }, [touchStart, touchEnd]);
 
   useEffect(() => {
-    audioRef.current = new Audio(coinSound);
-    if (audioRef.current) {
-      audioRef.current.volume = 0.2;
-      // Preload the audio
-      audioRef.current.load();
-    }
+    amplitude.track("Main_Enter");
   }, []);
 
   const handleClaimCoins = async (event: React.MouseEvent) => {
+    amplitude.track("Main_Claim_Coins");
+    playSuccessSound();
     if (isClaimingCoins) return; // Prevent multiple clicks
-
     try {
       setIsClaimingCoins(true);
-      // Start both sound and animation simultaneously
-      const playPromise = audioRef.current?.play();
       coinsFireworkRef.current?.triggerAnimation(
         event.clientX,
         event.clientY,
@@ -156,22 +152,12 @@ const Main = () => {
         },
       );
 
-      // Reset audio position
-      if (audioRef.current) {
-        audioRef.current.currentTime = 0;
-      }
-
-      // Handle any audio play errors silently
-      if (playPromise) {
-        playPromise.catch((error) => {
-          console.warn("Audio playback failed:", error);
-        });
-      }
-
       await addCoins(user);
       await queryClient.invalidateQueries("user");
+      amplitude.track("Main_Claim_Coins_Success");
     } catch (e) {
       console.log(e);
+      amplitude.track("Main_Claim_Coins_Error");
     } finally {
       setIsClaimingCoins(false);
     }
@@ -181,7 +167,8 @@ const Main = () => {
     if (store.detector) return;
     await tf.ready();
     const detectorConfig = {
-      modelType: poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING,
+      modelType: poseDetection.movenet.modelType.SINGLEPOSE_THUNDER,
+      modelUrl: "./movenet/model.json",
     };
     await requestWithRetry(
       async () =>
@@ -259,7 +246,6 @@ const Main = () => {
     }
   };
 
-  // http://localhost:3000/?claim=true&coins=217&energy=1000&experience=424
   useTimer(() => {
     if (!currentRankData) return;
     setUserStats((prev) => ({
@@ -312,18 +298,21 @@ const Main = () => {
     // @ts-ignore
     (!user?.onboarding_done && !objectSearchParams?.onboarding_done)
   )
-    return null;
+    return <Loader />;
 
   const handlePrevSlide = () => {
+    playSound();
     setCurrentSlide((prev) => (prev > 0 ? prev - 1 : ranks.length - 1));
   };
 
   const handleNextSlide = () => {
+    playSound();
     setCurrentSlide((prev) => (prev < ranks.length - 1 ? prev + 1 : 0));
   };
 
   return (
     <div className="flex h-full w-full flex-col overflow-hidden">
+      <ConnectionAlert />
       <Confetti
         width={width}
         height={height}
@@ -434,8 +423,8 @@ const Main = () => {
             href="/boosters"
             className="flex items-center gap-[4px]"
             onClick={() => {
-              const audio = new Audio(clickSound);
-              audio.play();
+              amplitude.track("Main_Boosters_Click");
+              playSound();
             }}
           >
             <Image src={saved as any} alt="boost" />
@@ -463,7 +452,13 @@ const Main = () => {
           </Button>
         ) : (
           <Link href="/pre-jump">
-            <Button disabled={currentEnergy < 1000} iconLeft={play as any}>
+            <Button
+              disabled={currentEnergy < 1000}
+              iconLeft={play as any}
+              onClick={() => {
+                amplitude.track("Main_Start_Jump");
+              }}
+            >
               Начать прыжки
             </Button>
           </Link>

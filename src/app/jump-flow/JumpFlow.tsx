@@ -32,8 +32,9 @@ import Lottie from "lottie-react";
 import loader from "@/app/_assets/loader.json";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import eye from "@/app/_assets/lottie/eye.json";
-const energyPerJump = 100;
+import * as amplitude from "@amplitude/analytics-browser";
 
+const energyPerJump = 100;
 const FPS = 24;
 const FRAME_TIME = 1000 / FPS;
 
@@ -60,8 +61,6 @@ const JumpFlow = () => {
   const { user, isUserLoading } = useGetUser<UserWithParameters>();
   // @ts-ignore
   const currentRankData = getRankData(user?.experience);
-  const queryClient = useQueryClient();
-  const calculateRewards = useRewards();
   const coinsFireworkRef = useRef<any>(null);
   const [lastJumpPosition, setLastJumpPosition] = React.useState({
     x: 0,
@@ -91,7 +90,6 @@ const JumpFlow = () => {
             }),
         );
       }
-
       if (finishAudioPool.length === 0) {
         setFinishAudioPool(
           Array(2)
@@ -222,15 +220,6 @@ const JumpFlow = () => {
     }
   };
 
-  // const loadModel = async () => {
-  //     if(!store.detector) return detectorRef.current = store.detector
-  //     // else {
-  //     //     const detectorConfig = {modelType: poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING};
-  //     //     await requestWithRetry(async () => await poseDetection.createDetector(poseDetection.SupportedModels.MoveNet, detectorConfig))
-  //     //     detectorRef.current = await poseDetection.createDetector(poseDetection.SupportedModels.MoveNet, detectorConfig);
-  //     // }
-  // };
-
   const setupCamera = async () => {
     const video: any = videoRef.current;
     console.log("start");
@@ -282,9 +271,9 @@ const JumpFlow = () => {
   };
 
   useEffect(() => {
+    amplitude.track("JumpFlow_Start");
     let lastFrameTime = 0;
     let animationFrameId: number;
-
     const animate = async (timestamp: number) => {
       if (timestamp - lastFrameTime >= FRAME_TIME) {
         await mainLoop();
@@ -326,9 +315,9 @@ const JumpFlow = () => {
   }, []);
 
   useEffect(() => {
-    console.log(cameraReady, detectorRef.current);
     // @ts-ignore
     if (videoRef.current.srcObject && detectorRef.current) {
+      amplitude.track("JumpFlow_Camera_Ready");
       setFlowStatus("searchHips");
       setAppReady(true);
     }
@@ -340,18 +329,21 @@ const JumpFlow = () => {
       return;
     if (!hipsVisible) {
       setFlowStatus("searchHips");
+      amplitude.track("JumpFlow_Hips_Not_Visible");
       stopCountDown();
       return;
     }
     if (hipsVisible && !isRunning) {
       setFlowStatus("countDown");
       startCountDown();
+      amplitude.track("JumpFlow_Countdown_Start");
       return;
     }
     // && moveVectorY.standStill
     if (hipsVisible && seconds === 0) {
       setFlowStatus("jump");
       setStarJumpingTime(new Date());
+      amplitude.track("JumpFlow_Jump_Start");
       return;
     }
   }, [hipsVisible, moveVectorY.standStill, seconds, isRunning, flowStatus]);
@@ -369,6 +361,7 @@ const JumpFlow = () => {
       isRewardRunning
     ) {
       setFlowStatus("end");
+      amplitude.track("JumpFlow_End");
       stopRewardCountdown();
       setTimeout(stopCamera, 1000);
     }
@@ -385,9 +378,10 @@ const JumpFlow = () => {
   }, [isMuted]);
 
   const handleJumpingFinished = () => {
+    amplitude.track("JumpFlow_Jump_Finished");
     setFlowStatus("endCountdown");
     startRewardCountdown();
-
+    console.log("finish");
     // Fix the finish sound playback
     const audio = finishAudioPool[currentFinishAudioIndex];
     if (audio) {
@@ -406,6 +400,7 @@ const JumpFlow = () => {
   useEffect(() => {
     if (flowStatus === "loadingCamera") {
       const timer = setTimeout(() => {
+        amplitude.track("JumpFlow_Loading_Note_Show");
         setShowLoadingNote(true);
       }, 5000);
 
@@ -417,16 +412,15 @@ const JumpFlow = () => {
 
   // Add this useEffect to simulate loading progress
   useEffect(() => {
-    if (flowStatus === "loadingCamera") {
-      // Start at 0
-      setLoadingProgress(0);
+    if (flowStatus === "loadingCamera" && loadingProgress === 0) {
       // Simulate progress until camera is ready
+      console.log("init loader");
       const interval = setInterval(() => {
         setLoadingProgress((prev) => {
           // Slow down progress as it gets higher
-          const increment = Math.max(0.5, (100 - prev) / 10);
-          const newProgress = Math.min(95, prev + increment);
-
+          // const increment = Math.max(0.5, (100 - prev) / 10);
+          // const newProgress = Math.min(95, prev + increment);
+          const newProgress = prev > 94 ? prev : prev + Math.random() * 5;
           return newProgress;
         });
       }, 100);
@@ -485,7 +479,7 @@ const JumpFlow = () => {
       </div>
 
       {flowStatus === "jump" && (
-        <div className="fixed bottom-[32px] left-1/2 z-10 flex w-[200px] w-full -translate-x-1/2 justify-center px-[12px]">
+        <div className="fixed bottom-[32px] left-1/2 z-50 flex w-[200px] w-full -translate-x-1/2 justify-center px-[12px]">
           <Button
             className="mx-[12px]"
             variant="secondary"
@@ -496,21 +490,23 @@ const JumpFlow = () => {
           </Button>
         </div>
       )}
-      <div className="absolute left-1/2 top-[100px] z-50 w-full -translate-x-1/2">
-        <div>
-          {statusText === "Загрузка..." && (
-            <div className="flex w-full flex-col items-center justify-center gap-[0px]">
-              <Lottie
-                width={50}
-                height={50}
-                animationData={loader}
-                loop={true}
-                className="mb-[24px]"
-              />
+      {statusText === "Загрузка..." && (
+        <div className="absolute left-1/2 top-[100px] z-10 z-50 h-[calc(100vh-100px)] w-full -translate-x-1/2">
+          <div className="h-full">
+            <div className="flex h-full w-full flex-col items-start justify-center gap-[0px] pb-[24px]">
+              <div className="mt-[36px] grow">
+                <Lottie
+                  width={75}
+                  height={75}
+                  animationData={loader}
+                  loop={true}
+                  className="mb-[24px]"
+                />
+              </div>
               <Title className="mb-[8px] text-center text-[16px]">
                 Загрузка...
               </Title>
-              <div className="mb-[24px] w-[250px]">
+              <div className="mb-[8px] w-full px-[24px]">
                 <div className="h-2 w-full rounded-full bg-background-dark">
                   <div
                     className="h-full rounded-full bg-primary transition-all duration-300"
@@ -522,24 +518,17 @@ const JumpFlow = () => {
                 </div>
               </div>
               {showLoadingNote && (
-                <p className="mt-2 w-full px-[12px] text-center text-sm text-gray-300">
+                <p className="mt-2 w-full px-[24px] text-center text-sm text-gray-300">
                   Загрузка может занять некоторое время, пожалуйста, не
                   прерывайте процесс
                 </p>
               )}
             </div>
-          )}
+          </div>
         </div>
-      </div>
+      )}
       {isRunning && seconds > 0 && (
         <div className="fixed left-1/2 top-1/2 z-50 w-full -translate-x-1/2 -translate-y-1/2">
-          {/* <h1 className="flex items-center justify-center text-[54px] font-bold text-white">
-            {secondsToMinutesString(currentSeconds)}
-          </h1> */}
-          {/* <div className="-ml-[32px] mb-[80px] flex items-center justify-center text-[32px] font-bold text-primary">
-            <Image height={32} src={energy as any} alt="energy" />
-            {availableEnergy}/{currentRankData.energyCapacity}
-          </div> */}
           <h1 className="flex items-center justify-center text-[140px] font-black leading-[120px] text-white">
             {seconds}
           </h1>
@@ -547,13 +536,6 @@ const JumpFlow = () => {
       )}
       {flowStatus === "jump" && (
         <div className="tr absolute left-1/2 top-1/2 z-50 w-full -translate-x-1/2 -translate-y-[60%]">
-          {/* <h1 className="flex items-center justify-center text-[54px] font-bold text-white">
-            {secondsToMinutesString(currentSeconds)}
-          </h1> */}
-          {/* <div className="-ml-[32px] mb-[80px] flex items-center justify-center text-[32px] font-bold text-primary">
-            <Image height={32} src={energy as any} alt="energy" />
-            {availableEnergy}/{currentRankData.energyCapacity}
-          </div> */}
           <h1 className="flex items-center justify-center text-[140px] font-black leading-[120px] text-white">
             {jumpsCounter}
           </h1>

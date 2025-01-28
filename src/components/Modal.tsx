@@ -1,5 +1,7 @@
 import React from "react";
 import clickSound from "@/app/_assets/audio/click.wav";
+import { useSound } from "@/hooks/useSound";
+
 interface ModalProps {
   isOpen: null | number;
   setOpen: (id: number) => void;
@@ -7,11 +9,10 @@ interface ModalProps {
 }
 
 const Modal: React.FC<ModalProps> = ({ isOpen, setOpen, children }) => {
+  const { playSound } = useSound(clickSound);
   if (!isOpen) return null;
-
   const handleClose = () => {
-    const audio = new Audio(clickSound);
-    audio.play();
+    playSound();
     setOpen(null);
   };
 

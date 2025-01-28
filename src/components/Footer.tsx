@@ -15,6 +15,7 @@ import crownOutlineIcon from "@/app/_assets/icons/crown-1.svg";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import clickSound from "@/app/_assets/audio/click.wav";
+import { useSound } from "@/hooks/useSound";
 
 const Navitem = ({
   children,
@@ -25,13 +26,10 @@ const Navitem = ({
   src: string;
   href: string;
 }) => {
-  const handleClick = () => {
-    const audio = new Audio(clickSound);
-    audio.play();
-  };
+  const { playSound } = useSound(clickSound);
 
   return (
-    <Link href={href} onClick={handleClick}>
+    <Link href={href} onClick={playSound}>
       <li className="flex h-[50px] flex-col items-center justify-between gap-[4px] rounded-[12px] px-[8px] py-[4px] transition active:bg-background">
         <Image
           src={src}

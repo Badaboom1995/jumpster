@@ -6,7 +6,7 @@ import { useSlider } from "@/hooks/useSlider";
 import arrow from "@/app/_assets/icons/ArrowDown.svg";
 import Confetti from "react-confetti";
 import Lottie from "lottie-react";
-
+import * as amplitude from "@amplitude/analytics-browser";
 type SlideProps = {
   title: string | React.ReactNode;
   description: string | React.ReactNode;
@@ -51,6 +51,7 @@ const SlideTemplate = (props: SlideProps) => {
   const animationFrameRef = useRef<number>();
 
   useEffect(() => {
+    amplitude.track(`Onboarding_Slide_View_${title}`);
     if (!icon || iconLottie || !animate) return;
 
     const canvas = canvasRef.current;
@@ -81,7 +82,7 @@ const SlideTemplate = (props: SlideProps) => {
       fallingIconsRef.current = Array.from({ length: 10 }, () => ({
         x: Math.random() * canvas.width,
         y: Math.random() * canvas.height - canvas.height,
-        speed: 1 + Math.random() * 0.5,
+        speed: 2 + Math.random() * 0.5,
         rotation: Math.random() * Math.PI * 2,
         rotationSpeed: (Math.random() - 0.5) * 0.02,
         size: 100 + Math.random() * 30,
@@ -153,8 +154,8 @@ const SlideTemplate = (props: SlideProps) => {
           width={window.innerWidth}
           height={window.innerHeight}
           recycle={false}
-          numberOfPieces={300}
-          gravity={0.1}
+          numberOfPieces={200}
+          gravity={1}
         />
       )}
       {icon && !iconLottie && animate && (
@@ -173,7 +174,10 @@ const SlideTemplate = (props: SlideProps) => {
           {!last && (
             <button
               className="text-[14px] active:bg-caption"
-              onClick={onSkip || toLastSlide}
+              onClick={() => {
+                amplitude.track("Onboarding_Skip");
+                onSkip ? onSkip() : toLastSlide();
+              }}
             >
               Пропустить
             </button>

@@ -1,11 +1,14 @@
 "use client";
-import React from "react";
+import React, { useEffect } from "react";
 import { BoostersList } from "@/components/Boosters/BoostersList";
 import useGetUser from "@/hooks/api/useGetUser";
+import * as amplitude from "@amplitude/analytics-browser";
 
 export default function BoostersPage() {
   const { user, isUserLoading } = useGetUser(false);
-
+  useEffect(() => {
+    amplitude.track("Boosters_Enter");
+  }, []);
   if (isUserLoading || !user) return null;
 
   return (

@@ -7,9 +7,11 @@ import frendsIcon from "@/app/_assets/icons/frens.png";
 import telegramIcon from "@/app/_assets/icons/telegram.png";
 import youtubeIcon from "@/app/_assets/icons/youtube.png";
 import jumpsterIcon from "@/app/_assets/icons/roo.png";
-import arrowDown from "@/app/_assets/icons/ArrowDown.svg";
 import coinIcon from "@/app/_assets/images/coin.png";
 import toast from "react-hot-toast";
+import { useSound } from "@/hooks/useSound";
+import clickSound from "@/app/_assets/audio/click.wav";
+import successSound from "@/app/_assets/audio/special-click.wav";
 
 export type Quest = {
   id: number;
@@ -44,8 +46,11 @@ export const QuestCard = ({
 }: QuestCardProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isReadyToClaim, setIsReadyToClaim] = useState(false);
+  const { playSound } = useSound(clickSound);
+  const { playSound: playSuccessSound } = useSound(successSound);
 
   const handleComplete = async () => {
+    playSound();
     if (isReadyToClaim) return;
 
     setIsLoading(true);
@@ -61,6 +66,7 @@ export const QuestCard = ({
   };
 
   const handleClaim = async (event: React.MouseEvent) => {
+    playSuccessSound();
     startFirework(event);
     await onComplete(quest);
     toast.success(`Получено ${quest.points.toLocaleString()} монет!`, {
@@ -85,7 +91,7 @@ export const QuestCard = ({
       />
       <div className="flex w-full items-center justify-between">
         <div className="pr-[8px]">
-          <h3 className="mb-0 truncate text-[16px] font-medium text-white">
+          <h3 className="mb-0 max-w-[200px] truncate text-[14px] font-medium text-white">
             {quest.title}
           </h3>
           <p className="flex items-center gap-[4px] text-[14px] text-gray-400">

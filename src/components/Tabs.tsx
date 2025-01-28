@@ -1,6 +1,7 @@
 import React from "react";
 import { twMerge } from "tailwind-merge";
 import clickSound from "@/app/_assets/audio/click.wav";
+import { useSound } from "@/hooks/useSound";
 const Tabs = ({
   tabs,
   children,
@@ -9,7 +10,7 @@ const Tabs = ({
   children: React.ReactNode;
 }) => {
   const [activeTab, setActiveTab] = React.useState(0);
-
+  const { playSound } = useSound(clickSound);
   return (
     <div>
       <div className="mb-[16px] flex w-full gap-[16px] overflow-y-scroll border-b border-background pb-[8px] text-[16px]">
@@ -22,8 +23,7 @@ const Tabs = ({
             )}
             onClick={() => {
               setActiveTab(index);
-              const audio = new Audio(clickSound);
-              audio.play();
+              playSound();
             }}
           >
             {tab}
