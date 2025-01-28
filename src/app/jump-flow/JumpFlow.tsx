@@ -61,8 +61,6 @@ const JumpFlow = () => {
   const { user, isUserLoading } = useGetUser<UserWithParameters>();
   // @ts-ignore
   const currentRankData = getRankData(user?.experience);
-  const queryClient = useQueryClient();
-  const calculateRewards = useRewards();
   const coinsFireworkRef = useRef<any>(null);
   const [lastJumpPosition, setLastJumpPosition] = React.useState({
     x: 0,
