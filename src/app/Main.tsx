@@ -86,7 +86,6 @@ const Main = () => {
   const currentCharacterImage = currentRankData?.url;
 
   const coinsFireworkRef = useRef<CoinsFireworkRef>(null);
-
   const [isClaimingCoins, setIsClaimingCoins] = useState(false);
 
   const [touchStart, setTouchStart] = useState<number | null>(null);
@@ -267,7 +266,7 @@ const Main = () => {
     ) {
       router.push("/onboarding");
     }
-    loadModel();
+    if (!detectorRef.current) loadModel();
     if (!user) return;
     // @ts-ignore
     const currentRankId = getRankData(user?.experience)?.id - 1;
@@ -277,7 +276,6 @@ const Main = () => {
 
   useEffect(() => {
     if (!user) return;
-    // TODO: move to backend
     if (objectSearchParams?.onboarding_done) {
       setOnboardingDone(user);
     }
@@ -401,6 +399,7 @@ const Main = () => {
         <div className="mb-[8px] flex justify-between px-[16px] font-semibold text-white">
           <div className="flex items-center gap-[4px]">
             <div className="relative ml-[-6px]">
+              {/* {window.localStorage.getItem("onboarding_done")} */}
               {currentEnergy < currentRankData?.energyCapacity && (
                 <div
                   className="absolute inset-0 left-[7px] top-[4px] z-0 h-[10px] w-[2px] animate-pulseLight rounded-full opacity-90"
