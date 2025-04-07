@@ -62,6 +62,7 @@ const JumpFlow = () => {
   // const coinsFireworkRef = useRef<any>(null);
 
   const [loadingProgress, setLoadingProgress] = useState(0);
+  const [isPlayerOpen, setIsPlayerOpen] = useState(false);
 
   useEffect(() => {
     if (isUserLoading) return;
@@ -120,36 +121,20 @@ const JumpFlow = () => {
 
   const detectUpAndDown = (vector: any) => {
     if (vector > 10 && jumpState === "down") {
-      if (availableEnergy < energyPerJump) {
-        setFlowStatus("endCountdown");
-        startRewardCountdown();
-        playFinishSound();
-        return;
-      }
+      // if (availableEnergy < energyPerJump) {
+      //   setFlowStatus("endCountdown");
+      //   startRewardCountdown();
+      //   playFinishSound();
+      //   return;
+      // }
 
       setJumpState("up");
       setJumpsCounter((prev) => prev + 1);
-      setAvailableEnergy((prev) => prev - energyPerJump);
+      // setAvailableEnergy((prev) => prev - energyPerJump);
     }
     if (vector < 0 && jumpState === "up") {
       playCoinSound();
       setJumpState("down");
-      // Get random parameters for coins
-      // const coinParams = getRandomCoinParams();
-      // Trigger coins animation at random border position
-      // const position = getRandomTopPosition();
-
-      // if (coinsFireworkRef.current) {
-      //   coinsFireworkRef.current.triggerAnimation(
-      //     position.x,
-      //     position.y,
-      //     {
-      //       min: 1,
-      //       max: 1,
-      //     },
-      //     { min: 1, max: 1 },
-      //   );
-      // }
     }
   };
 
@@ -360,6 +345,62 @@ const JumpFlow = () => {
           </Link>
         )}
       </div>
+      {/* Spotify Widget */}
+      <div
+        className={twMerge(
+          "fixed bottom-[100px] right-1/2 z-50 translate-x-1/2 transition-all duration-300",
+          // flowStatus === "jump" && "translate-y-[calc(100%+16px)]",
+          isPlayerOpen ? "w-[360px]" : "w-[48px] cursor-pointer",
+        )}
+        onClick={() => !isPlayerOpen && setIsPlayerOpen(true)}
+      >
+        <div className={twMerge("rounded-full p-3", !isPlayerOpen && "hidden")}>
+          <button
+            className="absolute -top-8 right-0 p-2 text-white"
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsPlayerOpen(false);
+            }}
+          >
+            Close
+          </button>
+          <iframe
+            width="360"
+            height="200"
+            style={{
+              borderRadius: "12px",
+              width: "100%",
+              margin: "0 auto",
+            }}
+            src="https://www.youtube.com/embed/oNMevWPa0Ms?si=pM5wKEn5bfXtVUT1"
+            title="YouTube video player"
+            frameBorder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            referrerPolicy="strict-origin-when-cross-origin"
+            allowFullScreen
+          />
+        </div>
+
+        <div
+          className={twMerge(
+            "rounded-full bg-white p-3",
+            isPlayerOpen && "hidden",
+          )}
+        >
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"
+              fill="currentColor"
+            />
+          </svg>
+        </div>
+      </div>
       <div
         className={twMerge(
           "fixed left-0 top-0 flex h-[100vh] w-full bg-background-dark bg-opacity-70 transition-opacity duration-1000 ease-out",
@@ -367,9 +408,9 @@ const JumpFlow = () => {
         )}
       >
         <div className="absolute left-1/2 top-[300px] z-50 w-full -translate-x-1/2 -translate-y-1/2">
-          <div className="mx-auto w-[200px]">
+          {/* <div className="mx-auto w-[200px]">
             <Lottie width={35} height={35} animationData={eye} loop={true} />
-          </div>
+          </div> */}
           <p className="w-full text-center text-[24px] text-white">
             Встаньте в кадр
           </p>
@@ -392,7 +433,7 @@ const JumpFlow = () => {
         <div className="absolute left-1/2 top-[100px] z-10 z-50 h-[calc(100vh-100px)] w-full -translate-x-1/2">
           <div className="h-full">
             <div className="flex h-full w-full flex-col items-start justify-center gap-[0px] pb-[24px]">
-              <div className="mt-[36px] grow">
+              {/* <div className="mt-[36px] grow">
                 <Lottie
                   width={75}
                   height={75}
@@ -400,7 +441,7 @@ const JumpFlow = () => {
                   loop={true}
                   className="mb-[24px]"
                 />
-              </div>
+              </div> */}
               <Title className="mb-[8px] text-center text-[16px]">
                 Загрузка...
               </Title>
@@ -433,7 +474,7 @@ const JumpFlow = () => {
         </div>
       )}
       {flowStatus === "jump" && (
-        <div className="tr absolute left-1/2 top-1/2 z-50 w-full -translate-x-1/2 -translate-y-[60%]">
+        <div className="tr absolute left-1/2 top-1/2 z-50 w-full -translate-x-1/2 -translate-y-[80%]">
           <h1 className="flex items-center justify-center text-[140px] font-black leading-[120px] text-white">
             {jumpsCounter}
           </h1>
