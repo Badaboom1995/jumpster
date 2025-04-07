@@ -78,7 +78,7 @@ const OnboardingView = () => {
       {/* @ts-ignore */}
       <Slider onFinish={() => user && setOnboardingDone(user)}>
         <SlideOne />
-        <SlideTemplate
+        {/* <SlideTemplate
           icon={coin}
           title="Получай долю"
           animate={true}
@@ -90,7 +90,7 @@ const OnboardingView = () => {
               долю от пула ты получишь.
             </p>
           }
-        />
+        /> */}
         <SlideTemplate
           icon={prize}
           title="Прокачай атлета"
