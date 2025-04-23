@@ -121,16 +121,16 @@ const JumpFlow = () => {
 
   const detectUpAndDown = (vector: any) => {
     if (vector > 10 && jumpState === "down") {
-      // if (availableEnergy < energyPerJump) {
-      //   setFlowStatus("endCountdown");
-      //   startRewardCountdown();
-      //   playFinishSound();
-      //   return;
-      // }
+      if (availableEnergy < energyPerJump) {
+        setFlowStatus("endCountdown");
+        startRewardCountdown();
+        playFinishSound();
+        return;
+      }
 
       setJumpState("up");
       setJumpsCounter((prev) => prev + 1);
-      // setAvailableEnergy((prev) => prev - energyPerJump);
+      setAvailableEnergy((prev) => prev - energyPerJump);
     }
     if (vector < 0 && jumpState === "up") {
       playCoinSound();
